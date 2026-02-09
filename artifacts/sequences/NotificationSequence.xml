@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sequence name="NotificationSequence" xmlns="http://ws.apache.org/ns/synapse">
+    <variable name="customerEmail" expression="${payload.customerEmail}" type="STRING"/>
+    <variable name="transactionType" expression="${payload.transactionType}" type="STRING"/>
+    <variable name="amount" expression="${payload.amount}" type="STRING"/>
+    
+    <email.send configKey="EmailConnection">
+        <from>bank@example.com</from>
+        <to>${vars.customerEmail}</to>
+        <subject>Transaction Notification - ${vars.transactionType}</subject>
+        <content>Dear Customer,
+
+Your ${vars.transactionType} transaction of ${vars.amount} has been processed successfully.
+
+Transaction ID: ${payload.transactionId}
+Timestamp: ${formatDateTime(now(), 'yyyy-MM-dd HH:mm:ss')}
+
+Thank you for banking with us.
+
+Best regards,
+O2 Bank</content>
+        <contentType>text/plain</contentType>
+    </email.send>
+    
+    <log category="INFO">
+        <message>Notification sent to ${vars.customerEmail}</message>
+    </log>
+</sequence>

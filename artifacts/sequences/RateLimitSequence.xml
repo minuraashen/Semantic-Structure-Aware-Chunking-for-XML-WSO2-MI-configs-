@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sequence name="RateLimitSequence" xmlns="http://ws.apache.org/ns/synapse">
+    <variable name="clientId" expression="${headers['X-Client-ID']}" type="STRING"/>
+    
+    <filter xpath="${exists(vars.clientId)}">
+        <then>
+            <throttle id="BankAPIThrottle">
+                <policy>
+                    <wsp:Policy xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy"
+                                xmlns:throttle="http://www.wso2.org/products/wso2commons/throttle">
+                        <throttle:ThrottleAssertion>
+                            <throttle:MaximumConcurrentAccess>10</throttle:MaximumConcurrentAccess>
+                            <wsp:Policy>
+                                <throttle:ID throttle:type="IP">other</throttle:ID>
+                                <wsp:Policy>
+                                    <throttle:Control>
+                                        <wsp:Policy>
+                                            <throttle:MaximumCount>100</throttle:MaximumCount>
+                                            <throttle:UnitTime>60000</throttle:UnitTime>
+                                        </wsp:Policy>
+                                    </throttle:Control>
+                                </wsp:Policy>
+                            </wsp:Policy>
+                        </throttle:ThrottleAssertion>
+                    </wsp:Policy>
+                </policy>
+                <onAccept>
+                    <log category="INFO">
+                        <message>Request accepted for client: ${vars.clientId}</message>
+                    </log>
+                </onAccept>
+                <onReject>
+                    <payloadFactory media-type="json">
+                        <format>{
+                            "status": "error",
+                            "message": "Rate limit exceeded. Please try again later."
+                        }</format>
+                    </payloadFactory>
+                    <respond/>
+                </onReject>
+            </throttle>
+        </then>
+        <else>
+            <throwError type="VALIDATION_ERROR" errorMessage="Client ID header missing"/>
+        </else>
+    </filter>
+</sequence>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sequence name="AuthenticationSequence" xmlns="http://ws.apache.org/ns/synapse">
+    <filter xpath="${exists(headers.Authorization)}">
+        <then>
+            <variable name="authHeader" expression="${headers.Authorization}" type="STRING"/>
+            <filter xpath="${startsWith(vars.authHeader, 'Bearer ')}">
+                <then>
+                    <variable name="token" expression="${subString(vars.authHeader, 7)}" type="STRING"/>
+                    <log category="INFO">
+                        <message>Authentication successful for token: ${vars.token}</message>
+                    </log>
+                </then>
+                <else>
+                    <throwError type="AUTH_ERROR" errorMessage="Invalid authorization header format"/>
+                </else>
+            </filter>
+        </then>
+        <else>
+            <throwError type="AUTH_ERROR" errorMessage="Authorization header missing"/>
+        </else>
+    </filter>
+</sequence>

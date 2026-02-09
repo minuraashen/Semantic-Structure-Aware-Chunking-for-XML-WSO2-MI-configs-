@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sequence name="LoggingSequence" xmlns="http://ws.apache.org/ns/synapse">
+    <variable name="requestId" expression="${now()}" type="STRING"/>
+    <variable name="endpoint" expression="${props.synapse.REST_URL_POSTFIX}" type="STRING"/>
+    <variable name="method" expression="${props.synapse.REST_METHOD}" type="STRING"/>
+    
+    <log category="INFO">
+        <message>Request ID: ${vars.requestId} | Method: ${vars.method} | Endpoint: ${vars.endpoint}</message>
+    </log>
+    
+    <dblookup>
+        <connection>
+            <pool>
+                <driver>com.mysql.jdbc.Driver</driver>
+                <url>jdbc:mysql://localhost:3306/bankdb</url>
+                <user>bankuser</user>
+                <password>bankpass</password>
+            </pool>
+        </connection>
+        <statement>
+            <sql>INSERT INTO api_logs (request_id, method, endpoint, timestamp) VALUES (?, ?, ?, NOW())</sql>
+            <parameter expression="${vars.requestId}" type="VARCHAR"/>
+            <parameter expression="${vars.method}" type="VARCHAR"/>
+            <parameter expression="${vars.endpoint}" type="VARCHAR"/>
+        </statement>
+    </dblookup>
+</sequence>

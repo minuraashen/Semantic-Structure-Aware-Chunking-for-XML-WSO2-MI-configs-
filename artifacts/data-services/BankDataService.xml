@@ -1,0 +1,73 @@
+<data name="BankDataService" serviceNamespace="http://ws.wso2.org/dataservice">
+    <config id="BankDB">
+        <property name="driverClassName">com.mysql.jdbc.Driver</property>
+        <property name="url">jdbc:mysql://localhost:3306/bankdb</property>
+        <property name="username">bankuser</property>
+        <property name="password">bankpass</property>
+    </config>
+    
+    <query id="getAccountBalance" useConfig="BankDB">
+        <sql>SELECT balance, currency FROM accounts WHERE account_id = ?</sql>
+        <param name="accountId" sqlType="STRING"/>
+        <result element="Account" rowName="AccountInfo">
+            <element column="balance" name="balance" xsdType="double"/>
+            <element column="currency" name="currency" xsdType="string"/>
+        </result>
+    </query>
+    
+    <query id="updateAccountBalance" useConfig="BankDB">
+        <sql>UPDATE accounts SET balance = ?, last_updated = NOW() WHERE account_id = ?</sql>
+        <param name="balance" sqlType="DOUBLE"/>
+        <param name="accountId" sqlType="STRING"/>
+    </query>
+    
+    <query id="insertTransaction" useConfig="BankDB">
+        <sql>INSERT INTO transactions (transaction_id, account_id, type, amount, currency, timestamp) VALUES (?, ?, ?, ?, ?, NOW())</sql>
+        <param name="transactionId" sqlType="STRING"/>
+        <param name="accountId" sqlType="STRING"/>
+        <param name="type" sqlType="STRING"/>
+        <param name="amount" sqlType="DOUBLE"/>
+        <param name="currency" sqlType="STRING"/>
+    </query>
+    
+    <query id="getTransactionHistory" useConfig="BankDB">
+        <sql>SELECT transaction_id, type, amount, currency, timestamp FROM transactions WHERE account_id = ? ORDER BY timestamp DESC LIMIT 10</sql>
+        <param name="accountId" sqlType="STRING"/>
+        <result element="Transactions" rowName="Transaction">
+            <element column="transaction_id" name="transactionId" xsdType="string"/>
+            <element column="type" name="type" xsdType="string"/>
+            <element column="amount" name="amount" xsdType="double"/>
+            <element column="currency" name="currency" xsdType="string"/>
+            <element column="timestamp" name="date" xsdType="string"/>
+        </result>
+    </query>
+    
+    <operation name="getAccountBalance">
+        <call-query href="getAccountBalance">
+            <with-param name="accountId" query-param="accountId"/>
+        </call-query>
+    </operation>
+    
+    <operation name="updateAccountBalance">
+        <call-query href="updateAccountBalance">
+            <with-param name="balance" query-param="balance"/>
+            <with-param name="accountId" query-param="accountId"/>
+        </call-query>
+    </operation>
+    
+    <operation name="insertTransaction">
+        <call-query href="insertTransaction">
+            <with-param name="transactionId" query-param="transactionId"/>
+            <with-param name="accountId" query-param="accountId"/>
+            <with-param name="type" query-param="type"/>
+            <with-param name="amount" query-param="amount"/>
+            <with-param name="currency" query-param="currency"/>
+        </call-query>
+    </operation>
+    
+    <operation name="getTransactionHistory">
+        <call-query href="getTransactionHistory">
+            <with-param name="accountId" query-param="accountId"/>
+        </call-query>
+    </operation>
+</data>

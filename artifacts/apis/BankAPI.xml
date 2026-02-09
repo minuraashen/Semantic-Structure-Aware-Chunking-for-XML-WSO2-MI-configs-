@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<api context="/bankapi" name="BankAPI" xmlns="http://ws.apache.org/ns/synapse">
+    <resource methods="GET" uri-template="/">
+        <inSequence>
+            <payloadFactory media-type="json">
+                <format>{"greetings":"Welcome to O2 Bank !!"}</format>
+            </payloadFactory>
+            <respond/>
+        </inSequence>
+        <faultSequence>
+        </faultSequence>
+    </resource>
+    
+    <resource methods="POST" uri-template="/deposit">
+        <inSequence>
+            <variable name="originalAmount" expression="${payload.amount}" type="DOUBLE"/>
+            <variable name="currency" expression="${payload.currency}" type="STRING"/>
+            
+            <http.post configKey="CurrencyConverter">
+                <relativePath>/currency/rate</relativePath>
+                <headers>[]</headers>
+                <requestBodyType>JSON</requestBodyType>
+                <requestBodyJson>{
+                    "fromCurrency": "${vars.currency}",
+                    "toCurrency": "USD"
+                }</requestBodyJson>
+                <responseVariable>conversionRate</responseVariable>
+                <overwriteBody>false</overwriteBody>
+            </http.post>
+            
+            <variable name="rate" expression="${vars.conversionRate.rate}" type="DOUBLE"/>
+            <variable name="amountInUSD" expression="${vars.originalAmount * vars.rate}" type="DOUBLE"/>
+            
+            <payloadFactory media-type="json">
+                <format>{
+                    "status": "success",
+                    "message": "Deposit processed successfully",
+                    "transaction": {
+                        "originalAmount": ${vars.originalAmount},
+                        "currency": "${vars.currency}",
+                        "amountInUSD": ${vars.amountInUSD},
+                        "conversionRate": ${vars.rate}
+                    }
+                }</format>
+            </payloadFactory>
+            <respond/>
+        </inSequence>
+        <faultSequence>
+            <log category="ERROR">
+                <message>Deposit failed: ${props.synapse.ERROR_MESSAGE}</message>
+            </log>
+            <payloadFactory media-type="json">
+                <format>{
+                    "status": "error",
+                    "message": "Deposit processing failed"
+                }</format>
+            </payloadFactory>
+            <respond/>
+        </faultSequence>
+    </resource>
+    
+    <resource methods="GET" uri-template="/balance/{accountId}">
+        <inSequence>
+            <variable name="accountId" expression="${params.pathParams.accountId}" type="STRING"/>
+            
+            <payloadFactory media-type="json">
+                <format>{
+                    "accountId": "${vars.accountId}",
+                    "balance": 5000.00,
+                    "currency": "USD",
+                    "lastUpdated": "${formatDateTime(now(), 'yyyy-MM-dd HH:mm:ss')}"
+                }</format>
+            </payloadFactory>
+            <respond/>
+        </inSequence>
+        <faultSequence>
+        </faultSequence>
+    </resource>
+    
+    <resource methods="POST" uri-template="/transfer">
+        <inSequence>
+            <variable name="fromAccount" expression="${payload.fromAccount}" type="STRING"/>
+            <variable name="toAccount" expression="${payload.toAccount}" type="STRING"/>
+            <variable name="amount" expression="${payload.amount}" type="DOUBLE"/>
+            
+            <filter xpath="${vars.amount &gt; 0}">
+                <then>
+                    <payloadFactory media-type="json">
+                        <format>{
+                            "status": "success",
+                            "message": "Transfer completed successfully",
+                            "transaction": {
+                                "transactionId": "TXN${now()}",
+                                "fromAccount": "${vars.fromAccount}",
+                                "toAccount": "${vars.toAccount}",
+                                "amount": ${vars.amount},
+                                "timestamp": "${formatDateTime(now(), 'yyyy-MM-dd HH:mm:ss')}"
+                            }
+                        }</format>
+                    </payloadFactory>
+                    <respond/>
+                </then>
+                <else>
+                    <throwError type="VALIDATION_ERROR" errorMessage="Transfer amount must be greater than zero"/>
+                </else>
+            </filter>
+        </inSequence>
+        <faultSequence>
+            <log category="ERROR">
+                <message>Transfer failed: ${props.synapse.ERROR_MESSAGE}</message>
+            </log>
+            <payloadFactory media-type="json">
+                <format>{
+                    "status": "error",
+                    "message": "Transfer processing failed"
+                }</format>
+            </payloadFactory>
+            <respond/>
+        </faultSequence>
+    </resource>
+    
+    <resource methods="GET" uri-template="/transactions/{accountId}">
+        <inSequence>
+            <variable name="accountId" expression="${params.pathParams.accountId}" type="STRING"/>
+            
+            <payloadFactory media-type="json">
+                <format>{
+                    "accountId": "${vars.accountId}",
+                    "transactions": [
+                        {
+                            "transactionId": "TXN001",
+                            "type": "deposit",
+                            "amount": 1000.00,
+                            "date": "2024-01-15"
+                        },
+                        {
+                            "transactionId": "TXN002",
+                            "type": "withdrawal",
+                            "amount": 500.00,
+                            "date": "2024-01-16"
+                        }
+                    ]
+                }</format>
+            </payloadFactory>
+            <respond/>
+        </inSequence>
+        <faultSequence>
+        </faultSequence>
+    </resource>
+</api>

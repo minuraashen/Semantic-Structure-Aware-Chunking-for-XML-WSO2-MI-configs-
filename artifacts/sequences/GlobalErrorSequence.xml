@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sequence name="GlobalErrorSequence" xmlns="http://ws.apache.org/ns/synapse">
+    <variable name="errorCode" expression="${props.synapse.ERROR_CODE}" type="STRING"/>
+    <variable name="errorMessage" expression="${props.synapse.ERROR_MESSAGE}" type="STRING"/>
+    <variable name="errorDetail" expression="${props.synapse.ERROR_DETAIL}" type="STRING"/>
+    
+    <log category="ERROR">
+        <message>Error Code: ${vars.errorCode} | Message: ${vars.errorMessage} | Detail: ${vars.errorDetail}</message>
+    </log>
+    
+    <switch source="${vars.errorCode}">
+        <case regex="AUTH_ERROR">
+            <payloadFactory media-type="json">
+                <format>{
+                    "status": "error",
+                    "code": "401",
+                    "message": "Authentication failed",
+                    "detail": "${vars.errorMessage}"
+                }</format>
+            </payloadFactory>
+            <header name="HTTP_SC" value="401" scope="transport"/>
+        </case>
+        <case regex="VALIDATION_ERROR">
+            <payloadFactory media-type="json">
+                <format>{
+                    "status": "error",
+                    "code": "400",
+                    "message": "Validation failed",
+                    "detail": "${vars.errorMessage}"
+                }</format>
+            </payloadFactory>
+            <header name="HTTP_SC" value="400" scope="transport"/>
+        </case>
+        <default>
+            <payloadFactory media-type="json">
+                <format>{
+                    "status": "error",
+                    "code": "500",
+                    "message": "Internal server error",
+                    "detail": "${vars.errorMessage}"
+                }</format>
+            </payloadFactory>
+            <header name="HTTP_SC" value="500" scope="transport"/>
+        </default>
+    </switch>
+    
+    <respond/>
+</sequence>
