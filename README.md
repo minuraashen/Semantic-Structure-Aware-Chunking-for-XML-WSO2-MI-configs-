@@ -13,6 +13,7 @@ A semantic, hierarchical, and size-aware XML chunking algorithm specifically des
 ### 2. **Semantic Chunking**
 - **Intelligent Boundary Detection**: Recognizes semantic boundaries (resources, sequences, mediators)
 - **Context-Aware**: Preserves API context, resource methods, URI templates, and sequence information
+- **Context-First Embedding**: Each chunk's embedding text begins with structured metadata for better semantic search
 - **Semantic Intent Inference**: Automatically categorizes chunks by intent:
   - `validation` - Filter and switch mediators
   - `transformation` - PayloadFactory and enrich operations
@@ -40,12 +41,13 @@ Automatically detects and tracks references between artifacts:
 - Enables deduplication and change detection
 - Useful for incremental updates
 
-### 6. **Embedding-Ready Output**
-- Clean, natural text extraction from XML
-- Removes XML angle brackets and formatting
+### 6. **Context-Enriched Embedding Text**
+- **Context-First Approach**: Each chunk's embedding text starts with structured context metadata
+- **Format**: `"API: BankAPI Context: /bankapi Method: POST URI: /deposit" + cleaned content`
+- Clean, natural text extraction from XML (removes angle brackets and formatting)
 - Preserves semantic expressions like `${payload.userId}`
 - Maintains special characters in XPath: `${}()[]`
-- Optimized for semantic embeddings
+- Optimized for semantic embeddings with contextual awareness
 
 ## 🏗️ Supported WSO2 MI Artifacts
 
@@ -83,6 +85,7 @@ const chunks = await chunker.chunkFile('/path/to/artifact.xml');
 console.log(`Generated ${chunks.length} chunks`);
 chunks.forEach(chunk => {
   console.log(`${chunk.chunkType} at lines ${chunk.startLine}-${chunk.endLine}`);
+  console.log(`Embedding: ${chunk.embeddingText.substring(0, 80)}...`);
 });
 ```
 
@@ -174,26 +177,31 @@ export const config = {
    - Semantic Type: `resource`
    - Intent: `processing`
    - Context: `API: BankAPI, Method: POST, URI: /deposit`
+   - Embedding Text: `API: BankAPI Context: /bankapi Method: POST URI: /deposit resource methods=POST uri-template=/deposit ...`
    - Lines: 13-47
 
 2. **Variable Chunk**
    - Type: `variable`
    - Semantic Type: `component`
    - Intent: `processing`
-   - Embedding Text: `variable name=amount expression=${payload.amount} type=DOUBLE`
+   - Embedding Text: `API: BankAPI Context: /bankapi Method: POST URI: /deposit variable name=amount expression=${payload.amount} type=DOUBLE`
    - Lines: 16-16
 
 3. **PayloadFactory Chunk**
    - Type: `payloadFactory`
    - Semantic Type: `payloadFactory`
    - Intent: `transformation`
+   - Embedding Text: `API: BankAPI Context: /bankapi Method: POST URI: /deposit payloadFactory media-type=json format status success`
    - Lines: 34-45
 
 4. **Respond Chunk**
    - Type: `respond`
    - Semantic Type: `response`
    - Intent: `response`
+   - Embedding Text: `API: BankAPI Context: /bankapi Method: POST URI: /deposit respond`
    - Lines: 46-46
+
+**Key Insight**: Notice how each chunk's embedding text begins with contextual metadata (`API: BankAPI Context: /bankapi Method: POST URI: /deposit`), providing rich semantic context for better retrieval in RAG systems.
 
 ## 🧪 Testing
 
@@ -258,12 +266,13 @@ artifactRegistry.registerPlugin(myPlugin);
 
 ## 🎯 Use Cases
 
-- **RAG Systems**: Generate context-rich chunks for retrieval systems
-- **Semantic Search**: Enable intelligent search across WSO2 MI configs
-- **Documentation**: Automatically generate documentation from configs
+- **RAG Systems**: Generate context-rich chunks with metadata-prefixed embeddings for superior retrieval accuracy
+- **Semantic Search**: Enable intelligent search across WSO2 MI configs with contextual awareness
+- **Documentation**: Automatically generate documentation from configs with full context
 - **Change Detection**: Track configuration changes via content hashing
 - **Dependency Analysis**: Understand artifact relationships and dependencies
 - **Configuration Validation**: Analyze artifact structure and completeness
+- **AI-Powered Configuration Assistant**: Build intelligent assistants that understand WSO2 MI configurations in context
 
 ## 📈 Performance
 
