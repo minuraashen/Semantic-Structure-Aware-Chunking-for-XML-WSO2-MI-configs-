@@ -115,9 +115,6 @@ export class XMLChunker {
 
     this.processNode(parsed, xmlContent, lines, filePath, chunks, null, rootContext);
 
-    // Post-process: Extract sequence references from all chunks
-    this.extractSequenceReferences(chunks, xmlContent);
-
     return chunks;
   }
 
@@ -250,46 +247,6 @@ export class XMLChunker {
       }
     }
     return 'unknown';
-  }
-
-  /**
-   * Extract cross-artifact references from XML content
-   */
-  private extractSequenceReferences(chunks: XMLChunk[], xmlContent: string): void {
-    const allReferences = new Set<string>();
-
-    // Pattern 1: <sequence key="SequenceName"/>
-    const sequenceRefPattern = /<sequence\s+key=["']([^"']+)["']\s*\/>/g;
-    let match;
-    while ((match = sequenceRefPattern.exec(xmlContent)) !== null) {
-      allReferences.add(`sequence:${match[1]}`);
-    }
-
-    // Pattern 2: configKey="LocalEntryName"
-    const configKeyPattern = /configKey=["']([^"']+)["']/g;
-    while ((match = configKeyPattern.exec(xmlContent)) !== null) {
-      allReferences.add(`localEntry:${match[1]}`);
-    }
-
-    // Pattern 3: <endpoint key="EndpointName"/>
-    const endpointRefPattern = /<endpoint\s+key=["']([^"']+)["']\s*\/>/g;
-    while ((match = endpointRefPattern.exec(xmlContent)) !== null) {
-      allReferences.add(`endpoint:${match[1]}`);
-    }
-
-    // Pattern 4: <call-template target="TemplateName"/>
-    const templateRefPattern = /<call-template\s+target=["']([^"']+)["']/g;
-    while ((match = templateRefPattern.exec(xmlContent)) !== null) {
-      allReferences.add(`template:${match[1]}`);
-    }
-
-    // Attach references to all chunks in this file
-    if (allReferences.size > 0) {
-      const referencesArray = Array.from(allReferences);
-      for (const chunk of chunks) {
-        chunk.referencedSequences = referencesArray;
-      }
-    }
   }
 
   /**
@@ -426,7 +383,7 @@ export class XMLChunker {
       attrs.context || attrs['@_context'] || tagName;
     const chunkIndex = this.chunkCounter++;
 
-    const embeddingText = this.createEmbeddingText(tagName, resourceName, content, attrs);
+    const embeddingText = this.createEmbeddingText(tagName, resourceName, content, attrs, context);
     const semanticType = this.mapToSemanticType(tagName);
     const semanticIntent = this.inferIntent(tagName, attrs, content);
     const contentHash = computeChunkHash(content, {
@@ -627,20 +584,30 @@ export class XMLChunker {
     return 'unknown';
   }
 
-  /**
+   /**
    * Create natural text representation for embedding
-   * Removes all XML angle brackets and symbols for cleaner, more semantic embeddings
+   * Format: [JSON Context] + [Cleaned XML Content]
    * 
-   * Example transformation:
-   *   <api context="/orchestrate"><resource methods="POST">
-   *   → api context=/orchestrate resource methods=POST
+   * Example:
+   *   Context: {"api":{"name":"BankAPI","context":"/bankapi"},"resource":{"method":"GET","uriTemplate":"/"}}
+   *   Content: <payloadFactory><format>{"greeting":"Hello"}</format></payloadFactory>
+   *   → {"api":{"name":"BankAPI","context":"/bankapi"},"resource":{"method":"GET"}} payloadFactory format greeting Hello
    */
   private createEmbeddingText(
     tagName: string,
     resourceName: string,
     content: string,
-    attrs: Record<string, string>
+    attrs: Record<string, string>,
+    context: SemanticContext
   ): string {
+
+  //  // Start with JSON context for structured representation
+  //   const contextStr = JSON.stringify(context);
+
+    // Start with formatted context metadata as text
+    const contextStr = this.formatMetadata(context);
+    const tokens: string[] = contextStr ? [contextStr] : [];
+
     // Comprehensive XML preprocessing: Remove all angle brackets and create natural text
     const cleanedContent = content
       // Extract tag names and attributes from opening tags: <tag attr="val"> → tag attr="val"
@@ -652,18 +619,20 @@ export class XMLChunker {
       // Clean up attribute formatting: attr="value" → attr=value
       .replace(/="([^"]*)"/g, '=$1')
       .replace(/='([^']*)'/g, '=$1')
-      // Remove remaining special characters but preserve $, {, }, (, ), [, ] for expressions and paths
-      .replace(/[^\w\s=\$\{\}\(\)\[\]\/\-\.,:@]/g, ' ')
+      // Remove remaining special characters but preserve $, {, }, [, ] for expressions and paths
+      .replace(/[^\w\s=\$\{\}\[\]\/\-\.,:@]/g, ' ')
       // Normalize whitespace
       .replace(/\s+/g, ' ')
       .trim();
 
     // Split into meaningful tokens
-    const tokens = cleanedContent
+    const contentTokens = cleanedContent
       .split(/\s+/)
       .filter(t => t.length > 1 && t.length < 100); // Allow longer tokens for expressions like ${payload.userId}
 
+    tokens.push(...contentTokens);
+
     // Increased limit from 150 to 200 for better context representation
-    return tokens.slice(0, 200).join(' ');
+    return tokens.slice().join(' ');
   }
 }
