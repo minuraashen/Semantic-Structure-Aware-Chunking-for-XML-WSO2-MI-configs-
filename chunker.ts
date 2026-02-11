@@ -1,18 +1,15 @@
 import * as fs from 'fs';
 import { XMLParser } from 'fast-xml-parser';
-import { computeChunkHash } from './merkle';
-import { ArtifactRegistry, artifactRegistry, ArtifactMetadata } from './artifact-registry';
+import { AutoTokenizer, PreTrainedTokenizer } from '@huggingface/transformers';
+import { computeChunkHash } from './content-hash';
+import { ArtifactRegistry, artifactRegistry } from './artifact-registry';
 import { config } from './config';
 
 /**
- * Semantic, Hierarchical, Size-Aware XML Chunker (Refactored)
+ * Semantic Structure-Aware XML Chunker for WSO2 MI Configurations
  * 
  * Uses plugin-based ArtifactRegistry for extensible artifact detection.
- * Key improvements over previous version:
- * - No hardcoded artifact type lists - uses registry
- * - No hardcoded semantic boundaries - queries registry
- * - No hardcoded mediator types - queries registry
- * - Configurable token limit (default: 256 for all-MiniLM-L6-v2)
+ * Tokenization via sentence-transformers/all-MiniLM-L6-v2 AutoTokenizer.
  */
 
 export interface XMLChunk {
@@ -81,21 +78,31 @@ interface LineRange {
 }
 
 export class XMLChunker {
-  private chunkCounter = 0;
-  private lastSearchPosition: number = 0;
+  private nextChunkIndex = 0;
+  private lineSearchCursor: number = 0;
   private readonly maxTokens: number;
-  private embedder: any;
+  private tokenizer: PreTrainedTokenizer | null = null;
   private registry: ArtifactRegistry;
 
-  constructor(embedder?: any, registry?: ArtifactRegistry) {
-    this.embedder = embedder;
+  constructor(registry?: ArtifactRegistry) {
     this.registry = registry || artifactRegistry;
-    this.maxTokens = config.maxTokens; // Default: 256
+    this.maxTokens = config.maxTokens;
+  }
+
+  /**
+   * Initialize the tokenizer (must be called before chunking)
+   * Loads sentence-transformers/all-MiniLM-L6-v2 AutoTokenizer
+   */
+  async initialize(): Promise<void> {
+    if (!this.tokenizer) {
+      this.tokenizer = await AutoTokenizer.from_pretrained(config.tokenizerModel);
+    }
   }
 
   async chunkFile(filePath: string): Promise<XMLChunk[]> {
-    this.chunkCounter = 0;
-    this.lastSearchPosition = 0;
+    await this.initialize();
+    this.nextChunkIndex = 0;
+    this.lineSearchCursor = 0;
     const xmlContent = await fs.promises.readFile(filePath, 'utf-8');
     const lines = xmlContent.split('\n');
 
@@ -113,7 +120,7 @@ export class XMLChunker {
     // Detect artifact type using registry
     const rootContext = this.buildRootContext(parsed, filePath);
 
-    this.processNode(parsed, xmlContent, lines, filePath, chunks, null, rootContext);
+    this.processNode(parsed, lines, filePath, chunks, null, rootContext);
 
     return chunks;
   }
@@ -125,7 +132,7 @@ export class XMLChunker {
   private buildRootContext(parsed: any, filePath: string): SemanticContext {
     const context: SemanticContext = {};
 
-    // Try to detect artifact type from XML structure
+    // Try to detect artifact type from XML structure (registered plugins)
     const detected = this.registry.detectArtifactType(parsed);
 
     if (detected) {
@@ -165,26 +172,26 @@ export class XMLChunker {
           break;
       }
     } else {
-      // Fallback: try to extract API name for unknown types
-      context.api = {
-        name: this.extractApiName(parsed),
-      };
+      // Fallback: detect any artifact (including custom/unregistered types)
+      // Pass filePath to infer type from folder structure
+      const anyArtifact = this.registry.detectAnyArtifact(parsed, filePath);
+      if (anyArtifact) {
+        context.artifact = {
+          type: anyArtifact.type,
+          name: anyArtifact.name,
+          xmlns: anyArtifact.xmlns,
+          ...anyArtifact.additionalInfo,
+        };
+      } else {
+        // Ultimate fallback if parsing completely fails
+        context.artifact = {
+          type: 'unknown',
+          name: 'unknown',
+        };
+      }
     }
 
     return context;
-  }
-
-  /**
-   * Check if artifact is a standalone definition (sequence, endpoint, etc.)
-   * Uses registry to detect rather than path-based checks
-   */
-  private isStandaloneArtifactDefinition(parsed: any): boolean {
-    const detected = this.registry.detectArtifactType(parsed);
-    if (!detected) return false;
-
-    // Artifact types that are typically standalone definitions
-    const standaloneTypes = ['sequence', 'localEntry', 'endpoint', 'template'];
-    return standaloneTypes.includes(detected.metadata.type);
   }
 
   /**
@@ -224,56 +231,51 @@ export class XMLChunker {
     return tagName.startsWith('http.');
   }
 
-  /**
-   * Check if tag is atomic (should not be split)
-   */
-  private isAtomicNode(tagName: string): boolean {
-    return this.registry.isAtomicTag(tagName);
-  }
+
 
   /**
-   * Extract API name from parsed XML structure
-   */
-  private extractApiName(parsed: any): string {
-    if (!Array.isArray(parsed)) return 'unknown';
-
-    for (const item of parsed) {
-      const tagName = Object.keys(item).find(key => key !== ':@');
-      if (!tagName) continue;
-
-      if (this.registry.isResourceType(tagName)) {
-        const attrs = item[':@'] || {};
-        return attrs.name || attrs['@_name'] || attrs.context || attrs['@_context'] || tagName;
-      }
-    }
-    return 'unknown';
-  }
-
-  /**
-   * Extract references from a single chunk's content
+   * Extract cross-artifact references from a chunk's XML content.
+   * Detects: sequence key, configKey (local entries), endpoint key,
+   *          call-template target, useConfig (data service), call-query href.
    */
   private extractReferencesFromContent(content: string): string[] {
     const refs = new Set<string>();
-
-    const sequenceRefPattern = /<sequence\s+key=["']([^"']+)["']\s*\/>/g;
     let match;
+
+    // <sequence key="Name"/> → sequence reference
+    const sequenceRefPattern = /<sequence\s+key=["']([^"']+)["']\s*\/>/g;
     while ((match = sequenceRefPattern.exec(content)) !== null) {
       refs.add(`sequence:${match[1]}`);
     }
 
+    // configKey="Name" → local entry reference (used by http.post, email.send, etc.)
     const configKeyPattern = /configKey=["']([^"']+)["']/g;
     while ((match = configKeyPattern.exec(content)) !== null) {
       refs.add(`localEntry:${match[1]}`);
     }
 
+    // <endpoint key="Name"/> → endpoint reference
     const endpointRefPattern = /<endpoint\s+key=["']([^"']+)["']\s*\/>/g;
     while ((match = endpointRefPattern.exec(content)) !== null) {
       refs.add(`endpoint:${match[1]}`);
     }
 
+    // <call-template target="Name"/> → template reference
     const templateRefPattern = /<call-template\s+target=["']([^"']+)["']/g;
     while ((match = templateRefPattern.exec(content)) !== null) {
       refs.add(`template:${match[1]}`);
+    }
+
+    // useConfig="Name" → data service config reference
+    const useConfigPattern = /useConfig=["']([^"']+)["']/g;
+    while ((match = useConfigPattern.exec(content)) !== null) {
+      refs.add(`config:${match[1]}`);
+    }
+
+    // <call-query href="Name"> → data service query reference
+    const callQueryPattern = /<call-query\s+href=["']([^"']+)["']/g;
+    while ((match = callQueryPattern.exec(content)) !== null) {
+      refs.add(`query:${match[1]}`);
     }
 
     return Array.from(refs);
@@ -284,7 +286,6 @@ export class XMLChunker {
    */
   private processNode(
     node: any,
-    xmlContent: string,
     lines: string[],
     filePath: string,
     chunks: XMLChunk[],
@@ -310,10 +311,10 @@ export class XMLChunker {
 
       if (isChunkable) {
         // Token gating: Check if subtree fits within limit
-        const range = this.findElementRange(tagName, this.getNodeName(tagName, element), lines);
+        const range = this.findElementRange(tagName, lines);
         const content = this.extractContent(lines, range);
         const metadata = this.formatMetadata(updatedContext);
-        const tokenCount = this.countTokens(content, metadata);
+        const tokenCount = this.estimateTokenCount(content, metadata);
 
         if (tokenCount <= this.maxTokens) {
           // Subtree fits → Emit chunk and STOP traversal
@@ -321,12 +322,12 @@ export class XMLChunker {
         } else {
           // Subtree too large → Do NOT chunk, descend to ALL children
           if (Array.isArray(element)) {
-            this.processNode(element, xmlContent, lines, filePath, chunks, parentChunkId, updatedContext);
+            this.processNode(element, lines, filePath, chunks, parentChunkId, updatedContext);
           }
         }
       } else if (Array.isArray(element)) {
         // Non-chunkable nodes → just traverse
-        this.processNode(element, xmlContent, lines, filePath, chunks, parentChunkId, updatedContext);
+        this.processNode(element, lines, filePath, chunks, parentChunkId, updatedContext);
       }
     }
   }
@@ -381,9 +382,9 @@ export class XMLChunker {
   ): void {
     const resourceName = attrs.name || attrs['@_name'] || attrs.key || attrs['@_key'] ||
       attrs.context || attrs['@_context'] || tagName;
-    const chunkIndex = this.chunkCounter++;
+    const chunkIndex = this.nextChunkIndex++;
 
-    const embeddingText = this.createEmbeddingText(tagName, resourceName, content, attrs, context);
+    const embeddingText = this.buildEmbeddingText(tagName, resourceName, content, attrs, context);
     const semanticType = this.mapToSemanticType(tagName);
     const semanticIntent = this.inferIntent(tagName, attrs, content);
     const contentHash = computeChunkHash(content, {
@@ -392,21 +393,23 @@ export class XMLChunker {
       context,
     });
 
-    // Extract references from this chunk's content
+    // Extract cross-artifact references from this chunk's content
     const chunkReferences = this.extractReferencesFromContent(content);
-    if (chunkReferences.length > 0) {
-      context.references = chunkReferences;
-    }
 
     // Detect if this is a standalone artifact definition
     const standaloneTypes = ['sequence', 'localEntry', 'endpoint', 'template'];
     const isStandalone = standaloneTypes.includes(tagName);
     const sequenceKey = isStandalone ? (attrs.name || attrs['@_name'] || attrs.key || attrs['@_key']) : undefined;
 
+    // For custom artifacts, use the type inferred from context (folder-based)
+    // Otherwise, use registered resource types or fallback to path-based inference
+    const resourceType = context.artifact?.type || 
+                        (this.isResourceType(tagName) ? tagName : this.getResourceType(filePath));
+
     chunks.push({
       filePath,
       resourceName,
-      resourceType: this.isResourceType(tagName) ? tagName : this.getResourceType(filePath),
+      resourceType,
       chunkType: tagName,
       chunkIndex,
       startLine: range.start,
@@ -417,10 +420,10 @@ export class XMLChunker {
       semanticType,
       semanticIntent,
       contentHash,
-      context,
+      context: { ...context, references: chunkReferences.length > 0 ? chunkReferences : undefined },
       sequenceKey,
       isSequenceDefinition: isStandalone,
-      referencedSequences: [],
+      referencedSequences: chunkReferences,
     });
   }
 
@@ -460,26 +463,19 @@ export class XMLChunker {
   }
 
   /**
-   * Count tokens using the model's tokenizer
+   * Estimate token count using the loaded AutoTokenizer.
+   * Falls back to character-based approximation if tokenizer unavailable.
    */
-  private countTokens(content: string, metadata: string = ''): number {
+  private estimateTokenCount(content: string, metadata: string = ''): number {
     const fullText = metadata + ' ' + content;
 
-    if (this.embedder && this.embedder.countTokens) {
-      return this.embedder.countTokens(fullText);
+    if (this.tokenizer) {
+      const encoded = this.tokenizer.encode(fullText);
+      return encoded.length;
     }
 
-    // Fallback to character approximation
+    // Fallback to character approximation (~4 chars per token)
     return Math.ceil(fullText.length / 4);
-  }
-
-  /**
-   * Extract node name from element attributes
-   */
-  private getNodeName(tagName: string, element: any): string {
-    const attrs = this.extractAttributes(element);
-    return attrs.name || attrs['@_name'] || attrs.key || attrs['@_key'] ||
-      attrs.context || attrs['@_context'] || tagName;
   }
 
   /**
@@ -504,29 +500,12 @@ export class XMLChunker {
     return parts.join(' ');
   }
 
-  private extractAttributes(element: any): Record<string, string> {
-    const attrs: Record<string, string> = {};
-
-    if (Array.isArray(element)) {
-      for (const item of element) {
-        if (item[':@']) {
-          Object.assign(attrs, item[':@']);
-          break;
-        }
-      }
-    } else if (element && element[':@']) {
-      Object.assign(attrs, element[':@']);
-    }
-
-    return attrs;
-  }
-
-  private findElementRange(tagName: string, resourceName: string, lines: string[]): LineRange {
+  private findElementRange(tagName: string, lines: string[]): LineRange {
     let startLine = -1;
     let endLine = -1;
     let depth = 0;
 
-    for (let i = this.lastSearchPosition; i < lines.length; i++) {
+    for (let i = this.lineSearchCursor; i < lines.length; i++) {
       const line = lines[i];
 
       if (startLine === -1) {
@@ -534,7 +513,7 @@ export class XMLChunker {
         const openPattern = new RegExp(`<${tagName}[\\s>/]`);
         if (openPattern.test(line)) {
           startLine = i + 1;
-          this.lastSearchPosition = i + 1;
+          this.lineSearchCursor = i + 1;
 
           // Check if it's a self-closing tag
           if (line.includes('/>')) {
@@ -578,32 +557,25 @@ export class XMLChunker {
     if (filePath.includes('/local-entries/')) return 'localEntry';
     if (filePath.includes('/templates/')) return 'template';
     if (filePath.includes('/data-services/')) return 'dataService';
+    if (filePath.includes('/data-sources/')) return 'dataSource';
     if (filePath.includes('/tasks/')) return 'task';
     if (filePath.includes('/message-stores/')) return 'messageStore';
     if (filePath.includes('/message-processors/')) return 'messageProcessor';
+    if (filePath.includes('/inbound-endpoints/')) return 'inboundEndpoint';
     return 'unknown';
   }
 
    /**
-   * Create natural text representation for embedding
-   * Format: [JSON Context] + [Cleaned XML Content]
-   * 
-   * Example:
-   *   Context: {"api":{"name":"BankAPI","context":"/bankapi"},"resource":{"method":"GET","uriTemplate":"/"}}
-   *   Content: <payloadFactory><format>{"greeting":"Hello"}</format></payloadFactory>
-   *   → {"api":{"name":"BankAPI","context":"/bankapi"},"resource":{"method":"GET"}} payloadFactory format greeting Hello
+   * Build natural text representation for embedding.
+   * Format: [Context Metadata] + [Cleaned XML Content]
    */
-  private createEmbeddingText(
+  private buildEmbeddingText(
     tagName: string,
     resourceName: string,
     content: string,
     attrs: Record<string, string>,
     context: SemanticContext
   ): string {
-
-  //  // Start with JSON context for structured representation
-  //   const contextStr = JSON.stringify(context);
-
     // Start with formatted context metadata as text
     const contextStr = this.formatMetadata(context);
     const tokens: string[] = contextStr ? [contextStr] : [];
@@ -632,7 +604,6 @@ export class XMLChunker {
 
     tokens.push(...contentTokens);
 
-    // Increased limit from 150 to 200 for better context representation
-    return tokens.slice().join(' ');
+    return tokens.join(' ');
   }
 }
