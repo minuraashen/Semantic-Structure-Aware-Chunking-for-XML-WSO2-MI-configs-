@@ -2,6 +2,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { XMLChunker } from './chunker';
 import { artifactRegistry } from './artifact-registry';
+import { AutoTokenizer, PreTrainedTokenizer } from '@huggingface/transformers';
+import { config } from './config';
 
 /**
  * Comprehensive test script to verify all chunking algorithm functionalities
@@ -107,7 +109,7 @@ async function testChunkGeneration(files: string[]): Promise<Map<string, any[]>>
       
       // Show artifact type detection
       if (chunks.length > 0) {
-        const firstChunk = chunks[0];
+        const firstChunk = chunks[1];
         console.log(`  - Resource Type: ${colorize(firstChunk.resourceType, 'yellow')}`);
         console.log(`  - Resource Name: ${colorize(firstChunk.resourceName, 'yellow')}`);
       }
@@ -268,32 +270,33 @@ function testCrossReferences(allChunks: Map<string, any[]>): void {
 }
 
 /**
- * Test 7: Token size verification
+ * Test 7: Token size verification using real AutoTokenizer
  */
-function testTokenSizing(allChunks: Map<string, any[]>): void {
-  printSection('TEST 6: Token Size Verification');
+async function testTokenSizing(allChunks: Map<string, any[]>): Promise<void> {
+  printSection('TEST 6: Token Size Verification (AutoTokenizer)');
 
-  const maxTokens = 256; // Default limit
+  const tokenizer = await AutoTokenizer.from_pretrained(config.tokenizerModel);
+  const maxTokens = config.maxTokens;
   let oversizedCount = 0;
 
   for (const [file, chunks] of allChunks.entries()) {
     chunks.forEach(chunk => {
-      // Approximate token count (chars / 4)
-      const approxTokens = Math.ceil(chunk.content.length / 4);
-      
-      if (approxTokens > maxTokens) {
+      const encoded = tokenizer.encode(chunk.content);
+      const tokenCount = encoded.length;
+
+      if (tokenCount > maxTokens) {
         oversizedCount++;
         const relativePath = file.replace(process.cwd(), '.');
         console.log(colorize(`⚠ Oversized chunk in ${relativePath}`, 'yellow'));
         console.log(`  Chunk: ${chunk.chunkType} [${chunk.chunkIndex}]`);
-        console.log(`  Approx tokens: ${approxTokens} (limit: ${maxTokens})`);
+        console.log(`  Tokens: ${tokenCount} (limit: ${maxTokens})`);
         console.log(`  Lines: ${chunk.startLine}-${chunk.endLine}`);
       }
     });
   }
 
   if (oversizedCount === 0) {
-    console.log(colorize('✓ All chunks are within token limit', 'green'));
+    console.log(colorize(`✓ All chunks are within token limit (${maxTokens} tokens, model: ${config.tokenizerModel})`, 'green'));
   } else {
     console.log(colorize(`\n⚠ Found ${oversizedCount} oversized chunks`, 'yellow'));
   }
@@ -364,8 +367,8 @@ async function runAllTests(): Promise<void> {
     // Test 5: Cross-reference detection
     testCrossReferences(allChunks);
 
-    // Test 6: Token sizing
-    testTokenSizing(allChunks);
+    // Test 6: Token sizing (uses real tokenizer)
+    await testTokenSizing(allChunks);
 
     // Test 7: Export to JSON
     testExportToJSON(allChunks);

@@ -7,6 +7,7 @@
     "test": "ts-node test-chunker.ts"
   },
   "dependencies": {
+    "@huggingface/transformers": "^3.8.1",
     "fast-xml-parser": "^4.3.2"
   },
   "devDependencies": {

@@ -1,10 +1,10 @@
 /**
- * Configuration for XML chunker
+ * Configuration for the Semantic Structure-Aware XML Chunker
  */
 export const config = {
-  // Maximum token limit for chunk size (default for all-MiniLM-L6-v2)
+  /** Maximum token limit per chunk (tuned for sentence-transformers/all-MiniLM-L6-v2) */
   maxTokens: 256,
-  
-  // Other configuration options
-  encoding: 'utf-8',
+
+  /** HuggingFace model ID used for tokenization */
+  tokenizerModel: 'sentence-transformers/all-MiniLM-L6-v2',
 };

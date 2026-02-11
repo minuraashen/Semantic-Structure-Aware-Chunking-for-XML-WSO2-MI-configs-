@@ -1,6 +1,63 @@
-# WSO2 MI XML Chunker
+# Semantic Structure-Aware XML Chunker for WSO2 Micro Integrator
 
-A semantic, hierarchical, and size-aware XML chunking algorithm specifically designed for WSO2 Micro Integrator (MI) configuration files. This tool intelligently breaks down complex XML artifacts into meaningful, context-rich chunks optimized for RAG (Retrieval-Augmented Generation) systems and semantic search.
+A semantic, hierarchical, and size-aware XML chunking algorithm specifically designed for WSO2 Micro Integrator (MI) configuration files. This tool intelligently breaks down complex XML artifacts into meaningful, context-rich chunks optimized for **RAG (Retrieval-Augmented Generation) systems** and **semantic code retrieval**.
+
+---
+
+## ⚠️ CRITICAL: Understanding Chunk Structure for Semantic Retrieval
+
+> **Chunks are NOT just XML portions!** Each chunk consists of **METADATA as CONTEXT** combined with **Cleaned XML Content**.
+
+### Embedding Text Formula
+
+For semantic retrieval operations, the embedding text for each chunk follows this structure:
+
+```
+{ Context Metadata (JSON → Text) } + { Cleaned XML Content }
+```
+
+### Example
+
+Given this chunk context and XML content:
+
+**Context (from parent traversal):**
+```json
+{
+  "api": {
+    "name": "BankAPI",
+    "context": "/bankapi"
+  }
+}
+```
+
+**XML Content:**
+```xml
+<Custom.greet methods="GET" uri-template="/">
+    <inSequence>
+        <payloadFactory media-type="json">
+            <format>{"greetings":"Welcome to O2 Bank !!"}</format>
+        </payloadFactory>
+        <respond/>
+    </inSequence>
+    <faultSequence>
+    </faultSequence>
+</Custom.greet>
+```
+
+**Generated Embedding Text:**
+```
+API: BankAPI Context: /bankapi Custom.greet methods=GET uri-template=/ inSequence payloadFactory media-type=json format greetings Welcome to O2 Bank respond faultSequence
+```
+
+### Why This Matters
+
+1. **Contextual Awareness**: The embedding text always starts with hierarchical context (API name, context path, resource method, URI template), ensuring semantic search understands WHERE in the configuration this chunk belongs.
+
+2. **Semantic Richness**: By converting both metadata and XML structure to natural text, embedding models can capture the full semantic meaning.
+
+3. **Better Retrieval**: When querying "How does BankAPI handle greetings?", the context-prefixed embedding ensures this chunk ranks highly due to both API name and content relevance.
+
+---
 
 ## 🎯 Key Features
 
@@ -41,13 +98,14 @@ Automatically detects and tracks references between artifacts:
 - Enables deduplication and change detection
 - Useful for incremental updates
 
-### 6. **Context-Enriched Embedding Text**
+### 6. **Context-Enriched Embedding Text** ⭐
 - **Context-First Approach**: Each chunk's embedding text starts with structured context metadata
+- **Formula**: `{ Metadata Context } + { Cleaned XML Content }` → Single embedding text
 - **Format**: `"API: BankAPI Context: /bankapi Method: POST URI: /deposit" + cleaned content`
 - Clean, natural text extraction from XML (removes angle brackets and formatting)
 - Preserves semantic expressions like `${payload.userId}`
 - Maintains special characters in XPath: `${}()[]`
-- Optimized for semantic embeddings with contextual awareness
+- **Optimized for semantic embeddings**: The combined context + content creates rich, searchable text for vector databases
 
 ## 🏗️ Supported WSO2 MI Artifacts
 
@@ -227,18 +285,21 @@ The test suite verifies:
 ```
 .
 ├── artifact-registry.ts    # Plugin registry and artifact definitions
-├── chunker.ts             # Main chunking algorithm
-├── config.ts              # Configuration settings
-├── merkle.ts              # Content hashing utilities
-├── test-chunker.ts        # Comprehensive test suite
-├── artifacts/             # Sample WSO2 MI XML files
+├── chunker.ts              # Main chunking algorithm
+├── config.ts               # Configuration settings
+├── content-hash.ts         # Content hashing utilities (SHA-256)
+├── test-chunker.ts         # Comprehensive test suite
+├── package.json            # Dependencies and scripts
+├── tsconfig.json           # TypeScript configuration
+├── artifacts/              # Sample WSO2 MI XML files
 │   ├── apis/
 │   ├── sequences/
 │   ├── data-services/
+│   ├── data-sources/
 │   └── local-entries/
-├── test-output/           # Generated test results
-│   └── chunks.json        # Exported chunks
-└── package.json
+├── test-output/            # Generated test results
+│   └── chunks.json         # Exported chunks
+└── README.md
 ```
 
 ## 🔌 Adding Custom Plugins
@@ -264,15 +325,19 @@ const myPlugin: ArtifactPlugin = {
 artifactRegistry.registerPlugin(myPlugin);
 ```
 
-## 🎯 Use Cases
+## 🎯 Primary Use Case: Semantic Code Retrieval for RAG
 
-- **RAG Systems**: Generate context-rich chunks with metadata-prefixed embeddings for superior retrieval accuracy
-- **Semantic Search**: Enable intelligent search across WSO2 MI configs with contextual awareness
-- **Documentation**: Automatically generate documentation from configs with full context
-- **Change Detection**: Track configuration changes via content hashing
-- **Dependency Analysis**: Understand artifact relationships and dependencies
-- **Configuration Validation**: Analyze artifact structure and completeness
-- **AI-Powered Configuration Assistant**: Build intelligent assistants that understand WSO2 MI configurations in context
+This chunking algorithm is specifically designed for **semantic code retrieval** in RAG-based applications:
+
+| Use Case | How Chunks Help |
+|----------|-----------------|
+| **RAG Systems** | Context-prefixed embedding text (`API: X Context: /y ...`) enables precise retrieval |
+| **Semantic Search** | Natural language queries match contextual metadata + code content |
+| **AI Code Assistants** | Chunks provide complete context for LLMs to understand configuration purpose |
+| **Documentation Generation** | Rich metadata enables automatic documentation from configs |
+| **Change Detection** | SHA-256 content hashing tracks configuration changes |
+| **Dependency Analysis** | Cross-artifact reference tracking reveals relationships |
+| **Configuration Validation** | Semantic type/intent classification aids analysis |
 
 ## 📈 Performance
 

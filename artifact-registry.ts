@@ -1,6 +1,3 @@
-import * as fs from 'fs';
-import * as path from 'path';
-
 /**
  * Artifact Plugin Interface
  * 
@@ -48,7 +45,7 @@ export interface ArtifactMetadata {
  * These cover the standard WSO2 Micro Integrator artifact types.
  * Custom plugins can extend this set for organization-specific artifacts.
  */
-const BUILTIN_PLUGINS: ArtifactPlugin[] = [
+const WSO2_MI_ARTIFACT_PLUGINS: ArtifactPlugin[] = [
     // REST API
     {
         id: 'api',
@@ -207,6 +204,22 @@ const BUILTIN_PLUGINS: ArtifactPlugin[] = [
         })
     },
 
+    // Data Source
+    {
+        id: 'dataSource',
+        rootTags: ['datasource'],
+        semanticBoundaries: ['property'],
+        atomicTags: ['property'],
+        extractMetadata: (rootTag, attrs) => ({
+            type: 'dataSource',
+            name: attrs.name || attrs['@_name'] || 'unknown',
+            xmlns: attrs.xmlns || attrs['@_xmlns'],
+            additionalInfo: {
+                className: attrs.class || attrs['@_class']
+            }
+        })
+    },
+
     // Scheduled Task
     {
         id: 'task',
@@ -257,7 +270,7 @@ export class ArtifactRegistry {
 
     constructor() {
         // Register all built-in plugins
-        for (const plugin of BUILTIN_PLUGINS) {
+        for (const plugin of WSO2_MI_ARTIFACT_PLUGINS) {
             this.registerPlugin(plugin);
         }
     }
@@ -295,35 +308,6 @@ export class ArtifactRegistry {
     }
 
     /**
-     * Load custom plugins from a directory
-     * Plugins should export default an ArtifactPlugin object
-     */
-    async loadPluginsFromDirectory(pluginsPath: string): Promise<void> {
-        if (!fs.existsSync(pluginsPath)) {
-            return;
-        }
-
-        const entries = await fs.promises.readdir(pluginsPath, { withFileTypes: true });
-
-        for (const entry of entries) {
-            if (entry.isFile() && (entry.name.endsWith('.plugin.js') || entry.name.endsWith('.plugin.ts'))) {
-                try {
-                    const pluginPath = path.join(pluginsPath, entry.name);
-                    const pluginModule = require(pluginPath);
-                    const plugin: ArtifactPlugin = pluginModule.default || pluginModule;
-
-                    if (plugin.id && plugin.rootTags) {
-                        this.registerPlugin(plugin);
-                        console.log(`Loaded custom plugin: ${plugin.id}`);
-                    }
-                } catch (error) {
-                    console.error(`Failed to load plugin ${entry.name}:`, error);
-                }
-            }
-        }
-    }
-
-    /**
      * Check if a tag represents a semantic boundary
      */
     isSemanticBoundary(tagName: string): boolean {
@@ -352,13 +336,6 @@ export class ArtifactRegistry {
     }
 
     /**
-     * Get plugin for a given root tag
-     */
-    getPluginForRootTag(tagName: string): ArtifactPlugin | undefined {
-        return this.rootTagToPlugin.get(tagName);
-    }
-
-    /**
      * Detect artifact type from parsed XML
      * Returns the plugin and extracted metadata
      */
@@ -381,17 +358,64 @@ export class ArtifactRegistry {
     }
 
     /**
+     * Detect ANY artifact from parsed XML (including unregistered custom types)
+     * This is the fallback when detectArtifactType returns null
+     * Extracts metadata from the first non-processing-instruction root element
+     * Uses filePath to infer WSO2 MI artifact type from folder structure
+     */
+    detectAnyArtifact(parsed: any, filePath?: string): ArtifactMetadata | null {
+        if (!Array.isArray(parsed)) return null;
+
+        for (const item of parsed) {
+            const tagName = Object.keys(item).find(key => key !== ':@');
+            if (!tagName || tagName === '?xml') continue; // Skip processing instructions
+
+            const attrs = item[':@'] || {};
+            
+            // Extract name from common attribute patterns
+            const name = attrs.key || attrs['@_key'] || 
+                        attrs.name || attrs['@_name'] || 
+                        attrs.id || attrs['@_id'] ||
+                        attrs.context || attrs['@_context'] || 
+                        tagName;
+
+            // Infer artifact type from folder structure if filePath provided
+            let inferredType = tagName; // Default to tag name
+            if (filePath) {
+                if (filePath.includes('/data-sources/')) inferredType = 'dataSource';
+                else if (filePath.includes('/apis/')) inferredType = 'api';
+                else if (filePath.includes('/proxy-services/')) inferredType = 'proxyService';
+                else if (filePath.includes('/sequences/')) inferredType = 'sequence';
+                else if (filePath.includes('/endpoints/')) inferredType = 'endpoint';
+                else if (filePath.includes('/local-entries/')) inferredType = 'localEntry';
+                else if (filePath.includes('/templates/')) inferredType = 'template';
+                else if (filePath.includes('/data-services/')) inferredType = 'dataService';
+                else if (filePath.includes('/tasks/')) inferredType = 'task';
+                else if (filePath.includes('/message-stores/')) inferredType = 'messageStore';
+                else if (filePath.includes('/message-processors/')) inferredType = 'messageProcessor';
+                else if (filePath.includes('/inbound-endpoints/')) inferredType = 'inboundEndpoint';
+            }
+
+            return {
+                type: inferredType,
+                name: name,
+                xmlns: attrs.xmlns || attrs['@_xmlns'],
+                additionalInfo: {
+                    isCustom: true,
+                    rootTag: tagName,
+                    inferredFromPath: inferredType !== tagName
+                }
+            };
+        }
+
+        return null;
+    }
+
+    /**
      * Get all registered plugins
      */
     getAllPlugins(): ArtifactPlugin[] {
         return Array.from(this.plugins.values());
-    }
-
-    /**
-     * Get plugin by ID
-     */
-    getPlugin(id: string): ArtifactPlugin | undefined {
-        return this.plugins.get(id);
     }
 }
 
