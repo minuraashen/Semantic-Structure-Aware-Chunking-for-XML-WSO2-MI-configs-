@@ -1,5 +1,3 @@
-
-
 /**
  * Artifact Plugin Interface
  * 

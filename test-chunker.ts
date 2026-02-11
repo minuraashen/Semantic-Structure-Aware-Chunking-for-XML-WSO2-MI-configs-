@@ -358,17 +358,17 @@ async function runAllTests(): Promise<void> {
     // Test 2: Process files and generate chunks
     const allChunks = await testChunkGeneration(files);
 
-    // // Test 3: Display detailed chunk information
-    // testChunkDetails(allChunks);
+    // Test 3: Display detailed chunk information
+    testChunkDetails(allChunks);
 
-    // // Test 4: Verify hierarchical relationships
-    // testHierarchy(allChunks);
+    // Test 4: Verify hierarchical relationships
+    testHierarchy(allChunks);
 
-    // // Test 5: Cross-reference detection
-    // testCrossReferences(allChunks);
+    // Test 5: Cross-reference detection
+    testCrossReferences(allChunks);
 
-    // // Test 6: Token sizing (uses real tokenizer)
-    // await testTokenSizing(allChunks);
+    // Test 6: Token sizing (uses real tokenizer)
+    await testTokenSizing(allChunks);
 
     // Test 7: Export to JSON
     testExportToJSON(allChunks);
