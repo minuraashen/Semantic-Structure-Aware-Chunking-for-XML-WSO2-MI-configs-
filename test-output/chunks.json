@@ -1,6 +1,6 @@
 [
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/apis/BankAPI.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/BankAPI.xml",
     "resourceName": "?xml",
     "resourceType": "api",
     "chunkType": "?xml",
@@ -23,7 +23,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/apis/BankAPI.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/BankAPI.xml",
     "resourceName": "Custom.greet",
     "resourceType": "api",
     "chunkType": "Custom.greet",
@@ -46,7 +46,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/apis/BankAPI.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/BankAPI.xml",
     "resourceName": "originalAmount",
     "resourceType": "api",
     "chunkType": "variable",
@@ -74,7 +74,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/apis/BankAPI.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/BankAPI.xml",
     "resourceName": "currency",
     "resourceType": "api",
     "chunkType": "variable",
@@ -102,7 +102,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/apis/BankAPI.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/BankAPI.xml",
     "resourceName": "http.post",
     "resourceType": "api",
     "chunkType": "http.post",
@@ -135,7 +135,7 @@
     ]
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/apis/BankAPI.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/BankAPI.xml",
     "resourceName": "rate",
     "resourceType": "api",
     "chunkType": "variable",
@@ -163,7 +163,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/apis/BankAPI.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/BankAPI.xml",
     "resourceName": "amountInUSD",
     "resourceType": "api",
     "chunkType": "variable",
@@ -191,7 +191,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/apis/BankAPI.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/BankAPI.xml",
     "resourceName": "payloadFactory",
     "resourceType": "api",
     "chunkType": "payloadFactory",
@@ -219,7 +219,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/apis/BankAPI.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/BankAPI.xml",
     "resourceName": "respond",
     "resourceType": "api",
     "chunkType": "respond",
@@ -247,7 +247,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/apis/BankAPI.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/BankAPI.xml",
     "resourceName": "faultSequence",
     "resourceType": "api",
     "chunkType": "faultSequence",
@@ -275,7 +275,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/apis/BankAPI.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/BankAPI.xml",
     "resourceName": "resource",
     "resourceType": "api",
     "chunkType": "resource",
@@ -302,7 +302,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/apis/BankAPI.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/BankAPI.xml",
     "resourceName": "fromAccount",
     "resourceType": "api",
     "chunkType": "variable",
@@ -330,7 +330,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/apis/BankAPI.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/BankAPI.xml",
     "resourceName": "toAccount",
     "resourceType": "api",
     "chunkType": "variable",
@@ -358,7 +358,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/apis/BankAPI.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/BankAPI.xml",
     "resourceName": "amount",
     "resourceType": "api",
     "chunkType": "variable",
@@ -386,7 +386,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/apis/BankAPI.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/BankAPI.xml",
     "resourceName": "filter",
     "resourceType": "api",
     "chunkType": "filter",
@@ -414,7 +414,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/apis/BankAPI.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/BankAPI.xml",
     "resourceName": "faultSequence",
     "resourceType": "api",
     "chunkType": "faultSequence",
@@ -442,7 +442,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/apis/BankAPI.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/BankAPI.xml",
     "resourceName": "resource",
     "resourceType": "api",
     "chunkType": "resource",
@@ -469,7 +469,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/data-services/BankDataService.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/data-services/BankDataService.xml",
     "resourceName": "config",
     "resourceType": "dataService",
     "chunkType": "config",
@@ -493,7 +493,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/data-services/BankDataService.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/data-services/BankDataService.xml",
     "resourceName": "query",
     "resourceType": "dataService",
     "chunkType": "query",
@@ -526,7 +526,7 @@
     ]
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/data-services/BankDataService.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/data-services/BankDataService.xml",
     "resourceName": "query",
     "resourceType": "dataService",
     "chunkType": "query",
@@ -559,7 +559,7 @@
     ]
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/data-services/BankDataService.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/data-services/BankDataService.xml",
     "resourceName": "query",
     "resourceType": "dataService",
     "chunkType": "query",
@@ -592,7 +592,7 @@
     ]
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/data-services/BankDataService.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/data-services/BankDataService.xml",
     "resourceName": "query",
     "resourceType": "dataService",
     "chunkType": "query",
@@ -625,7 +625,7 @@
     ]
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/data-services/BankDataService.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/data-services/BankDataService.xml",
     "resourceName": "getAccountBalance",
     "resourceType": "dataService",
     "chunkType": "operation",
@@ -657,7 +657,7 @@
     ]
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/data-services/BankDataService.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/data-services/BankDataService.xml",
     "resourceName": "updateAccountBalance",
     "resourceType": "dataService",
     "chunkType": "operation",
@@ -689,7 +689,7 @@
     ]
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/data-services/BankDataService.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/data-services/BankDataService.xml",
     "resourceName": "insertTransaction",
     "resourceType": "dataService",
     "chunkType": "operation",
@@ -721,7 +721,7 @@
     ]
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/data-services/BankDataService.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/data-services/BankDataService.xml",
     "resourceName": "getTransactionHistory",
     "resourceType": "dataService",
     "chunkType": "operation",
@@ -753,7 +753,7 @@
     ]
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/data-sources/minura.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/data-sources/minura.xml",
     "resourceName": "?xml",
     "resourceType": "dataSource",
     "chunkType": "?xml",
@@ -779,7 +779,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/data-sources/minura.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/data-sources/minura.xml",
     "resourceName": "CurrencyConverter",
     "resourceType": "dataSource",
     "chunkType": "ENTC.agent",
@@ -805,7 +805,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/local-entries/CurrencyConverter.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/local-entries/CurrencyConverter.xml",
     "resourceName": "?xml",
     "resourceType": "localEntry",
     "chunkType": "?xml",
@@ -828,7 +828,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/local-entries/CurrencyConverter.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/local-entries/CurrencyConverter.xml",
     "resourceName": "CurrencyConverter",
     "resourceType": "localEntry",
     "chunkType": "localEntry",
@@ -852,7 +852,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/local-entries/EmailConnection.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/local-entries/EmailConnection.xml",
     "resourceName": "?xml",
     "resourceType": "localEntry",
     "chunkType": "?xml",
@@ -875,7 +875,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/local-entries/EmailConnection.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/local-entries/EmailConnection.xml",
     "resourceName": "EmailConnection",
     "resourceType": "localEntry",
     "chunkType": "localEntry",
@@ -899,7 +899,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/sequences/AuthenticationSequence.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/AuthenticationSequence.xml",
     "resourceName": "?xml",
     "resourceType": "sequence",
     "chunkType": "?xml",
@@ -921,7 +921,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/sequences/AuthenticationSequence.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/AuthenticationSequence.xml",
     "resourceName": "filter",
     "resourceType": "sequence",
     "chunkType": "filter",
@@ -943,7 +943,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/sequences/GlobalErrorSequence.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/GlobalErrorSequence.xml",
     "resourceName": "?xml",
     "resourceType": "sequence",
     "chunkType": "?xml",
@@ -965,7 +965,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/sequences/GlobalErrorSequence.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/GlobalErrorSequence.xml",
     "resourceName": "errorCode",
     "resourceType": "sequence",
     "chunkType": "variable",
@@ -987,7 +987,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/sequences/GlobalErrorSequence.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/GlobalErrorSequence.xml",
     "resourceName": "errorMessage",
     "resourceType": "sequence",
     "chunkType": "variable",
@@ -1009,7 +1009,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/sequences/GlobalErrorSequence.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/GlobalErrorSequence.xml",
     "resourceName": "errorDetail",
     "resourceType": "sequence",
     "chunkType": "variable",
@@ -1031,7 +1031,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/sequences/GlobalErrorSequence.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/GlobalErrorSequence.xml",
     "resourceName": "log",
     "resourceType": "sequence",
     "chunkType": "log",
@@ -1053,7 +1053,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/sequences/GlobalErrorSequence.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/GlobalErrorSequence.xml",
     "resourceName": "case",
     "resourceType": "sequence",
     "chunkType": "case",
@@ -1075,7 +1075,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/sequences/GlobalErrorSequence.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/GlobalErrorSequence.xml",
     "resourceName": "case",
     "resourceType": "sequence",
     "chunkType": "case",
@@ -1097,7 +1097,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/sequences/GlobalErrorSequence.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/GlobalErrorSequence.xml",
     "resourceName": "payloadFactory",
     "resourceType": "sequence",
     "chunkType": "payloadFactory",
@@ -1119,7 +1119,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/sequences/GlobalErrorSequence.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/GlobalErrorSequence.xml",
     "resourceName": "HTTP_SC",
     "resourceType": "sequence",
     "chunkType": "header",
@@ -1141,7 +1141,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/sequences/GlobalErrorSequence.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/GlobalErrorSequence.xml",
     "resourceName": "respond",
     "resourceType": "sequence",
     "chunkType": "respond",
@@ -1163,7 +1163,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/sequences/LoggingSequence.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/LoggingSequence.xml",
     "resourceName": "?xml",
     "resourceType": "sequence",
     "chunkType": "?xml",
@@ -1185,7 +1185,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/sequences/LoggingSequence.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/LoggingSequence.xml",
     "resourceName": "requestId",
     "resourceType": "sequence",
     "chunkType": "variable",
@@ -1207,7 +1207,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/sequences/LoggingSequence.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/LoggingSequence.xml",
     "resourceName": "endpoint",
     "resourceType": "sequence",
     "chunkType": "variable",
@@ -1229,7 +1229,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/sequences/LoggingSequence.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/LoggingSequence.xml",
     "resourceName": "method",
     "resourceType": "sequence",
     "chunkType": "variable",
@@ -1251,7 +1251,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/sequences/LoggingSequence.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/LoggingSequence.xml",
     "resourceName": "log",
     "resourceType": "sequence",
     "chunkType": "log",
@@ -1273,7 +1273,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/sequences/LoggingSequence.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/LoggingSequence.xml",
     "resourceName": "parameter",
     "resourceType": "sequence",
     "chunkType": "parameter",
@@ -1295,7 +1295,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/sequences/LoggingSequence.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/LoggingSequence.xml",
     "resourceName": "parameter",
     "resourceType": "sequence",
     "chunkType": "parameter",
@@ -1317,7 +1317,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/sequences/LoggingSequence.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/LoggingSequence.xml",
     "resourceName": "parameter",
     "resourceType": "sequence",
     "chunkType": "parameter",
@@ -1339,7 +1339,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/sequences/NotificationSequence.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/NotificationSequence.xml",
     "resourceName": "?xml",
     "resourceType": "sequence",
     "chunkType": "?xml",
@@ -1361,7 +1361,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/sequences/NotificationSequence.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/NotificationSequence.xml",
     "resourceName": "customerEmail",
     "resourceType": "sequence",
     "chunkType": "variable",
@@ -1383,7 +1383,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/sequences/NotificationSequence.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/NotificationSequence.xml",
     "resourceName": "transactionType",
     "resourceType": "sequence",
     "chunkType": "variable",
@@ -1405,7 +1405,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/sequences/NotificationSequence.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/NotificationSequence.xml",
     "resourceName": "amount",
     "resourceType": "sequence",
     "chunkType": "variable",
@@ -1427,7 +1427,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/sequences/NotificationSequence.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/NotificationSequence.xml",
     "resourceName": "email.send",
     "resourceType": "sequence",
     "chunkType": "email.send",
@@ -1454,7 +1454,7 @@
     ]
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/sequences/NotificationSequence.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/NotificationSequence.xml",
     "resourceName": "log",
     "resourceType": "sequence",
     "chunkType": "log",
@@ -1476,7 +1476,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/sequences/RateLimitSequence.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/RateLimitSequence.xml",
     "resourceName": "?xml",
     "resourceType": "sequence",
     "chunkType": "?xml",
@@ -1498,7 +1498,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/sequences/RateLimitSequence.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/RateLimitSequence.xml",
     "resourceName": "clientId",
     "resourceType": "sequence",
     "chunkType": "variable",
@@ -1520,7 +1520,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/sequences/RateLimitSequence.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/RateLimitSequence.xml",
     "resourceName": "ID",
     "resourceType": "sequence",
     "chunkType": "ID",
@@ -1542,7 +1542,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/sequences/RateLimitSequence.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/RateLimitSequence.xml",
     "resourceName": "log",
     "resourceType": "sequence",
     "chunkType": "log",
@@ -1564,7 +1564,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/sequences/RateLimitSequence.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/RateLimitSequence.xml",
     "resourceName": "payloadFactory",
     "resourceType": "sequence",
     "chunkType": "payloadFactory",
@@ -1586,7 +1586,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/sequences/RateLimitSequence.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/RateLimitSequence.xml",
     "resourceName": "respond",
     "resourceType": "sequence",
     "chunkType": "respond",
@@ -1608,7 +1608,7 @@
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/test/artifacts/sequences/RateLimitSequence.xml",
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/RateLimitSequence.xml",
     "resourceName": "throwError",
     "resourceType": "sequence",
     "chunkType": "throwError",

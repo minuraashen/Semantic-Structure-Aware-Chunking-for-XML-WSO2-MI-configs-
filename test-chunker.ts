@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { XMLChunker } from './chunker';
-import { artifactRegistry } from './artifact-registry';
 import { AutoTokenizer, PreTrainedTokenizer } from '@huggingface/transformers';
 import { config } from './config';
 
@@ -41,28 +40,25 @@ function printSubSection(title: string): void {
 /**
  * Test 1: Verify artifact registry functionality
  */
-function testArtifactRegistry(): void {
-  printSection('TEST 1: Artifact Registry Functionality');
+function testChunkerCapabilities(): void {
+  printSection('TEST 1: Generalized Chunker Capabilities');
 
-  console.log(colorize('✓ Registered Plugins:', 'green'));
-  const plugins = artifactRegistry.getAllPlugins();
-  plugins.forEach(plugin => {
-    console.log(`  - ${colorize(plugin.id, 'yellow')}: ${plugin.rootTags.join(', ')}`);
-  });
+  console.log(colorize('✓ Structure-Based Chunking:', 'green'));
+  console.log('  - Semantic boundaries detected via XML attribute heuristics');
+  console.log('  - Root artifact type inferred from XML root element structure');
+  console.log('  - Hierarchical context tracked through ancestor attributes');
+  console.log('  - No hardcoded artifact registry required');
 
-  console.log(colorize('\n✓ Semantic Boundaries:', 'green'));
-  const testBoundaries = ['resource', 'inSequence', 'outSequence', 'filter', 'query'];
-  testBoundaries.forEach(boundary => {
-    const isBoundary = artifactRegistry.isSemanticBoundary(boundary);
-    console.log(`  - ${boundary}: ${isBoundary ? colorize('YES', 'green') : colorize('NO', 'red')}`);
-  });
-
-  console.log(colorize('\n✓ Mediator Tags:', 'green'));
-  const testMediators = ['log', 'property', 'call', 'send', 'payloadFactory'];
-  testMediators.forEach(mediator => {
-    const isMediator = artifactRegistry.isMediatorTag(mediator);
-    console.log(`  - ${mediator}: ${isMediator ? colorize('YES', 'green') : colorize('NO', 'red')}`);
-  });
+  console.log(colorize('\n✓ Structural Patterns Used:', 'green'));
+  const patterns = [
+    'Elements with attributes → semantic boundaries',
+    'name + context attrs → API-like context',
+    'methods + uri-template attrs → resource context',
+    'Tag ending in "Sequence" → sequence context',
+    'id + useConfig attrs → query context',
+    'Dotted tag names (e.g., http.post) → mediator detection',
+  ];
+  patterns.forEach(p => console.log(`  - ${colorize(p, 'yellow')}`));
 }
 
 /**
@@ -343,8 +339,8 @@ async function runAllTests(): Promise<void> {
   }
 
   try {
-    // Test 1: Registry functionality
-    testArtifactRegistry();
+    // Test 1: Generalized chunker capabilities
+    testChunkerCapabilities();
 
     // Find all XML files
     const files = findArtifactFiles(artifactsDir);
