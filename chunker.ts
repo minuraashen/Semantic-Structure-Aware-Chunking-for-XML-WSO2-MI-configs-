@@ -491,15 +491,20 @@ export class XMLChunker {
         this.isLeafElement(tagName, element);
 
       if (isChunkable) {
-        // Token gating: Check if subtree fits within limit
+        // Token gating: Build embedding text first, then check if it fits the token limit.
+        // Counting MUST happen on the embeddingText (cleaned XML + metadata) — the exact
+        // text the embedding model will receive — not on raw XML content.
         const range = this.findElementRange(tagName, lines);
         const content = this.extractContent(lines, range);
-        const metadata = this.formatMetadata(updatedContext);
-        const tokenCount = this.estimateTokenCount(content, metadata);
+        const resourceName = nodeAttrs.name || nodeAttrs['@_name'] || nodeAttrs.key || nodeAttrs['@_key'] ||
+          nodeAttrs.context || nodeAttrs['@_context'] || tagName;
+        const embeddingText = this.buildEmbeddingText(tagName, resourceName, content, nodeAttrs, updatedContext);
+        const tokenCount = this.estimateTokenCount(embeddingText);
 
         if (tokenCount <= this.maxTokens) {
-          // Subtree fits -> Emit chunk and STOP traversal
-          this.createChunk(tagName, nodeAttrs, content, range, filePath, chunks, parentChunkId, updatedContext);
+          // Subtree fits -> Emit chunk and STOP traversal.
+          // Pass the pre-built embeddingText so createChunk doesn't rebuild it.
+          this.createChunk(tagName, nodeAttrs, content, embeddingText, range, filePath, chunks, parentChunkId, updatedContext);
         } else {
           // Subtree too large -> Do NOT chunk, descend to ALL children
           if (Array.isArray(element)) {
@@ -571,6 +576,7 @@ export class XMLChunker {
     tagName: string,
     attrs: Record<string, string>,
     content: string,
+    embeddingText: string,
     range: LineRange,
     filePath: string,
     chunks: XMLChunk[],
@@ -581,7 +587,8 @@ export class XMLChunker {
       attrs.context || attrs['@_context'] || tagName;
     const chunkIndex = this.nextChunkIndex++;
 
-    const embeddingText = this.buildEmbeddingText(tagName, resourceName, content, attrs, context);
+    // embeddingText is pre-built by processNode before the token gate —
+    // do NOT rebuild it here to keep token counting and embedding in sync.
     const semanticType = this.mapToSemanticType(tagName, context);
     const semanticIntent = this.inferIntent(tagName, attrs, content, context);
     const contentHash = computeChunkHash(content, {
@@ -727,18 +734,20 @@ export class XMLChunker {
   }
 
   /**
-   * Estimate token count using the loaded AutoTokenizer.
-   * Falls back to character-based approximation if tokenizer unavailable.
+   * Count tokens in the pre-built embeddingText using the embedding model's own tokenizer.
+   *
+   * Token counting MUST use the same tokenizer as the embedding model and MUST operate
+   * on the embeddingText (cleaned XML + context metadata) — not raw XML — so that the
+   * token gate accurately reflects what fits within the model's actual token limit.
+   *
+   * Falls back to character-based approximation (÷4) if the tokenizer is unavailable.
    */
-  private estimateTokenCount(content: string, metadata: string = ''): number {
-    const fullText = metadata + ' ' + content;
-
+  private estimateTokenCount(embeddingText: string): number {
     if (this.tokenizer) {
-      const encoded = this.tokenizer.encode(fullText);
+      const encoded = this.tokenizer.encode(embeddingText);
       return encoded.length;
     }
-
-    return Math.ceil(fullText.length / 4);
+    return Math.ceil(embeddingText.length / 4);
   }
 
   /**

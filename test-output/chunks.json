@@ -47,74 +47,18 @@
   },
   {
     "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/BankAPI.xml",
-    "resourceName": "originalAmount",
+    "resourceName": "inSequence",
     "resourceType": "api",
-    "chunkType": "variable",
+    "chunkType": "inSequence",
     "chunkIndex": 2,
-    "startLine": 16,
-    "endLine": 16,
-    "content": "            <variable name=\"originalAmount\" expression=\"${payload.amount}\" type=\"DOUBLE\"/>",
+    "startLine": 15,
+    "endLine": 47,
+    "content": "        <inSequence>\n            <variable name=\"originalAmount\" expression=\"${payload.amount}\" type=\"DOUBLE\"/>\n            <variable name=\"currency\" expression=\"${payload.currency}\" type=\"STRING\"/>\n            \n            <http.post configKey=\"CurrencyConverter\">\n                <relativePath>/currency/rate</relativePath>\n                <headers>[]</headers>\n                <requestBodyType>JSON</requestBodyType>\n                <requestBodyJson>{\n                    \"fromCurrency\": \"${vars.currency}\",\n                    \"toCurrency\": \"USD\"\n                }</requestBodyJson>\n                <responseVariable>conversionRate</responseVariable>\n                <overwriteBody>false</overwriteBody>\n            </http.post>\n            \n            <variable name=\"rate\" expression=\"${vars.conversionRate.rate}\" type=\"DOUBLE\"/>\n            <variable name=\"amountInUSD\" expression=\"${vars.originalAmount * vars.rate}\" type=\"DOUBLE\"/>\n            \n            <payloadFactory media-type=\"json\">\n                <format>{\n                    \"status\": \"success\",\n                    \"message\": \"Deposit processed successfully\",\n                    \"transaction\": {\n                        \"originalAmount\": ${vars.originalAmount},\n                        \"currency\": \"${vars.currency}\",\n                        \"amountInUSD\": ${vars.amountInUSD},\n                        \"conversionRate\": ${vars.rate}\n                    }\n                }</format>\n            </payloadFactory>\n            <respond/>\n        </inSequence>",
     "parentChunkId": null,
-    "embeddingText": "API: BankAPI Context: /bankapi Method: POST URI: /deposit Sequence: inSequence variable name=originalAmount expression=${payload.amount} type=DOUBLE/",
-    "semanticType": "component",
+    "embeddingText": "API: BankAPI Context: /bankapi Method: POST URI: /deposit Sequence: inSequence inSequence variable name=originalAmount expression=${payload.amount} type=DOUBLE/ variable name=currency expression=${payload.currency} type=STRING/ http.post configKey=CurrencyConverter relativePath /currency/rate headers [] requestBodyType JSON requestBodyJson fromCurrency ${vars.currency} toCurrency USD responseVariable conversionRate overwriteBody false variable name=rate expression=${vars.conversionRate.rate} type=DOUBLE/ variable name=amountInUSD expression=${vars.originalAmount vars.rate} type=DOUBLE/ payloadFactory media-type=json format status success message Deposit processed successfully transaction originalAmount ${vars.originalAmount}, currency ${vars.currency} amountInUSD ${vars.amountInUSD}, conversionRate ${vars.rate} respond",
+    "semanticType": "sequence",
     "semanticIntent": "processing",
-    "contentHash": "7c00eaae88c50a9e0ff5c41963db85b36d972569c97a95721e412178f6494152",
-    "context": {
-      "api": {
-        "name": "BankAPI",
-        "context": "/bankapi"
-      },
-      "resource": {
-        "method": "POST",
-        "uriTemplate": "/deposit"
-      },
-      "sequence": "inSequence"
-    },
-    "isSequenceDefinition": false,
-    "referencedSequences": []
-  },
-  {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/BankAPI.xml",
-    "resourceName": "currency",
-    "resourceType": "api",
-    "chunkType": "variable",
-    "chunkIndex": 3,
-    "startLine": 17,
-    "endLine": 17,
-    "content": "            <variable name=\"currency\" expression=\"${payload.currency}\" type=\"STRING\"/>",
-    "parentChunkId": null,
-    "embeddingText": "API: BankAPI Context: /bankapi Method: POST URI: /deposit Sequence: inSequence variable name=currency expression=${payload.currency} type=STRING/",
-    "semanticType": "component",
-    "semanticIntent": "processing",
-    "contentHash": "00c529f5cd61c7b95623ffa57752b3b76674e5a91feb8843cb60e88bfd9ffd14",
-    "context": {
-      "api": {
-        "name": "BankAPI",
-        "context": "/bankapi"
-      },
-      "resource": {
-        "method": "POST",
-        "uriTemplate": "/deposit"
-      },
-      "sequence": "inSequence"
-    },
-    "isSequenceDefinition": false,
-    "referencedSequences": []
-  },
-  {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/BankAPI.xml",
-    "resourceName": "http.post",
-    "resourceType": "api",
-    "chunkType": "http.post",
-    "chunkIndex": 4,
-    "startLine": 19,
-    "endLine": 29,
-    "content": "            <http.post configKey=\"CurrencyConverter\">\n                <relativePath>/currency/rate</relativePath>\n                <headers>[]</headers>\n                <requestBodyType>JSON</requestBodyType>\n                <requestBodyJson>{\n                    \"fromCurrency\": \"${vars.currency}\",\n                    \"toCurrency\": \"USD\"\n                }</requestBodyJson>\n                <responseVariable>conversionRate</responseVariable>\n                <overwriteBody>false</overwriteBody>\n            </http.post>",
-    "parentChunkId": null,
-    "embeddingText": "API: BankAPI Context: /bankapi Method: POST URI: /deposit Sequence: inSequence http.post configKey=CurrencyConverter relativePath /currency/rate headers [] requestBodyType JSON requestBodyJson fromCurrency ${vars.currency} toCurrency USD responseVariable conversionRate overwriteBody false",
-    "semanticType": "component",
-    "semanticIntent": "delegation",
-    "contentHash": "4e8a2a6a04016fe8eb2898e88e8b7f3d8408426a0e9e31952efd7d1815c81dd3",
+    "contentHash": "46ab656fac40e9f6cfdf8463490345da53dc9d6f8d6a2de9277df8fdce801948",
     "context": {
       "api": {
         "name": "BankAPI",
@@ -136,122 +80,10 @@
   },
   {
     "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/BankAPI.xml",
-    "resourceName": "rate",
-    "resourceType": "api",
-    "chunkType": "variable",
-    "chunkIndex": 5,
-    "startLine": 31,
-    "endLine": 31,
-    "content": "            <variable name=\"rate\" expression=\"${vars.conversionRate.rate}\" type=\"DOUBLE\"/>",
-    "parentChunkId": null,
-    "embeddingText": "API: BankAPI Context: /bankapi Method: POST URI: /deposit Sequence: inSequence variable name=rate expression=${vars.conversionRate.rate} type=DOUBLE/",
-    "semanticType": "component",
-    "semanticIntent": "processing",
-    "contentHash": "a69da50f23ac5beedf7cc0698abbfbc902714b25f22b74f0e4b73c4ad68bc3ff",
-    "context": {
-      "api": {
-        "name": "BankAPI",
-        "context": "/bankapi"
-      },
-      "resource": {
-        "method": "POST",
-        "uriTemplate": "/deposit"
-      },
-      "sequence": "inSequence"
-    },
-    "isSequenceDefinition": false,
-    "referencedSequences": []
-  },
-  {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/BankAPI.xml",
-    "resourceName": "amountInUSD",
-    "resourceType": "api",
-    "chunkType": "variable",
-    "chunkIndex": 6,
-    "startLine": 32,
-    "endLine": 32,
-    "content": "            <variable name=\"amountInUSD\" expression=\"${vars.originalAmount * vars.rate}\" type=\"DOUBLE\"/>",
-    "parentChunkId": null,
-    "embeddingText": "API: BankAPI Context: /bankapi Method: POST URI: /deposit Sequence: inSequence variable name=amountInUSD expression=${vars.originalAmount vars.rate} type=DOUBLE/",
-    "semanticType": "component",
-    "semanticIntent": "processing",
-    "contentHash": "073069aa6c7fff53cd4265f86e918d23210c959cbb3f2c22806170c05bf68add",
-    "context": {
-      "api": {
-        "name": "BankAPI",
-        "context": "/bankapi"
-      },
-      "resource": {
-        "method": "POST",
-        "uriTemplate": "/deposit"
-      },
-      "sequence": "inSequence"
-    },
-    "isSequenceDefinition": false,
-    "referencedSequences": []
-  },
-  {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/BankAPI.xml",
-    "resourceName": "payloadFactory",
-    "resourceType": "api",
-    "chunkType": "payloadFactory",
-    "chunkIndex": 7,
-    "startLine": 34,
-    "endLine": 45,
-    "content": "            <payloadFactory media-type=\"json\">\n                <format>{\n                    \"status\": \"success\",\n                    \"message\": \"Deposit processed successfully\",\n                    \"transaction\": {\n                        \"originalAmount\": ${vars.originalAmount},\n                        \"currency\": \"${vars.currency}\",\n                        \"amountInUSD\": ${vars.amountInUSD},\n                        \"conversionRate\": ${vars.rate}\n                    }\n                }</format>\n            </payloadFactory>",
-    "parentChunkId": null,
-    "embeddingText": "API: BankAPI Context: /bankapi Method: POST URI: /deposit Sequence: inSequence payloadFactory media-type=json format status success message Deposit processed successfully transaction originalAmount ${vars.originalAmount}, currency ${vars.currency} amountInUSD ${vars.amountInUSD}, conversionRate ${vars.rate}",
-    "semanticType": "payloadFactory",
-    "semanticIntent": "transformation",
-    "contentHash": "5246b014efea4ea4c488768dc4130553928beb3d567e45c09a2b62db708864ac",
-    "context": {
-      "api": {
-        "name": "BankAPI",
-        "context": "/bankapi"
-      },
-      "resource": {
-        "method": "POST",
-        "uriTemplate": "/deposit"
-      },
-      "sequence": "inSequence"
-    },
-    "isSequenceDefinition": false,
-    "referencedSequences": []
-  },
-  {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/BankAPI.xml",
-    "resourceName": "respond",
-    "resourceType": "api",
-    "chunkType": "respond",
-    "chunkIndex": 8,
-    "startLine": 46,
-    "endLine": 46,
-    "content": "            <respond/>",
-    "parentChunkId": null,
-    "embeddingText": "API: BankAPI Context: /bankapi Method: POST URI: /deposit Sequence: inSequence respond",
-    "semanticType": "response",
-    "semanticIntent": "response",
-    "contentHash": "0d90e40f69df947eb50f9e0a3205759c15b0b0b38e925b0c18a71b03ff6bad5b",
-    "context": {
-      "api": {
-        "name": "BankAPI",
-        "context": "/bankapi"
-      },
-      "resource": {
-        "method": "POST",
-        "uriTemplate": "/deposit"
-      },
-      "sequence": "inSequence"
-    },
-    "isSequenceDefinition": false,
-    "referencedSequences": []
-  },
-  {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/BankAPI.xml",
     "resourceName": "faultSequence",
     "resourceType": "api",
     "chunkType": "faultSequence",
-    "chunkIndex": 9,
+    "chunkIndex": 3,
     "startLine": 48,
     "endLine": 59,
     "content": "        <faultSequence>\n            <log category=\"ERROR\">\n                <message>Deposit failed: ${props.synapse.ERROR_MESSAGE}</message>\n            </log>\n            <payloadFactory media-type=\"json\">\n                <format>{\n                    \"status\": \"error\",\n                    \"message\": \"Deposit processing failed\"\n                }</format>\n            </payloadFactory>\n            <respond/>\n        </faultSequence>",
@@ -279,7 +111,7 @@
     "resourceName": "resource",
     "resourceType": "api",
     "chunkType": "resource",
-    "chunkIndex": 10,
+    "chunkIndex": 4,
     "startLine": 62,
     "endLine": 78,
     "content": "    <resource methods=\"GET\" uri-template=\"/balance/{accountId}\">\n        <inSequence>\n            <variable name=\"accountId\" expression=\"${params.pathParams.accountId}\" type=\"STRING\"/>\n            \n            <payloadFactory media-type=\"json\">\n                <format>{\n                    \"accountId\": \"${vars.accountId}\",\n                    \"balance\": 5000.00,\n                    \"currency\": \"USD\",\n                    \"lastUpdated\": \"${formatDateTime(now(), 'yyyy-MM-dd HH:mm:ss')}\"\n                }</format>\n            </payloadFactory>\n            <respond/>\n        </inSequence>\n        <faultSequence>\n        </faultSequence>\n    </resource>",
@@ -303,18 +135,18 @@
   },
   {
     "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/BankAPI.xml",
-    "resourceName": "fromAccount",
+    "resourceName": "resource",
     "resourceType": "api",
-    "chunkType": "variable",
-    "chunkIndex": 11,
-    "startLine": 82,
-    "endLine": 82,
-    "content": "            <variable name=\"fromAccount\" expression=\"${payload.fromAccount}\" type=\"STRING\"/>",
+    "chunkType": "resource",
+    "chunkIndex": 5,
+    "startLine": 80,
+    "endLine": 120,
+    "content": "    <resource methods=\"POST\" uri-template=\"/transfer\">\n        <inSequence>\n            <variable name=\"fromAccount\" expression=\"${payload.fromAccount}\" type=\"STRING\"/>\n            <variable name=\"toAccount\" expression=\"${payload.toAccount}\" type=\"STRING\"/>\n            <variable name=\"amount\" expression=\"${payload.amount}\" type=\"DOUBLE\"/>\n            \n            <filter xpath=\"${vars.amount &gt; 0}\">\n                <then>\n                    <payloadFactory media-type=\"json\">\n                        <format>{\n                            \"status\": \"success\",\n                            \"message\": \"Transfer completed successfully\",\n                            \"transaction\": {\n                                \"transactionId\": \"TXN${now()}\",\n                                \"fromAccount\": \"${vars.fromAccount}\",\n                                \"toAccount\": \"${vars.toAccount}\",\n                                \"amount\": ${vars.amount},\n                                \"timestamp\": \"${formatDateTime(now(), 'yyyy-MM-dd HH:mm:ss')}\"\n                            }\n                        }</format>\n                    </payloadFactory>\n                    <respond/>\n                </then>\n                <else>\n                    <throwError type=\"VALIDATION_ERROR\" errorMessage=\"Transfer amount must be greater than zero\"/>\n                </else>\n            </filter>\n        </inSequence>\n        <faultSequence>\n            <log category=\"ERROR\">\n                <message>Transfer failed: ${props.synapse.ERROR_MESSAGE}</message>\n            </log>\n            <payloadFactory media-type=\"json\">\n                <format>{\n                    \"status\": \"error\",\n                    \"message\": \"Transfer processing failed\"\n                }</format>\n            </payloadFactory>\n            <respond/>\n        </faultSequence>\n    </resource>",
     "parentChunkId": null,
-    "embeddingText": "API: BankAPI Context: /bankapi Method: POST URI: /transfer Sequence: inSequence variable name=fromAccount expression=${payload.fromAccount} type=STRING/",
-    "semanticType": "component",
+    "embeddingText": "API: BankAPI Context: /bankapi Method: POST URI: /transfer resource methods=POST uri-template=/transfer inSequence variable name=fromAccount expression=${payload.fromAccount} type=STRING/ variable name=toAccount expression=${payload.toAccount} type=STRING/ variable name=amount expression=${payload.amount} type=DOUBLE/ filter xpath=${vars.amount gt 0} then payloadFactory media-type=json format status success message Transfer completed successfully transaction transactionId TXN${now fromAccount ${vars.fromAccount} toAccount ${vars.toAccount} amount ${vars.amount}, timestamp ${formatDateTime now yyyy-MM-dd HH:mm:ss respond else throwError type=VALIDATION_ERROR errorMessage=Transfer amount must be greater than zero/ faultSequence log category=ERROR message Transfer failed: ${props.synapse.ERROR_MESSAGE} payloadFactory media-type=json format status error message Transfer processing failed respond",
+    "semanticType": "resource",
     "semanticIntent": "processing",
-    "contentHash": "e0512cb9914fede9d9519300578eb2684e9a977db411c49504d16bdc455199c1",
+    "contentHash": "6a285eca4744708ca8501b5a40a719aad41689a67dc0cbedd6d5d1167cff3491",
     "context": {
       "api": {
         "name": "BankAPI",
@@ -323,120 +155,7 @@
       "resource": {
         "method": "POST",
         "uriTemplate": "/transfer"
-      },
-      "sequence": "inSequence"
-    },
-    "isSequenceDefinition": false,
-    "referencedSequences": []
-  },
-  {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/BankAPI.xml",
-    "resourceName": "toAccount",
-    "resourceType": "api",
-    "chunkType": "variable",
-    "chunkIndex": 12,
-    "startLine": 83,
-    "endLine": 83,
-    "content": "            <variable name=\"toAccount\" expression=\"${payload.toAccount}\" type=\"STRING\"/>",
-    "parentChunkId": null,
-    "embeddingText": "API: BankAPI Context: /bankapi Method: POST URI: /transfer Sequence: inSequence variable name=toAccount expression=${payload.toAccount} type=STRING/",
-    "semanticType": "component",
-    "semanticIntent": "processing",
-    "contentHash": "6377035e827c8e889ace40405fba551bdbd3e61f22d85d1908c5edc89678ffe3",
-    "context": {
-      "api": {
-        "name": "BankAPI",
-        "context": "/bankapi"
-      },
-      "resource": {
-        "method": "POST",
-        "uriTemplate": "/transfer"
-      },
-      "sequence": "inSequence"
-    },
-    "isSequenceDefinition": false,
-    "referencedSequences": []
-  },
-  {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/BankAPI.xml",
-    "resourceName": "amount",
-    "resourceType": "api",
-    "chunkType": "variable",
-    "chunkIndex": 13,
-    "startLine": 84,
-    "endLine": 84,
-    "content": "            <variable name=\"amount\" expression=\"${payload.amount}\" type=\"DOUBLE\"/>",
-    "parentChunkId": null,
-    "embeddingText": "API: BankAPI Context: /bankapi Method: POST URI: /transfer Sequence: inSequence variable name=amount expression=${payload.amount} type=DOUBLE/",
-    "semanticType": "component",
-    "semanticIntent": "processing",
-    "contentHash": "d6df98af7b9e258508e7f1871aa52f2bd233932746f4795d0e48accd9ac48c4b",
-    "context": {
-      "api": {
-        "name": "BankAPI",
-        "context": "/bankapi"
-      },
-      "resource": {
-        "method": "POST",
-        "uriTemplate": "/transfer"
-      },
-      "sequence": "inSequence"
-    },
-    "isSequenceDefinition": false,
-    "referencedSequences": []
-  },
-  {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/BankAPI.xml",
-    "resourceName": "filter",
-    "resourceType": "api",
-    "chunkType": "filter",
-    "chunkIndex": 14,
-    "startLine": 86,
-    "endLine": 106,
-    "content": "            <filter xpath=\"${vars.amount &gt; 0}\">\n                <then>\n                    <payloadFactory media-type=\"json\">\n                        <format>{\n                            \"status\": \"success\",\n                            \"message\": \"Transfer completed successfully\",\n                            \"transaction\": {\n                                \"transactionId\": \"TXN${now()}\",\n                                \"fromAccount\": \"${vars.fromAccount}\",\n                                \"toAccount\": \"${vars.toAccount}\",\n                                \"amount\": ${vars.amount},\n                                \"timestamp\": \"${formatDateTime(now(), 'yyyy-MM-dd HH:mm:ss')}\"\n                            }\n                        }</format>\n                    </payloadFactory>\n                    <respond/>\n                </then>\n                <else>\n                    <throwError type=\"VALIDATION_ERROR\" errorMessage=\"Transfer amount must be greater than zero\"/>\n                </else>\n            </filter>",
-    "parentChunkId": null,
-    "embeddingText": "API: BankAPI Context: /bankapi Method: POST URI: /transfer Sequence: inSequence filter xpath=${vars.amount gt 0} then payloadFactory media-type=json format status success message Transfer completed successfully transaction transactionId TXN${now fromAccount ${vars.fromAccount} toAccount ${vars.toAccount} amount ${vars.amount}, timestamp ${formatDateTime now yyyy-MM-dd HH:mm:ss respond else throwError type=VALIDATION_ERROR errorMessage=Transfer amount must be greater than zero/",
-    "semanticType": "filter",
-    "semanticIntent": "validation",
-    "contentHash": "56c7ef13573f002828f35c6290e12eb0937254858cf265b14921dad8c460ce59",
-    "context": {
-      "api": {
-        "name": "BankAPI",
-        "context": "/bankapi"
-      },
-      "resource": {
-        "method": "POST",
-        "uriTemplate": "/transfer"
-      },
-      "sequence": "inSequence"
-    },
-    "isSequenceDefinition": false,
-    "referencedSequences": []
-  },
-  {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/BankAPI.xml",
-    "resourceName": "faultSequence",
-    "resourceType": "api",
-    "chunkType": "faultSequence",
-    "chunkIndex": 15,
-    "startLine": 108,
-    "endLine": 119,
-    "content": "        <faultSequence>\n            <log category=\"ERROR\">\n                <message>Transfer failed: ${props.synapse.ERROR_MESSAGE}</message>\n            </log>\n            <payloadFactory media-type=\"json\">\n                <format>{\n                    \"status\": \"error\",\n                    \"message\": \"Transfer processing failed\"\n                }</format>\n            </payloadFactory>\n            <respond/>\n        </faultSequence>",
-    "parentChunkId": null,
-    "embeddingText": "API: BankAPI Context: /bankapi Method: POST URI: /transfer Sequence: faultSequence faultSequence log category=ERROR message Transfer failed: ${props.synapse.ERROR_MESSAGE} payloadFactory media-type=json format status error message Transfer processing failed respond",
-    "semanticType": "sequence",
-    "semanticIntent": "error-handling",
-    "contentHash": "00cce031522069f3f7c6d00d98102a8bb2b6e8aa73fbfb97c9b295948dce2337",
-    "context": {
-      "api": {
-        "name": "BankAPI",
-        "context": "/bankapi"
-      },
-      "resource": {
-        "method": "POST",
-        "uriTemplate": "/transfer"
-      },
-      "sequence": "faultSequence"
+      }
     },
     "isSequenceDefinition": false,
     "referencedSequences": []
@@ -446,7 +165,7 @@
     "resourceName": "resource",
     "resourceType": "api",
     "chunkType": "resource",
-    "chunkIndex": 16,
+    "chunkIndex": 6,
     "startLine": 122,
     "endLine": 149,
     "content": "    <resource methods=\"GET\" uri-template=\"/transactions/{accountId}\">\n        <inSequence>\n            <variable name=\"accountId\" expression=\"${params.pathParams.accountId}\" type=\"STRING\"/>\n            \n            <payloadFactory media-type=\"json\">\n                <format>{\n                    \"accountId\": \"${vars.accountId}\",\n                    \"transactions\": [\n                        {\n                            \"transactionId\": \"TXN001\",\n                            \"type\": \"deposit\",\n                            \"amount\": 1000.00,\n                            \"date\": \"2024-01-15\"\n                        },\n                        {\n                            \"transactionId\": \"TXN002\",\n                            \"type\": \"withdrawal\",\n                            \"amount\": 500.00,\n                            \"date\": \"2024-01-16\"\n                        }\n                    ]\n                }</format>\n            </payloadFactory>\n            <respond/>\n        </inSequence>\n        <faultSequence>\n        </faultSequence>\n    </resource>",
@@ -922,24 +641,25 @@
   },
   {
     "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/AuthenticationSequence.xml",
-    "resourceName": "filter",
+    "resourceName": "AuthenticationSequence",
     "resourceType": "sequence",
-    "chunkType": "filter",
+    "chunkType": "sequence",
     "chunkIndex": 1,
-    "startLine": 3,
-    "endLine": 21,
-    "content": "    <filter xpath=\"${exists(headers.Authorization)}\">\n        <then>\n            <variable name=\"authHeader\" expression=\"${headers.Authorization}\" type=\"STRING\"/>\n            <filter xpath=\"${startsWith(vars.authHeader, 'Bearer ')}\">\n                <then>\n                    <variable name=\"token\" expression=\"${subString(vars.authHeader, 7)}\" type=\"STRING\"/>\n                    <log category=\"INFO\">\n                        <message>Authentication successful for token: ${vars.token}</message>\n                    </log>\n                </then>\n                <else>\n                    <throwError type=\"AUTH_ERROR\" errorMessage=\"Invalid authorization header format\"/>\n                </else>\n            </filter>\n        </then>\n        <else>\n            <throwError type=\"AUTH_ERROR\" errorMessage=\"Authorization header missing\"/>\n        </else>\n    </filter>",
+    "startLine": 2,
+    "endLine": 22,
+    "content": "<sequence name=\"AuthenticationSequence\" xmlns=\"http://ws.apache.org/ns/synapse\">\n    <filter xpath=\"${exists(headers.Authorization)}\">\n        <then>\n            <variable name=\"authHeader\" expression=\"${headers.Authorization}\" type=\"STRING\"/>\n            <filter xpath=\"${startsWith(vars.authHeader, 'Bearer ')}\">\n                <then>\n                    <variable name=\"token\" expression=\"${subString(vars.authHeader, 7)}\" type=\"STRING\"/>\n                    <log category=\"INFO\">\n                        <message>Authentication successful for token: ${vars.token}</message>\n                    </log>\n                </then>\n                <else>\n                    <throwError type=\"AUTH_ERROR\" errorMessage=\"Invalid authorization header format\"/>\n                </else>\n            </filter>\n        </then>\n        <else>\n            <throwError type=\"AUTH_ERROR\" errorMessage=\"Authorization header missing\"/>\n        </else>\n    </filter>\n</sequence>",
     "parentChunkId": null,
-    "embeddingText": "Sequence: AuthenticationSequence filter xpath=${exists headers.Authorization then variable name=authHeader expression=${headers.Authorization} type=STRING/ filter xpath=${startsWith vars.authHeader, Bearer then variable name=token expression=${subString vars.authHeader, type=STRING/ log category=INFO message Authentication successful for token: ${vars.token} else throwError type=AUTH_ERROR errorMessage=Invalid authorization header format/ else throwError type=AUTH_ERROR errorMessage=Authorization header missing/",
-    "semanticType": "filter",
-    "semanticIntent": "validation",
-    "contentHash": "0e02bc385d1cc641e9c97e67d06e863e9e4d00cc1eec15b8d1a4edcdbb4bda35",
+    "embeddingText": "Sequence: AuthenticationSequence sequence name=AuthenticationSequence xmlns=http://ws.apache.org/ns/synapse filter xpath=${exists headers.Authorization then variable name=authHeader expression=${headers.Authorization} type=STRING/ filter xpath=${startsWith vars.authHeader, Bearer then variable name=token expression=${subString vars.authHeader, type=STRING/ log category=INFO message Authentication successful for token: ${vars.token} else throwError type=AUTH_ERROR errorMessage=Invalid authorization header format/ else throwError type=AUTH_ERROR errorMessage=Authorization header missing/",
+    "semanticType": "sequence",
+    "semanticIntent": "processing",
+    "contentHash": "c7c975e91427b0df79e00c7f0990f76d4cfaf99787192d63e5b42f43a863b4b8",
     "context": {
       "sequence": {
         "name": "AuthenticationSequence"
       }
     },
-    "isSequenceDefinition": false,
+    "sequenceKey": "AuthenticationSequence",
+    "isSequenceDefinition": true,
     "referencedSequences": []
   },
   {
@@ -1054,84 +774,18 @@
   },
   {
     "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/GlobalErrorSequence.xml",
-    "resourceName": "case",
+    "resourceName": "switch",
     "resourceType": "sequence",
-    "chunkType": "case",
+    "chunkType": "switch",
     "chunkIndex": 5,
-    "startLine": 12,
-    "endLine": 22,
-    "content": "        <case regex=\"AUTH_ERROR\">\n            <payloadFactory media-type=\"json\">\n                <format>{\n                    \"status\": \"error\",\n                    \"code\": \"401\",\n                    \"message\": \"Authentication failed\",\n                    \"detail\": \"${vars.errorMessage}\"\n                }</format>\n            </payloadFactory>\n            <header name=\"HTTP_SC\" value=\"401\" scope=\"transport\"/>\n        </case>",
+    "startLine": 11,
+    "endLine": 45,
+    "content": "    <switch source=\"${vars.errorCode}\">\n        <case regex=\"AUTH_ERROR\">\n            <payloadFactory media-type=\"json\">\n                <format>{\n                    \"status\": \"error\",\n                    \"code\": \"401\",\n                    \"message\": \"Authentication failed\",\n                    \"detail\": \"${vars.errorMessage}\"\n                }</format>\n            </payloadFactory>\n            <header name=\"HTTP_SC\" value=\"401\" scope=\"transport\"/>\n        </case>\n        <case regex=\"VALIDATION_ERROR\">\n            <payloadFactory media-type=\"json\">\n                <format>{\n                    \"status\": \"error\",\n                    \"code\": \"400\",\n                    \"message\": \"Validation failed\",\n                    \"detail\": \"${vars.errorMessage}\"\n                }</format>\n            </payloadFactory>\n            <header name=\"HTTP_SC\" value=\"400\" scope=\"transport\"/>\n        </case>\n        <default>\n            <payloadFactory media-type=\"json\">\n                <format>{\n                    \"status\": \"error\",\n                    \"code\": \"500\",\n                    \"message\": \"Internal server error\",\n                    \"detail\": \"${vars.errorMessage}\"\n                }</format>\n            </payloadFactory>\n            <header name=\"HTTP_SC\" value=\"500\" scope=\"transport\"/>\n        </default>\n    </switch>",
     "parentChunkId": null,
-    "embeddingText": "Sequence: GlobalErrorSequence case regex=AUTH_ERROR payloadFactory media-type=json format status error code 401 message Authentication failed detail ${vars.errorMessage} header name=HTTP_SC value=401 scope=transport/",
-    "semanticType": "component",
-    "semanticIntent": "processing",
-    "contentHash": "5042b8cbeb02dfd9ffb508589569253919f0357e0256d42f25c3911369ce7f65",
-    "context": {
-      "sequence": {
-        "name": "GlobalErrorSequence"
-      }
-    },
-    "isSequenceDefinition": false,
-    "referencedSequences": []
-  },
-  {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/GlobalErrorSequence.xml",
-    "resourceName": "case",
-    "resourceType": "sequence",
-    "chunkType": "case",
-    "chunkIndex": 6,
-    "startLine": 23,
-    "endLine": 33,
-    "content": "        <case regex=\"VALIDATION_ERROR\">\n            <payloadFactory media-type=\"json\">\n                <format>{\n                    \"status\": \"error\",\n                    \"code\": \"400\",\n                    \"message\": \"Validation failed\",\n                    \"detail\": \"${vars.errorMessage}\"\n                }</format>\n            </payloadFactory>\n            <header name=\"HTTP_SC\" value=\"400\" scope=\"transport\"/>\n        </case>",
-    "parentChunkId": null,
-    "embeddingText": "Sequence: GlobalErrorSequence case regex=VALIDATION_ERROR payloadFactory media-type=json format status error code 400 message Validation failed detail ${vars.errorMessage} header name=HTTP_SC value=400 scope=transport/",
-    "semanticType": "component",
-    "semanticIntent": "processing",
-    "contentHash": "46b7d3b44bcd712e1ab54bedf3dcf5bd1687d21850585c9bef51ebe7590bf7cc",
-    "context": {
-      "sequence": {
-        "name": "GlobalErrorSequence"
-      }
-    },
-    "isSequenceDefinition": false,
-    "referencedSequences": []
-  },
-  {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/GlobalErrorSequence.xml",
-    "resourceName": "payloadFactory",
-    "resourceType": "sequence",
-    "chunkType": "payloadFactory",
-    "chunkIndex": 7,
-    "startLine": 24,
-    "endLine": 31,
-    "content": "            <payloadFactory media-type=\"json\">\n                <format>{\n                    \"status\": \"error\",\n                    \"code\": \"400\",\n                    \"message\": \"Validation failed\",\n                    \"detail\": \"${vars.errorMessage}\"\n                }</format>\n            </payloadFactory>",
-    "parentChunkId": null,
-    "embeddingText": "Sequence: GlobalErrorSequence payloadFactory media-type=json format status error code 400 message Validation failed detail ${vars.errorMessage}",
-    "semanticType": "payloadFactory",
-    "semanticIntent": "transformation",
-    "contentHash": "4f6d5be3f8501e297bb3c14952932b269e4a198b425d993e1191f61565da4ec4",
-    "context": {
-      "sequence": {
-        "name": "GlobalErrorSequence"
-      }
-    },
-    "isSequenceDefinition": false,
-    "referencedSequences": []
-  },
-  {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/GlobalErrorSequence.xml",
-    "resourceName": "HTTP_SC",
-    "resourceType": "sequence",
-    "chunkType": "header",
-    "chunkIndex": 8,
-    "startLine": 32,
-    "endLine": 32,
-    "content": "            <header name=\"HTTP_SC\" value=\"400\" scope=\"transport\"/>",
-    "parentChunkId": null,
-    "embeddingText": "Sequence: GlobalErrorSequence header name=HTTP_SC value=400 scope=transport/",
-    "semanticType": "component",
-    "semanticIntent": "processing",
-    "contentHash": "6d429617f111f7a83f2d1656ff9712091f27773e02e9a2cf2bb0835663c4bfba",
+    "embeddingText": "Sequence: GlobalErrorSequence switch source=${vars.errorCode} case regex=AUTH_ERROR payloadFactory media-type=json format status error code 401 message Authentication failed detail ${vars.errorMessage} header name=HTTP_SC value=401 scope=transport/ case regex=VALIDATION_ERROR payloadFactory media-type=json format status error code 400 message Validation failed detail ${vars.errorMessage} header name=HTTP_SC value=400 scope=transport/ default payloadFactory media-type=json format status error code 500 message Internal server error detail ${vars.errorMessage} header name=HTTP_SC value=500 scope=transport/",
+    "semanticType": "filter",
+    "semanticIntent": "validation",
+    "contentHash": "33e36519a5d93c412d578d4b6fcbdce7a9d7ab98ce9824e97aa43924eb499f7c",
     "context": {
       "sequence": {
         "name": "GlobalErrorSequence"
@@ -1145,7 +799,7 @@
     "resourceName": "respond",
     "resourceType": "sequence",
     "chunkType": "respond",
-    "chunkIndex": 9,
+    "chunkIndex": 6,
     "startLine": 47,
     "endLine": 47,
     "content": "    <respond/>",
@@ -1186,156 +840,25 @@
   },
   {
     "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/LoggingSequence.xml",
-    "resourceName": "requestId",
+    "resourceName": "LoggingSequence",
     "resourceType": "sequence",
-    "chunkType": "variable",
+    "chunkType": "sequence",
     "chunkIndex": 1,
-    "startLine": 3,
-    "endLine": 3,
-    "content": "    <variable name=\"requestId\" expression=\"${now()}\" type=\"STRING\"/>",
+    "startLine": 2,
+    "endLine": 27,
+    "content": "<sequence name=\"LoggingSequence\" xmlns=\"http://ws.apache.org/ns/synapse\">\n    <variable name=\"requestId\" expression=\"${now()}\" type=\"STRING\"/>\n    <variable name=\"endpoint\" expression=\"${props.synapse.REST_URL_POSTFIX}\" type=\"STRING\"/>\n    <variable name=\"method\" expression=\"${props.synapse.REST_METHOD}\" type=\"STRING\"/>\n    \n    <log category=\"INFO\">\n        <message>Request ID: ${vars.requestId} | Method: ${vars.method} | Endpoint: ${vars.endpoint}</message>\n    </log>\n    \n    <dblookup>\n        <connection>\n            <pool>\n                <driver>com.mysql.jdbc.Driver</driver>\n                <url>jdbc:mysql://localhost:3306/bankdb</url>\n                <user>bankuser</user>\n                <password>bankpass</password>\n            </pool>\n        </connection>\n        <statement>\n            <sql>INSERT INTO api_logs (request_id, method, endpoint, timestamp) VALUES (?, ?, ?, NOW())</sql>\n            <parameter expression=\"${vars.requestId}\" type=\"VARCHAR\"/>\n            <parameter expression=\"${vars.method}\" type=\"VARCHAR\"/>\n            <parameter expression=\"${vars.endpoint}\" type=\"VARCHAR\"/>\n        </statement>\n    </dblookup>\n</sequence>",
     "parentChunkId": null,
-    "embeddingText": "Sequence: LoggingSequence variable name=requestId expression=${now type=STRING/",
-    "semanticType": "component",
+    "embeddingText": "Sequence: LoggingSequence sequence name=LoggingSequence xmlns=http://ws.apache.org/ns/synapse variable name=requestId expression=${now type=STRING/ variable name=endpoint expression=${props.synapse.REST_URL_POSTFIX} type=STRING/ variable name=method expression=${props.synapse.REST_METHOD} type=STRING/ log category=INFO message Request ID: ${vars.requestId} Method: ${vars.method} Endpoint: ${vars.endpoint} dblookup connection pool driver com.mysql.jdbc.Driver url jdbc:mysql://localhost:3306/bankdb user bankuser password bankpass statement sql INSERT INTO api_logs request_id, method, endpoint, timestamp VALUES NOW parameter expression=${vars.requestId} type=VARCHAR/ parameter expression=${vars.method} type=VARCHAR/ parameter expression=${vars.endpoint} type=VARCHAR/",
+    "semanticType": "sequence",
     "semanticIntent": "processing",
-    "contentHash": "1fd8d3658c74e5664da6bbb1ab6f112bfcae79ccf31fe16b6fc5caa5ca3a71fc",
+    "contentHash": "ed24b453c952ae0b4b281e25d8e755c01ca4747f0131a8cf9f85cdaec3b815b9",
     "context": {
       "sequence": {
         "name": "LoggingSequence"
       }
     },
-    "isSequenceDefinition": false,
-    "referencedSequences": []
-  },
-  {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/LoggingSequence.xml",
-    "resourceName": "endpoint",
-    "resourceType": "sequence",
-    "chunkType": "variable",
-    "chunkIndex": 2,
-    "startLine": 4,
-    "endLine": 4,
-    "content": "    <variable name=\"endpoint\" expression=\"${props.synapse.REST_URL_POSTFIX}\" type=\"STRING\"/>",
-    "parentChunkId": null,
-    "embeddingText": "Sequence: LoggingSequence variable name=endpoint expression=${props.synapse.REST_URL_POSTFIX} type=STRING/",
-    "semanticType": "component",
-    "semanticIntent": "processing",
-    "contentHash": "a7ade56472a56e89bd8d4d2f16f1cc0cb28136fd31c308c24fea94376ac2b73f",
-    "context": {
-      "sequence": {
-        "name": "LoggingSequence"
-      }
-    },
-    "isSequenceDefinition": false,
-    "referencedSequences": []
-  },
-  {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/LoggingSequence.xml",
-    "resourceName": "method",
-    "resourceType": "sequence",
-    "chunkType": "variable",
-    "chunkIndex": 3,
-    "startLine": 5,
-    "endLine": 5,
-    "content": "    <variable name=\"method\" expression=\"${props.synapse.REST_METHOD}\" type=\"STRING\"/>",
-    "parentChunkId": null,
-    "embeddingText": "Sequence: LoggingSequence variable name=method expression=${props.synapse.REST_METHOD} type=STRING/",
-    "semanticType": "component",
-    "semanticIntent": "processing",
-    "contentHash": "cc6efe6982a4f47681bafa08cf20495d7ca68654881d433eb94d85dbd2ac9585",
-    "context": {
-      "sequence": {
-        "name": "LoggingSequence"
-      }
-    },
-    "isSequenceDefinition": false,
-    "referencedSequences": []
-  },
-  {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/LoggingSequence.xml",
-    "resourceName": "log",
-    "resourceType": "sequence",
-    "chunkType": "log",
-    "chunkIndex": 4,
-    "startLine": 7,
-    "endLine": 9,
-    "content": "    <log category=\"INFO\">\n        <message>Request ID: ${vars.requestId} | Method: ${vars.method} | Endpoint: ${vars.endpoint}</message>\n    </log>",
-    "parentChunkId": null,
-    "embeddingText": "Sequence: LoggingSequence log category=INFO message Request ID: ${vars.requestId} Method: ${vars.method} Endpoint: ${vars.endpoint}",
-    "semanticType": "component",
-    "semanticIntent": "processing",
-    "contentHash": "17aa1c4b17b372f4ab0f13b77039bca4b1318657091bb6f3deef28278b40c4bc",
-    "context": {
-      "sequence": {
-        "name": "LoggingSequence"
-      }
-    },
-    "isSequenceDefinition": false,
-    "referencedSequences": []
-  },
-  {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/LoggingSequence.xml",
-    "resourceName": "parameter",
-    "resourceType": "sequence",
-    "chunkType": "parameter",
-    "chunkIndex": 5,
-    "startLine": 22,
-    "endLine": 22,
-    "content": "            <parameter expression=\"${vars.requestId}\" type=\"VARCHAR\"/>",
-    "parentChunkId": null,
-    "embeddingText": "Sequence: LoggingSequence parameter expression=${vars.requestId} type=VARCHAR/",
-    "semanticType": "component",
-    "semanticIntent": "processing",
-    "contentHash": "a7a0330f093716ada784b08f63bc04343382456c4717e17de04ddccf87bee0c6",
-    "context": {
-      "sequence": {
-        "name": "LoggingSequence"
-      }
-    },
-    "isSequenceDefinition": false,
-    "referencedSequences": []
-  },
-  {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/LoggingSequence.xml",
-    "resourceName": "parameter",
-    "resourceType": "sequence",
-    "chunkType": "parameter",
-    "chunkIndex": 6,
-    "startLine": 23,
-    "endLine": 23,
-    "content": "            <parameter expression=\"${vars.method}\" type=\"VARCHAR\"/>",
-    "parentChunkId": null,
-    "embeddingText": "Sequence: LoggingSequence parameter expression=${vars.method} type=VARCHAR/",
-    "semanticType": "component",
-    "semanticIntent": "processing",
-    "contentHash": "23d95b1be12c124cee91c76c8cbef9fc7f9fadade4e75b54b8a18dba5661fe74",
-    "context": {
-      "sequence": {
-        "name": "LoggingSequence"
-      }
-    },
-    "isSequenceDefinition": false,
-    "referencedSequences": []
-  },
-  {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/LoggingSequence.xml",
-    "resourceName": "parameter",
-    "resourceType": "sequence",
-    "chunkType": "parameter",
-    "chunkIndex": 7,
-    "startLine": 24,
-    "endLine": 24,
-    "content": "            <parameter expression=\"${vars.endpoint}\" type=\"VARCHAR\"/>",
-    "parentChunkId": null,
-    "embeddingText": "Sequence: LoggingSequence parameter expression=${vars.endpoint} type=VARCHAR/",
-    "semanticType": "component",
-    "semanticIntent": "processing",
-    "contentHash": "e1538804efc67ffffda96f139ab29b84c1a282cd5ab255b4ab9015e7cc862095",
-    "context": {
-      "sequence": {
-        "name": "LoggingSequence"
-      }
-    },
-    "isSequenceDefinition": false,
+    "sequenceKey": "LoggingSequence",
+    "isSequenceDefinition": true,
     "referencedSequences": []
   },
   {
@@ -1362,84 +885,18 @@
   },
   {
     "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/NotificationSequence.xml",
-    "resourceName": "customerEmail",
+    "resourceName": "NotificationSequence",
     "resourceType": "sequence",
-    "chunkType": "variable",
+    "chunkType": "sequence",
     "chunkIndex": 1,
-    "startLine": 3,
-    "endLine": 3,
-    "content": "    <variable name=\"customerEmail\" expression=\"${payload.customerEmail}\" type=\"STRING\"/>",
+    "startLine": 2,
+    "endLine": 28,
+    "content": "<sequence name=\"NotificationSequence\" xmlns=\"http://ws.apache.org/ns/synapse\">\n    <variable name=\"customerEmail\" expression=\"${payload.customerEmail}\" type=\"STRING\"/>\n    <variable name=\"transactionType\" expression=\"${payload.transactionType}\" type=\"STRING\"/>\n    <variable name=\"amount\" expression=\"${payload.amount}\" type=\"STRING\"/>\n    \n    <email.send configKey=\"EmailConnection\">\n        <from>bank@example.com</from>\n        <to>${vars.customerEmail}</to>\n        <subject>Transaction Notification - ${vars.transactionType}</subject>\n        <content>Dear Customer,\n\nYour ${vars.transactionType} transaction of ${vars.amount} has been processed successfully.\n\nTransaction ID: ${payload.transactionId}\nTimestamp: ${formatDateTime(now(), 'yyyy-MM-dd HH:mm:ss')}\n\nThank you for banking with us.\n\nBest regards,\nO2 Bank</content>\n        <contentType>text/plain</contentType>\n    </email.send>\n    \n    <log category=\"INFO\">\n        <message>Notification sent to ${vars.customerEmail}</message>\n    </log>\n</sequence>",
     "parentChunkId": null,
-    "embeddingText": "Sequence: NotificationSequence variable name=customerEmail expression=${payload.customerEmail} type=STRING/",
-    "semanticType": "component",
+    "embeddingText": "Sequence: NotificationSequence sequence name=NotificationSequence xmlns=http://ws.apache.org/ns/synapse variable name=customerEmail expression=${payload.customerEmail} type=STRING/ variable name=transactionType expression=${payload.transactionType} type=STRING/ variable name=amount expression=${payload.amount} type=STRING/ email.send configKey=EmailConnection from bank@example.com to ${vars.customerEmail} subject Transaction Notification ${vars.transactionType} content Dear Customer, Your ${vars.transactionType} transaction of ${vars.amount} has been processed successfully. Transaction ID: ${payload.transactionId} Timestamp: ${formatDateTime now yyyy-MM-dd HH:mm:ss Thank you for banking with us. Best regards, O2 Bank contentType text/plain log category=INFO message Notification sent to ${vars.customerEmail}",
+    "semanticType": "sequence",
     "semanticIntent": "processing",
-    "contentHash": "7401b1a35b9b4fabaf4cc14437b8a3ebd7dbea20385a5c87ceaecec49ab48438",
-    "context": {
-      "sequence": {
-        "name": "NotificationSequence"
-      }
-    },
-    "isSequenceDefinition": false,
-    "referencedSequences": []
-  },
-  {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/NotificationSequence.xml",
-    "resourceName": "transactionType",
-    "resourceType": "sequence",
-    "chunkType": "variable",
-    "chunkIndex": 2,
-    "startLine": 4,
-    "endLine": 4,
-    "content": "    <variable name=\"transactionType\" expression=\"${payload.transactionType}\" type=\"STRING\"/>",
-    "parentChunkId": null,
-    "embeddingText": "Sequence: NotificationSequence variable name=transactionType expression=${payload.transactionType} type=STRING/",
-    "semanticType": "component",
-    "semanticIntent": "processing",
-    "contentHash": "40697146f3f42f0d77539d4888f80e7f5fb39ea3e9622ca3754e740e68d8c6d7",
-    "context": {
-      "sequence": {
-        "name": "NotificationSequence"
-      }
-    },
-    "isSequenceDefinition": false,
-    "referencedSequences": []
-  },
-  {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/NotificationSequence.xml",
-    "resourceName": "amount",
-    "resourceType": "sequence",
-    "chunkType": "variable",
-    "chunkIndex": 3,
-    "startLine": 5,
-    "endLine": 5,
-    "content": "    <variable name=\"amount\" expression=\"${payload.amount}\" type=\"STRING\"/>",
-    "parentChunkId": null,
-    "embeddingText": "Sequence: NotificationSequence variable name=amount expression=${payload.amount} type=STRING/",
-    "semanticType": "component",
-    "semanticIntent": "processing",
-    "contentHash": "aeb5d3ea69cbc7a25be264b6dd936a4722a5ef9b135c0389ded265b0ca2a1c38",
-    "context": {
-      "sequence": {
-        "name": "NotificationSequence"
-      }
-    },
-    "isSequenceDefinition": false,
-    "referencedSequences": []
-  },
-  {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/NotificationSequence.xml",
-    "resourceName": "email.send",
-    "resourceType": "sequence",
-    "chunkType": "email.send",
-    "chunkIndex": 4,
-    "startLine": 7,
-    "endLine": 23,
-    "content": "    <email.send configKey=\"EmailConnection\">\n        <from>bank@example.com</from>\n        <to>${vars.customerEmail}</to>\n        <subject>Transaction Notification - ${vars.transactionType}</subject>\n        <content>Dear Customer,\n\nYour ${vars.transactionType} transaction of ${vars.amount} has been processed successfully.\n\nTransaction ID: ${payload.transactionId}\nTimestamp: ${formatDateTime(now(), 'yyyy-MM-dd HH:mm:ss')}\n\nThank you for banking with us.\n\nBest regards,\nO2 Bank</content>\n        <contentType>text/plain</contentType>\n    </email.send>",
-    "parentChunkId": null,
-    "embeddingText": "Sequence: NotificationSequence email.send configKey=EmailConnection from bank@example.com to ${vars.customerEmail} subject Transaction Notification ${vars.transactionType} content Dear Customer, Your ${vars.transactionType} transaction of ${vars.amount} has been processed successfully. Transaction ID: ${payload.transactionId} Timestamp: ${formatDateTime now yyyy-MM-dd HH:mm:ss Thank you for banking with us. Best regards, O2 Bank contentType text/plain",
-    "semanticType": "component",
-    "semanticIntent": "processing",
-    "contentHash": "d8515cdadb7edeb7c6b8f4d93bbd5f0f945fee273ba988208542eb6efe1ab98d",
+    "contentHash": "def96f77dc672b6e38c5234424276ce392b0c0338cf0258091fb780e2c4dcc5c",
     "context": {
       "sequence": {
         "name": "NotificationSequence"
@@ -1448,32 +905,11 @@
         "localEntry:EmailConnection"
       ]
     },
-    "isSequenceDefinition": false,
+    "sequenceKey": "NotificationSequence",
+    "isSequenceDefinition": true,
     "referencedSequences": [
       "localEntry:EmailConnection"
     ]
-  },
-  {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/NotificationSequence.xml",
-    "resourceName": "log",
-    "resourceType": "sequence",
-    "chunkType": "log",
-    "chunkIndex": 5,
-    "startLine": 25,
-    "endLine": 27,
-    "content": "    <log category=\"INFO\">\n        <message>Notification sent to ${vars.customerEmail}</message>\n    </log>",
-    "parentChunkId": null,
-    "embeddingText": "Sequence: NotificationSequence log category=INFO message Notification sent to ${vars.customerEmail}",
-    "semanticType": "component",
-    "semanticIntent": "processing",
-    "contentHash": "8289b6403feab574756d57a2a617eb6e2ff68f44bf1320f2e0faa03c57e88eb6",
-    "context": {
-      "sequence": {
-        "name": "NotificationSequence"
-      }
-    },
-    "isSequenceDefinition": false,
-    "referencedSequences": []
   },
   {
     "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/RateLimitSequence.xml",
@@ -1521,106 +957,18 @@
   },
   {
     "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/RateLimitSequence.xml",
-    "resourceName": "ID",
+    "resourceName": "filter",
     "resourceType": "sequence",
-    "chunkType": "ID",
+    "chunkType": "filter",
     "chunkIndex": 2,
-    "startLine": 1,
-    "endLine": 1,
-    "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
+    "startLine": 5,
+    "endLine": 46,
+    "content": "    <filter xpath=\"${exists(vars.clientId)}\">\n        <then>\n            <throttle id=\"BankAPIThrottle\">\n                <policy>\n                    <wsp:Policy xmlns:wsp=\"http://schemas.xmlsoap.org/ws/2004/09/policy\"\n                                xmlns:throttle=\"http://www.wso2.org/products/wso2commons/throttle\">\n                        <throttle:ThrottleAssertion>\n                            <throttle:MaximumConcurrentAccess>10</throttle:MaximumConcurrentAccess>\n                            <wsp:Policy>\n                                <throttle:ID throttle:type=\"IP\">other</throttle:ID>\n                                <wsp:Policy>\n                                    <throttle:Control>\n                                        <wsp:Policy>\n                                            <throttle:MaximumCount>100</throttle:MaximumCount>\n                                            <throttle:UnitTime>60000</throttle:UnitTime>\n                                        </wsp:Policy>\n                                    </throttle:Control>\n                                </wsp:Policy>\n                            </wsp:Policy>\n                        </throttle:ThrottleAssertion>\n                    </wsp:Policy>\n                </policy>\n                <onAccept>\n                    <log category=\"INFO\">\n                        <message>Request accepted for client: ${vars.clientId}</message>\n                    </log>\n                </onAccept>\n                <onReject>\n                    <payloadFactory media-type=\"json\">\n                        <format>{\n                            \"status\": \"error\",\n                            \"message\": \"Rate limit exceeded. Please try again later.\"\n                        }</format>\n                    </payloadFactory>\n                    <respond/>\n                </onReject>\n            </throttle>\n        </then>\n        <else>\n            <throwError type=\"VALIDATION_ERROR\" errorMessage=\"Client ID header missing\"/>\n        </else>\n    </filter>",
     "parentChunkId": null,
-    "embeddingText": "Sequence: RateLimitSequence xml version=1.0 encoding=UTF-8",
-    "semanticType": "component",
-    "semanticIntent": "processing",
-    "contentHash": "9f9810035096a642e335cd47b534b51fd222820baf8f644da46bd116d8df785a",
-    "context": {
-      "sequence": {
-        "name": "RateLimitSequence"
-      }
-    },
-    "isSequenceDefinition": false,
-    "referencedSequences": []
-  },
-  {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/RateLimitSequence.xml",
-    "resourceName": "log",
-    "resourceType": "sequence",
-    "chunkType": "log",
-    "chunkIndex": 3,
-    "startLine": 28,
-    "endLine": 30,
-    "content": "                    <log category=\"INFO\">\n                        <message>Request accepted for client: ${vars.clientId}</message>\n                    </log>",
-    "parentChunkId": null,
-    "embeddingText": "Sequence: RateLimitSequence log category=INFO message Request accepted for client: ${vars.clientId}",
-    "semanticType": "component",
-    "semanticIntent": "processing",
-    "contentHash": "c2bcca5f14e9f60c50a1a6c689a452e9bc0edcbee2ee54d30a08bc9ff4ba261a",
-    "context": {
-      "sequence": {
-        "name": "RateLimitSequence"
-      }
-    },
-    "isSequenceDefinition": false,
-    "referencedSequences": []
-  },
-  {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/RateLimitSequence.xml",
-    "resourceName": "payloadFactory",
-    "resourceType": "sequence",
-    "chunkType": "payloadFactory",
-    "chunkIndex": 4,
-    "startLine": 33,
-    "endLine": 38,
-    "content": "                    <payloadFactory media-type=\"json\">\n                        <format>{\n                            \"status\": \"error\",\n                            \"message\": \"Rate limit exceeded. Please try again later.\"\n                        }</format>\n                    </payloadFactory>",
-    "parentChunkId": null,
-    "embeddingText": "Sequence: RateLimitSequence payloadFactory media-type=json format status error message Rate limit exceeded. Please try again later.",
-    "semanticType": "payloadFactory",
-    "semanticIntent": "transformation",
-    "contentHash": "870920f6620b3b283b993ef8c82f5b3a1decbc63adc6dba2c99c0f37020ede83",
-    "context": {
-      "sequence": {
-        "name": "RateLimitSequence"
-      }
-    },
-    "isSequenceDefinition": false,
-    "referencedSequences": []
-  },
-  {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/RateLimitSequence.xml",
-    "resourceName": "respond",
-    "resourceType": "sequence",
-    "chunkType": "respond",
-    "chunkIndex": 5,
-    "startLine": 39,
-    "endLine": 39,
-    "content": "                    <respond/>",
-    "parentChunkId": null,
-    "embeddingText": "Sequence: RateLimitSequence respond",
-    "semanticType": "response",
-    "semanticIntent": "response",
-    "contentHash": "9c5f0f27280d2dfa6a004748754abf3c462d454fb13bb778ce2b41b1232fc004",
-    "context": {
-      "sequence": {
-        "name": "RateLimitSequence"
-      }
-    },
-    "isSequenceDefinition": false,
-    "referencedSequences": []
-  },
-  {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/RateLimitSequence.xml",
-    "resourceName": "throwError",
-    "resourceType": "sequence",
-    "chunkType": "throwError",
-    "chunkIndex": 6,
-    "startLine": 44,
-    "endLine": 44,
-    "content": "            <throwError type=\"VALIDATION_ERROR\" errorMessage=\"Client ID header missing\"/>",
-    "parentChunkId": null,
-    "embeddingText": "Sequence: RateLimitSequence throwError type=VALIDATION_ERROR errorMessage=Client ID header missing/",
-    "semanticType": "component",
-    "semanticIntent": "processing",
-    "contentHash": "6a515ee70a67a5d77e2e76be57293037694c1ea8cbcf9b22d080502cf191fd5e",
+    "embeddingText": "Sequence: RateLimitSequence filter xpath=${exists vars.clientId then throttle id=BankAPIThrottle policy wsp:Policy xmlns:wsp=http://schemas.xmlsoap.org/ws/2004/09/policy xmlns:throttle=http://www.wso2.org/products/wso2commons/throttle throttle:ThrottleAssertion throttle:MaximumConcurrentAccess 10 wsp:Policy throttle:ID throttle:type=IP other wsp:Policy throttle:Control wsp:Policy throttle:MaximumCount 100 throttle:UnitTime 60000 onAccept log category=INFO message Request accepted for client: ${vars.clientId} onReject payloadFactory media-type=json format status error message Rate limit exceeded. Please try again later. respond else throwError type=VALIDATION_ERROR errorMessage=Client ID header missing/",
+    "semanticType": "filter",
+    "semanticIntent": "validation",
+    "contentHash": "fb71650ace12cacec2acb6c6597705e892425f6fd559f654f58fc27e0b098e20",
     "context": {
       "sequence": {
         "name": "RateLimitSequence"
