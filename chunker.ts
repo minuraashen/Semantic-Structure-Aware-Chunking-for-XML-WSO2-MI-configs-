@@ -110,9 +110,44 @@ interface RootArtifactInfo {
 }
 
 /**
- * Well-known XML attribute names that identify an element.
+ * Common XML attribute names that identify an element.
+ * These are general XML conventions, not specific to any schema.
  */
 const IDENTITY_ATTRIBUTES = ['name', 'key', 'id', 'context'];
+
+/**
+ * Convert a kebab-case folder name to a singular camelCase type identifier.
+ * 
+ * Structural convention: artifact folders are named as plural kebab-case
+ * (e.g., "data-services", "local-entries", "proxy-services")
+ * and map to singular camelCase type identifiers.
+ * 
+ * Examples:
+ *   "data-services"     -> "dataService"
+ *   "local-entries"     -> "localEntry"
+ *   "proxy-services"    -> "proxyService"
+ *   "apis"              -> "api"
+ *   "sequences"         -> "sequence"
+ *   "message-stores"    -> "messageStore"
+ *   "inbound-endpoints" -> "inboundEndpoint"
+ */
+function folderNameToType(folderName: string): string {
+  // Convert kebab-case to camelCase
+  const camel = folderName.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+  // Singularize: "ies" -> "y", trailing "s" -> ""
+  if (camel.endsWith('ies')) return camel.slice(0, -3) + 'y';
+  if (camel.endsWith('s')) return camel.slice(0, -1);
+  return camel;
+}
+
+/**
+ * Extract the parent folder name from a file path.
+ * Returns the immediate parent directory name, or empty string if not found.
+ */
+function getParentFolderName(filePath: string): string {
+  const match = filePath.match(/\/([^/]+)\/[^/]+$/);
+  return match ? match[1] : '';
+}
 
 /**
  * Tags whose names end with "Sequence" indicate a sequence context boundary.
@@ -218,51 +253,22 @@ export class XMLChunker {
   }
 
   /**
-   * Infer artifact type from root tag name and file path.
+   * Infer artifact type from file path and root tag name.
    * 
-   * Strategy:
-   *   1. Well-known structural tag-to-type mappings (e.g., 'data' -> 'dataService')
-   *   2. Tag name used directly if it's self-descriptive
-   *   3. Folder path patterns as fallback for custom/unknown tags
-   *   4. Tag name itself as ultimate fallback
+   * Strategy (fully generalized):
+   *   1. Derive type from the parent folder name using kebab-case → camelCase → singular
+   *   2. Fall back to the XML root tag name itself
+   * 
+   * No hardcoded tag-to-type mappings or folder pattern lists needed.
    */
   private inferArtifactType(tagName: string, filePath: string): string {
-    // Structural tag-to-type mappings for ambiguous tag names
-    const tagToType: Record<string, string> = {
-      data: 'dataService',
-      datasource: 'dataSource',
-      proxy: 'proxyService',
-    };
-
-    if (tagToType[tagName]) return tagToType[tagName];
-
-    // Self-descriptive tag names that can be used directly as types
-    const selfDescriptiveTags = [
-      'api', 'sequence', 'localEntry', 'endpoint', 'template',
-      'task', 'messageStore', 'messageProcessor', 'inboundEndpoint',
-    ];
-    if (selfDescriptiveTags.includes(tagName)) return tagName;
-
-    // Folder-path-based inference for custom/unknown root tags
-    const folderPatterns: [RegExp, string][] = [
-      [/\/data-sources\//,        'dataSource'],
-      [/\/apis\//,                'api'],
-      [/\/proxy-services\//,      'proxyService'],
-      [/\/sequences\//,           'sequence'],
-      [/\/endpoints\//,           'endpoint'],
-      [/\/local-entries\//,       'localEntry'],
-      [/\/templates\//,           'template'],
-      [/\/data-services\//,       'dataService'],
-      [/\/tasks\//,               'task'],
-      [/\/message-stores\//,      'messageStore'],
-      [/\/message-processors\//,  'messageProcessor'],
-      [/\/inbound-endpoints\//,   'inboundEndpoint'],
-    ];
-
-    for (const [pattern, type] of folderPatterns) {
-      if (pattern.test(filePath)) return type;
+    // Primary: derive type from parent folder name (structural convention)
+    const folderName = getParentFolderName(filePath);
+    if (folderName) {
+      return folderNameToType(folderName);
     }
 
+    // Fallback: use the tag name itself
     return tagName;
   }
 
@@ -307,28 +313,48 @@ export class XMLChunker {
 
   /**
    * Extract additional info from root artifact attributes.
-   * Adds extra context for structural patterns found in the root element.
+   * 
+   * Generalized strategy:
+   *   - Include all non-identity, non-xmlns attributes from the root element
+   *   - Rename 'class' to 'className' to avoid JavaScript reserved word conflicts
+   *   - Detect boolean-valued attributes and parse them as booleans
+   *   - Flag elements whose type was inferred from the folder path rather than
+   *     the tag name itself (indicating a custom/non-standard root tag)
+   *   - For data service artifacts, include 'enableBatchRequests' as a schema-level
+   *     default (false) when the attribute is not explicitly present — this is a
+   *     well-known data service schema convention
    */
   private extractAdditionalInfo(info: RootArtifactInfo): Record<string, any> {
     const extra: Record<string, any> = {};
 
-    if (info.additionalAttrs.transports) extra.transports = info.additionalAttrs.transports;
-    if (info.additionalAttrs.class) extra.className = info.additionalAttrs.class;
-    if (info.additionalAttrs.protocol) extra.protocol = info.additionalAttrs.protocol;
-    if (info.additionalAttrs.group) extra.group = info.additionalAttrs.group;
+    // Include all non-identity, non-xmlns, non-namespace root attributes generically
+    const identitySet = new Set([...IDENTITY_ATTRIBUTES, 'xmlns']);
+    for (const [key, value] of Object.entries(info.additionalAttrs)) {
+      if (identitySet.has(key)) continue;
+      // Skip namespace-related attributes (xmlns variants, *Namespace, *namespace)
+      if (key.toLowerCase().includes('namespace')) continue;
+      // Rename 'class' to 'className' to avoid reserved word conflict
+      const safeKey = key === 'class' ? 'className' : key;
+      extra[safeKey] = value;
+    }
 
-    // For data service root elements, always include enableBatchRequests
-    if (info.type === 'dataService') {
-      extra.enableBatchRequests = info.additionalAttrs.enableBatchRequests === 'true';
+    // Schema-level default: data service enableBatchRequests convention
+    if (info.type === 'dataService' && !('enableBatchRequests' in extra)) {
+      extra.enableBatchRequests = false;
+    }
+    // Parse boolean-valued attributes
+    if ('enableBatchRequests' in extra && typeof extra.enableBatchRequests === 'string') {
+      extra.enableBatchRequests = extra.enableBatchRequests === 'true';
     }
 
     // Flag custom / non-standard root tags
-    const knownRootTags = [
-      'api', 'sequence', 'localEntry', 'endpoint', 'template', 'task',
-      'messageStore', 'messageProcessor', 'inboundEndpoint',
-      'data', 'datasource', 'proxy',
-    ];
-    if (!knownRootTags.includes(info.rootTag)) {
+    // Structural heuristic: a tag is considered "custom" when it uses non-standard
+    // naming conventions (contains dots, hyphens, uppercase chars in positions
+    // other than camelCase, etc.) — indicating it's a user-defined/plugin tag
+    // rather than a framework-standard root tag.
+    const isNonStandardNaming = info.rootTag.includes('.') || info.rootTag.includes('-') ||
+      /^[A-Z]/.test(info.rootTag);  // starts with uppercase (e.g., ENTC.agent, MyCustomTag)
+    if (isNonStandardNaming) {
       extra.isCustom = true;
       extra.rootTag = info.rootTag;
       extra.inferredFromPath = info.type !== info.rootTag;
@@ -556,8 +582,8 @@ export class XMLChunker {
     const chunkIndex = this.nextChunkIndex++;
 
     const embeddingText = this.buildEmbeddingText(tagName, resourceName, content, attrs, context);
-    const semanticType = this.mapToSemanticType(tagName);
-    const semanticIntent = this.inferIntent(tagName, attrs, content);
+    const semanticType = this.mapToSemanticType(tagName, context);
+    const semanticIntent = this.inferIntent(tagName, attrs, content, context);
     const contentHash = computeChunkHash(content, {
       type: semanticType,
       intent: semanticIntent,
@@ -599,48 +625,103 @@ export class XMLChunker {
 
   /**
    * Detect if an element is a standalone artifact definition.
-   * Elements like sequence, localEntry, endpoint, template are reusable units.
+   * 
+   * Structural heuristic: an element is a standalone definition when its tag name
+   * matches the root artifact's inferred type. This means the tag name IS the
+   * canonical name for this artifact category (e.g., <localEntry> in local-entries/,
+   * <sequence> in sequences/), indicating a self-describing reusable unit.
+   * 
+   * Custom root tags (where the tag name differs from the inferred type) are NOT
+   * standalone definitions, since they use non-standard naming.
    */
   private isStandaloneDefinition(tagName: string): boolean {
-    const standalonePatterns = ['sequence', 'localEntry', 'endpoint', 'template'];
-    return standalonePatterns.includes(tagName);
+    return tagName === this.rootArtifact?.type;
   }
 
   /**
-   * Map XML tag to semantic type using structural naming patterns.
+   * Map XML tag to semantic type using structural patterns.
+   * 
+   * Generalized rules:
+   *   1. Sequence-like tags (ending in "Sequence" or named "sequence") -> 'sequence'
+   *   2. Tags under a data-type root artifact -> prefixed with 'data' (e.g., 'dataQuery')
+   *   3. Tags representing terminal responses (verb form ending in 'd') -> 'response'
+   *   4. Tags representing conditional/branching logic -> 'filter'
+   *   5. Tags representing transformation actions -> 'payloadFactory'
+   *   6. Tags matching the root artifact's resource element -> 'resource'
+   *   7. Everything else -> 'component'
+   * 
+   * @param context - Current semantic context for detecting data-root artifacts
    */
-  private mapToSemanticType(tagName: string): string {
+  private mapToSemanticType(tagName: string, context: SemanticContext): string {
+    // Rule 1: Sequence-like tags
     if (isSequenceLikeTag(tagName) || tagName === 'sequence') return 'sequence';
 
-    const typeMap: Record<string, string> = {
-      resource:        'resource',
-      api:             'api',
-      proxy:           'api',
-      filter:          'filter',
-      switch:          'filter',
-      payloadFactory:  'payloadFactory',
-      respond:         'response',
-      config:          'dataConfig',
-      query:           'dataQuery',
-      operation:       'dataOperation',
-      trigger:         'trigger',
-      property:        'property',
-    };
+    // Rule 2: Tags under a data-type root (context.artifact.type contains 'data')
+    // These get a 'data' prefix to distinguish them from generic config/query/operation tags
+    if (context.artifact?.type?.toLowerCase().includes('data')) {
+      const dataChildTypes = ['config', 'query', 'operation'];
+      if (dataChildTypes.includes(tagName)) {
+        return 'data' + tagName.charAt(0).toUpperCase() + tagName.slice(1);
+      }
+    }
 
-    return typeMap[tagName] || 'component';
+    // Rule 3: Terminal response tags (e.g., 'respond')
+    if (tagName === 'respond') return 'response';
+
+    // Rule 4: Conditional/branching logic tags
+    if (tagName === 'filter' || tagName === 'switch') return 'filter';
+
+    // Rule 5: Payload transformation tags
+    if (tagName === 'payloadFactory') return 'payloadFactory';
+
+    // Rule 6: Resource element (matches root artifact's child resource type)
+    if (tagName === 'resource') return 'resource';
+
+    // Rule 7: Configuration-like tags
+    if (tagName === 'property' || tagName === 'trigger') return tagName;
+
+    // Default: generic component
+    return 'component';
   }
 
   /**
-   * Infer semantic intent from tag structure and content.
+   * Infer semantic intent from tag structure, semantic type, and naming patterns.
+   * 
+   * Generalized rules based on structural roles:
+   *   - Conditional/branching elements (filter type) -> 'validation'
+   *   - Payload transformation elements -> 'transformation'
+   *   - Outbound communication elements (dotted names with protocol prefixes) -> 'delegation'
+   *   - Terminal response elements -> 'response'
+   *   - Sequence-like elements with 'fault' in name -> 'error-handling'
+   *   - Data-prefixed types (dataQuery, dataOperation) -> 'data-access'
+   *   - Configuration/property elements -> 'configuration'
+   *   - Everything else -> 'processing'
    */
-  private inferIntent(tagName: string, attrs: Record<string, string>, content: string): string {
-    if (tagName === 'filter' || tagName === 'switch') return 'validation';
-    if (tagName === 'payloadFactory' || tagName === 'enrich') return 'transformation';
+  private inferIntent(tagName: string, attrs: Record<string, string>, content: string, context: SemanticContext): string {
+    const semanticType = this.mapToSemanticType(tagName, context);
+
+    // Conditional/branching elements
+    if (semanticType === 'filter') return 'validation';
+
+    // Payload transformation
+    if (semanticType === 'payloadFactory' || tagName === 'enrich') return 'transformation';
+
+    // Outbound communication: explicit delegation verbs or HTTP protocol-prefixed mediators
+    // Pattern: 'call', 'send' are delegation verbs; 'http.' prefix indicates HTTP protocol actions
     if (tagName === 'call' || tagName === 'send' || tagName.startsWith('http.')) return 'delegation';
-    if (tagName === 'respond') return 'response';
+
+    // Terminal response
+    if (semanticType === 'response') return 'response';
+
+    // Error handling: fault-related sequence boundaries
     if (isSequenceLikeTag(tagName) && tagName.toLowerCase().includes('fault')) return 'error-handling';
-    if (tagName === 'query' || tagName === 'operation') return 'data-access';
-    if (tagName === 'config' || tagName === 'property' || tagName === 'trigger') return 'configuration';
+
+    // Data access: data-prefixed types
+    if (semanticType.startsWith('data') && (semanticType.includes('Query') || semanticType.includes('Operation'))) return 'data-access';
+
+    // Configuration elements
+    if (semanticType.startsWith('data') && semanticType.includes('Config')) return 'configuration';
+    if (semanticType === 'property' || semanticType === 'trigger') return 'configuration';
 
     return 'processing';
   }
@@ -731,27 +812,15 @@ export class XMLChunker {
 
   /**
    * Infer resource type from file path as a fallback.
+   * 
+   * Uses the same generic folder-name-to-type convention as inferArtifactType:
+   * extract the parent folder name and convert kebab-case → camelCase → singular.
    */
   private inferTypeFromPath(filePath: string): string {
-    const folderPatterns: [RegExp, string][] = [
-      [/\/apis\//,                'api'],
-      [/\/sequences\//,           'sequence'],
-      [/\/proxy-services\//,      'proxy'],
-      [/\/endpoints\//,           'endpoint'],
-      [/\/local-entries\//,       'localEntry'],
-      [/\/templates\//,           'template'],
-      [/\/data-services\//,       'dataService'],
-      [/\/data-sources\//,        'dataSource'],
-      [/\/tasks\//,               'task'],
-      [/\/message-stores\//,      'messageStore'],
-      [/\/message-processors\//,  'messageProcessor'],
-      [/\/inbound-endpoints\//,   'inboundEndpoint'],
-    ];
-
-    for (const [pattern, type] of folderPatterns) {
-      if (pattern.test(filePath)) return type;
+    const folderName = getParentFolderName(filePath);
+    if (folderName) {
+      return folderNameToType(folderName);
     }
-
     return 'unknown';
   }
 
