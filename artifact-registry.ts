@@ -1,3 +1,6 @@
+import * as fs from 'fs';
+import * as path from 'path';
+
 /**
  * Artifact Plugin Interface
  * 
@@ -45,7 +48,7 @@ export interface ArtifactMetadata {
  * These cover the standard WSO2 Micro Integrator artifact types.
  * Custom plugins can extend this set for organization-specific artifacts.
  */
-const WSO2_MI_ARTIFACT_PLUGINS: ArtifactPlugin[] = [
+const BUILTIN_PLUGINS: ArtifactPlugin[] = [
     // REST API
     {
         id: 'api',
@@ -270,7 +273,7 @@ export class ArtifactRegistry {
 
     constructor() {
         // Register all built-in plugins
-        for (const plugin of WSO2_MI_ARTIFACT_PLUGINS) {
+        for (const plugin of BUILTIN_PLUGINS) {
             this.registerPlugin(plugin);
         }
     }
@@ -308,6 +311,35 @@ export class ArtifactRegistry {
     }
 
     /**
+     * Load custom plugins from a directory
+     * Plugins should export default an ArtifactPlugin object
+     */
+    async loadPluginsFromDirectory(pluginsPath: string): Promise<void> {
+        if (!fs.existsSync(pluginsPath)) {
+            return;
+        }
+
+        const entries = await fs.promises.readdir(pluginsPath, { withFileTypes: true });
+
+        for (const entry of entries) {
+            if (entry.isFile() && (entry.name.endsWith('.plugin.js') || entry.name.endsWith('.plugin.ts'))) {
+                try {
+                    const pluginPath = path.join(pluginsPath, entry.name);
+                    const pluginModule = require(pluginPath);
+                    const plugin: ArtifactPlugin = pluginModule.default || pluginModule;
+
+                    if (plugin.id && plugin.rootTags) {
+                        this.registerPlugin(plugin);
+                        console.log(`Loaded custom plugin: ${plugin.id}`);
+                    }
+                } catch (error) {
+                    console.error(`Failed to load plugin ${entry.name}:`, error);
+                }
+            }
+        }
+    }
+
+    /**
      * Check if a tag represents a semantic boundary
      */
     isSemanticBoundary(tagName: string): boolean {
@@ -333,6 +365,13 @@ export class ArtifactRegistry {
      */
     isResourceType(tagName: string): boolean {
         return this.allResourceTypes.has(tagName);
+    }
+
+    /**
+     * Get plugin for a given root tag
+     */
+    getPluginForRootTag(tagName: string): ArtifactPlugin | undefined {
+        return this.rootTagToPlugin.get(tagName);
     }
 
     /**
@@ -410,7 +449,6 @@ export class ArtifactRegistry {
 
         return null;
     }
-
     /**
      * Get all registered plugins
      */
