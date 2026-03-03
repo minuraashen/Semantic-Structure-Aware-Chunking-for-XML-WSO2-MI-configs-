@@ -103,11 +103,11 @@ async function testChunkGeneration(files: string[]): Promise<Map<string, any[]>>
 
       console.log(colorize(`  ✓ Generated ${chunks.length} chunks`, 'green'));
 
-      // Show artifact type detection
+      // Show artifact type from context
       if (chunks.length > 0) {
-        const firstChunk = chunks[1];
-        console.log(`  - Resource Type: ${colorize(firstChunk.resourceType, 'yellow')}`);
-        console.log(`  - Resource Name: ${colorize(firstChunk.resourceName, 'yellow')}`);
+        const firstChunk = chunks[0];
+        console.log(`  - Artifact Type: ${colorize(firstChunk.context.artifact?.type || 'unknown', 'yellow')}`);
+        console.log(`  - Artifact Name: ${colorize(firstChunk.context.artifact?.name || 'unknown', 'yellow')}`);
       }
     } catch (error: any) {
       console.log(colorize(`  ✗ Error: ${error?.message || 'Unknown error'}`, 'red'));
@@ -125,7 +125,6 @@ function testChunkDetails(allChunks: Map<string, any[]>): void {
 
   let totalChunks = 0;
   const chunkTypeCount = new Map<string, number>();
-  const semanticTypeCount = new Map<string, number>();
 
   for (const [file, chunks] of allChunks.entries()) {
     const relativePath = file.replace(process.cwd(), '.');
@@ -136,28 +135,13 @@ function testChunkDetails(allChunks: Map<string, any[]>): void {
 
       // Count chunk types
       chunkTypeCount.set(chunk.chunkType, (chunkTypeCount.get(chunk.chunkType) || 0) + 1);
-      semanticTypeCount.set(chunk.semanticType, (semanticTypeCount.get(chunk.semanticType) || 0) + 1);
 
       console.log(`\n${colorize(`Chunk #${index + 1}`, 'magenta')}`);
       console.log(`  Type: ${colorize(chunk.chunkType, 'yellow')}`);
-      console.log(`  Semantic Type: ${colorize(chunk.semanticType, 'cyan')}`);
-      console.log(`  Intent: ${colorize(chunk.semanticIntent, 'cyan')}`);
       console.log(`  Lines: ${chunk.startLine}-${chunk.endLine} (${chunk.endLine - chunk.startLine + 1} lines)`);
       console.log(`  Content Hash: ${colorize(chunk.contentHash.substring(0, 16) + '...', 'dim')}`);
 
       // Show context
-      if (chunk.context.api) {
-        console.log(`  API Context: ${chunk.context.api.name || 'N/A'}`);
-      }
-      if (chunk.context.resource) {
-        console.log(`  Resource: ${chunk.context.resource.method} ${chunk.context.resource.uriTemplate}`);
-      }
-      if (chunk.context.sequence) {
-        const seqName = typeof chunk.context.sequence === 'string'
-          ? chunk.context.sequence
-          : chunk.context.sequence.name;
-        console.log(`  Sequence: ${seqName}`);
-      }
       if (chunk.context.artifact) {
         console.log(`  Artifact: ${chunk.context.artifact.type} - ${chunk.context.artifact.name}`);
       }
@@ -193,39 +177,9 @@ function testChunkDetails(allChunks: Map<string, any[]>): void {
   for (const [type, count] of chunkTypeCount.entries()) {
     console.log(`  ${type}: ${count}`);
   }
-
-  console.log(colorize('\nSemantic Types:', 'cyan'));
-  for (const [type, count] of semanticTypeCount.entries()) {
-    console.log(`  ${type}: ${count}`);
-  }
 }
 
-/**
- * Test 5: Verify hierarchical relationships
- */
-function testHierarchy(allChunks: Map<string, any[]>): void {
-  printSection('TEST 4: Hierarchical Relationships');
 
-  for (const [file, chunks] of allChunks.entries()) {
-    const relativePath = file.replace(process.cwd(), '.');
-
-    // Check for parent-child relationships
-    const hasHierarchy = chunks.some(chunk => chunk.parentChunkId !== null);
-
-    if (hasHierarchy) {
-      printSubSection(`File: ${relativePath}`);
-
-      chunks.forEach(chunk => {
-        if (chunk.parentChunkId !== null) {
-          const parent = chunks.find(c => c.chunkIndex === chunk.parentChunkId);
-          console.log(`  ${chunk.chunkType} [${chunk.chunkIndex}] → parent: ${parent?.chunkType || 'unknown'} [${chunk.parentChunkId}]`);
-        } else {
-          console.log(`  ${colorize(chunk.chunkType, 'yellow')} [${chunk.chunkIndex}] → ${colorize('ROOT', 'green')}`);
-        }
-      });
-    }
-  }
-}
 
 /**
  * Test 6: Cross-artifact reference detection
@@ -372,10 +326,7 @@ async function runAllTests(): Promise<void> {
     // Test 3: Display detailed chunk information
     testChunkDetails(allChunks);
 
-    // Test 4: Verify hierarchical relationships
-    testHierarchy(allChunks);
-
-    // Test 5: Cross-reference detection
+    // Test 4: Cross-reference detection
     testCrossReferences(allChunks);
 
     // Test 6: Token sizing (uses real tokenizer)
