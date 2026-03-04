@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template name="GetAccountBalanceTool" xmlns="http://ws.apache.org/ns/synapse">
+  <description>Retrieves the current account balance for a given account ID</description>
+  <parameter isMandatory="true" name="accountId" description="The account ID to check balance for"/>
+  <sequence>
+    <payloadFactory media-type="json">
+      <format>{
+        "accountId": "${params.functionParams.accountId}",
+        "balance": 5000.00,
+        "currency": "USD",
+        "lastUpdated": "${formatDateTime(now(), 'yyyy-MM-dd HH:mm:ss')}"
+      }</format>
+    </payloadFactory>
+  </sequence>
+</template>

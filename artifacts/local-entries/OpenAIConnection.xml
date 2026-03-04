@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<localEntry key="OPENAI_CONN" xmlns="http://ws.apache.org/ns/synapse">
+  <ai.init>
+    <connectionType>OPEN_AI</connectionType>
+    <apiKey>${configs.openai_api_key}</apiKey>
+    <baseUrl>https://api.openai.com/v1</baseUrl>
+    <name>OPENAI_CONN</name>
+  </ai.init>
+</localEntry>

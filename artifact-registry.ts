@@ -207,6 +207,22 @@ const BUILTIN_PLUGINS: ArtifactPlugin[] = [
         })
     },
 
+    // Data Source
+    {
+        id: 'dataSource',
+        rootTags: ['datasource'],
+        semanticBoundaries: ['property'],
+        atomicTags: ['property'],
+        extractMetadata: (rootTag, attrs) => ({
+            type: 'dataSource',
+            name: attrs.name || attrs['@_name'] || 'unknown',
+            xmlns: attrs.xmlns || attrs['@_xmlns'],
+            additionalInfo: {
+                className: attrs.class || attrs['@_class']
+            }
+        })
+    },
+
     // Scheduled Task
     {
         id: 'task',
@@ -381,17 +397,63 @@ export class ArtifactRegistry {
     }
 
     /**
+     * Detect ANY artifact from parsed XML (including unregistered custom types)
+     * This is the fallback when detectArtifactType returns null
+     * Extracts metadata from the first non-processing-instruction root element
+     * Uses filePath to infer WSO2 MI artifact type from folder structure
+     */
+    detectAnyArtifact(parsed: any, filePath?: string): ArtifactMetadata | null {
+        if (!Array.isArray(parsed)) return null;
+
+        for (const item of parsed) {
+            const tagName = Object.keys(item).find(key => key !== ':@');
+            if (!tagName || tagName === '?xml') continue; // Skip processing instructions
+
+            const attrs = item[':@'] || {};
+            
+            // Extract name from common attribute patterns
+            const name = attrs.key || attrs['@_key'] || 
+                        attrs.name || attrs['@_name'] || 
+                        attrs.id || attrs['@_id'] ||
+                        attrs.context || attrs['@_context'] || 
+                        tagName;
+
+            // Infer artifact type from folder structure if filePath provided
+            let inferredType = tagName; // Default to tag name
+            if (filePath) {
+                if (filePath.includes('/data-sources/')) inferredType = 'dataSource';
+                else if (filePath.includes('/apis/')) inferredType = 'api';
+                else if (filePath.includes('/proxy-services/')) inferredType = 'proxyService';
+                else if (filePath.includes('/sequences/')) inferredType = 'sequence';
+                else if (filePath.includes('/endpoints/')) inferredType = 'endpoint';
+                else if (filePath.includes('/local-entries/')) inferredType = 'localEntry';
+                else if (filePath.includes('/templates/')) inferredType = 'template';
+                else if (filePath.includes('/data-services/')) inferredType = 'dataService';
+                else if (filePath.includes('/tasks/')) inferredType = 'task';
+                else if (filePath.includes('/message-stores/')) inferredType = 'messageStore';
+                else if (filePath.includes('/message-processors/')) inferredType = 'messageProcessor';
+                else if (filePath.includes('/inbound-endpoints/')) inferredType = 'inboundEndpoint';
+            }
+
+            return {
+                type: inferredType,
+                name: name,
+                xmlns: attrs.xmlns || attrs['@_xmlns'],
+                additionalInfo: {
+                    isCustom: true,
+                    rootTag: tagName,
+                    inferredFromPath: inferredType !== tagName
+                }
+            };
+        }
+
+        return null;
+    }
+    /**
      * Get all registered plugins
      */
     getAllPlugins(): ArtifactPlugin[] {
         return Array.from(this.plugins.values());
-    }
-
-    /**
-     * Get plugin by ID
-     */
-    getPlugin(id: string): ArtifactPlugin | undefined {
-        return this.plugins.get(id);
     }
 }
 

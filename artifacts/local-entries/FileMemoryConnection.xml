@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<localEntry key="FILE_MEMORY_CONN" xmlns="http://ws.apache.org/ns/synapse">
+  <ai.init>
+    <connectionType>FILE_MEMORY</connectionType>
+    <name>FILE_MEMORY_CONN</name>
+  </ai.init>
+</localEntry>

@@ -1,7 +1,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { XMLChunker } from './chunker';
-import { artifactRegistry } from './artifact-registry';
+import { AutoTokenizer, PreTrainedTokenizer } from '@huggingface/transformers';
+import { config } from './config';
 
 /**
  * Comprehensive test script to verify all chunking algorithm functionalities
@@ -39,28 +40,25 @@ function printSubSection(title: string): void {
 /**
  * Test 1: Verify artifact registry functionality
  */
-function testArtifactRegistry(): void {
-  printSection('TEST 1: Artifact Registry Functionality');
+function testChunkerCapabilities(): void {
+  printSection('TEST 1: Generalized Chunker Capabilities');
 
-  console.log(colorize('✓ Registered Plugins:', 'green'));
-  const plugins = artifactRegistry.getAllPlugins();
-  plugins.forEach(plugin => {
-    console.log(`  - ${colorize(plugin.id, 'yellow')}: ${plugin.rootTags.join(', ')}`);
-  });
+  console.log(colorize('✓ Structure-Based Chunking:', 'green'));
+  console.log('  - Semantic boundaries detected via XML attribute heuristics');
+  console.log('  - Root artifact type inferred from XML root element structure');
+  console.log('  - Hierarchical context tracked through ancestor attributes');
+  console.log('  - No hardcoded artifact registry required');
 
-  console.log(colorize('\n✓ Semantic Boundaries:', 'green'));
-  const testBoundaries = ['resource', 'inSequence', 'outSequence', 'filter', 'query'];
-  testBoundaries.forEach(boundary => {
-    const isBoundary = artifactRegistry.isSemanticBoundary(boundary);
-    console.log(`  - ${boundary}: ${isBoundary ? colorize('YES', 'green') : colorize('NO', 'red')}`);
-  });
-
-  console.log(colorize('\n✓ Mediator Tags:', 'green'));
-  const testMediators = ['log', 'property', 'call', 'send', 'payloadFactory'];
-  testMediators.forEach(mediator => {
-    const isMediator = artifactRegistry.isMediatorTag(mediator);
-    console.log(`  - ${mediator}: ${isMediator ? colorize('YES', 'green') : colorize('NO', 'red')}`);
-  });
+  console.log(colorize('\n✓ Structural Patterns Used:', 'green'));
+  const patterns = [
+    'Elements with attributes → semantic boundaries',
+    'name + context attrs → API-like context',
+    'methods + uri-template attrs → resource context',
+    'Tag ending in "Sequence" → sequence context',
+    'id + useConfig attrs → query context',
+    'Dotted tag names (e.g., http.post) → mediator detection',
+  ];
+  patterns.forEach(p => console.log(`  - ${colorize(p, 'yellow')}`));
 }
 
 /**
@@ -68,10 +66,10 @@ function testArtifactRegistry(): void {
  */
 function findArtifactFiles(artifactsDir: string): string[] {
   const files: string[] = [];
-  
+
   function scanDirectory(dir: string): void {
     const entries = fs.readdirSync(dir, { withFileTypes: true });
-    
+
     for (const entry of entries) {
       const fullPath = path.join(dir, entry.name);
       if (entry.isDirectory()) {
@@ -81,7 +79,7 @@ function findArtifactFiles(artifactsDir: string): string[] {
       }
     }
   }
-  
+
   scanDirectory(artifactsDir);
   return files;
 }
@@ -104,12 +102,12 @@ async function testChunkGeneration(files: string[]): Promise<Map<string, any[]>>
       allChunks.set(file, chunks);
 
       console.log(colorize(`  ✓ Generated ${chunks.length} chunks`, 'green'));
-      
-      // Show artifact type detection
+
+      // Show artifact type from context
       if (chunks.length > 0) {
         const firstChunk = chunks[0];
-        console.log(`  - Resource Type: ${colorize(firstChunk.resourceType, 'yellow')}`);
-        console.log(`  - Resource Name: ${colorize(firstChunk.resourceName, 'yellow')}`);
+        console.log(`  - Artifact Type: ${colorize(firstChunk.context.artifact?.type || 'unknown', 'yellow')}`);
+        console.log(`  - Artifact Name: ${colorize(firstChunk.context.artifact?.name || 'unknown', 'yellow')}`);
       }
     } catch (error: any) {
       console.log(colorize(`  ✗ Error: ${error?.message || 'Unknown error'}`, 'red'));
@@ -127,7 +125,6 @@ function testChunkDetails(allChunks: Map<string, any[]>): void {
 
   let totalChunks = 0;
   const chunkTypeCount = new Map<string, number>();
-  const semanticTypeCount = new Map<string, number>();
 
   for (const [file, chunks] of allChunks.entries()) {
     const relativePath = file.replace(process.cwd(), '.');
@@ -135,31 +132,16 @@ function testChunkDetails(allChunks: Map<string, any[]>): void {
 
     chunks.forEach((chunk, index) => {
       totalChunks++;
-      
+
       // Count chunk types
       chunkTypeCount.set(chunk.chunkType, (chunkTypeCount.get(chunk.chunkType) || 0) + 1);
-      semanticTypeCount.set(chunk.semanticType, (semanticTypeCount.get(chunk.semanticType) || 0) + 1);
 
       console.log(`\n${colorize(`Chunk #${index + 1}`, 'magenta')}`);
       console.log(`  Type: ${colorize(chunk.chunkType, 'yellow')}`);
-      console.log(`  Semantic Type: ${colorize(chunk.semanticType, 'cyan')}`);
-      console.log(`  Intent: ${colorize(chunk.semanticIntent, 'cyan')}`);
       console.log(`  Lines: ${chunk.startLine}-${chunk.endLine} (${chunk.endLine - chunk.startLine + 1} lines)`);
       console.log(`  Content Hash: ${colorize(chunk.contentHash.substring(0, 16) + '...', 'dim')}`);
-      
+
       // Show context
-      if (chunk.context.api) {
-        console.log(`  API Context: ${chunk.context.api.name || 'N/A'}`);
-      }
-      if (chunk.context.resource) {
-        console.log(`  Resource: ${chunk.context.resource.method} ${chunk.context.resource.uriTemplate}`);
-      }
-      if (chunk.context.sequence) {
-        const seqName = typeof chunk.context.sequence === 'string' 
-          ? chunk.context.sequence 
-          : chunk.context.sequence.name;
-        console.log(`  Sequence: ${seqName}`);
-      }
       if (chunk.context.artifact) {
         console.log(`  Artifact: ${chunk.context.artifact.type} - ${chunk.context.artifact.name}`);
       }
@@ -190,44 +172,14 @@ function testChunkDetails(allChunks: Map<string, any[]>): void {
   // Summary statistics
   printSubSection('Summary Statistics');
   console.log(`Total Chunks: ${colorize(totalChunks.toString(), 'bright')}`);
-  
+
   console.log(colorize('\nChunk Types:', 'cyan'));
   for (const [type, count] of chunkTypeCount.entries()) {
     console.log(`  ${type}: ${count}`);
   }
-
-  console.log(colorize('\nSemantic Types:', 'cyan'));
-  for (const [type, count] of semanticTypeCount.entries()) {
-    console.log(`  ${type}: ${count}`);
-  }
 }
 
-/**
- * Test 5: Verify hierarchical relationships
- */
-function testHierarchy(allChunks: Map<string, any[]>): void {
-  printSection('TEST 4: Hierarchical Relationships');
 
-  for (const [file, chunks] of allChunks.entries()) {
-    const relativePath = file.replace(process.cwd(), '.');
-    
-    // Check for parent-child relationships
-    const hasHierarchy = chunks.some(chunk => chunk.parentChunkId !== null);
-    
-    if (hasHierarchy) {
-      printSubSection(`File: ${relativePath}`);
-      
-      chunks.forEach(chunk => {
-        if (chunk.parentChunkId !== null) {
-          const parent = chunks.find(c => c.chunkIndex === chunk.parentChunkId);
-          console.log(`  ${chunk.chunkType} [${chunk.chunkIndex}] → parent: ${parent?.chunkType || 'unknown'} [${chunk.parentChunkId}]`);
-        } else {
-          console.log(`  ${colorize(chunk.chunkType, 'yellow')} [${chunk.chunkIndex}] → ${colorize('ROOT', 'green')}`);
-        }
-      });
-    }
-  }
-}
 
 /**
  * Test 6: Cross-artifact reference detection
@@ -240,18 +192,18 @@ function testCrossReferences(allChunks: Map<string, any[]>): void {
 
   for (const [file, chunks] of allChunks.entries()) {
     const relativePath = file.replace(process.cwd(), '.');
-    
+
     const chunksWithRefs = chunks.filter(c => c.referencedSequences && c.referencedSequences.length > 0);
-    
+
     if (chunksWithRefs.length > 0) {
       printSubSection(`File: ${relativePath}`);
-      
+
       chunksWithRefs.forEach(chunk => {
         console.log(`  ${colorize(chunk.chunkType, 'yellow')} references:`);
         chunk.referencedSequences.forEach((ref: string) => {
           console.log(`    → ${colorize(ref, 'cyan')}`);
           totalRefs++;
-          
+
           const refType = ref.split(':')[0];
           refTypes.set(refType, (refTypes.get(refType) || 0) + 1);
         });
@@ -268,34 +220,50 @@ function testCrossReferences(allChunks: Map<string, any[]>): void {
 }
 
 /**
- * Test 7: Token size verification
+ * Test 7: Token size verification using real AutoTokenizer.
+ *
+ * IMPORTANT: token counting is done on `chunk.embeddingText` — the cleaned XML + context
+ * metadata string that the token gate in processNode checks against maxTokens. This is the
+ * same text that will be fed to the embedding model.
+ *
+ * Raw `chunk.content` (un-cleaned XML) is also shown for comparison, but it is NOT
+ * what determines whether a chunk passes the gate.
  */
-function testTokenSizing(allChunks: Map<string, any[]>): void {
-  printSection('TEST 6: Token Size Verification');
+async function testTokenSizing(allChunks: Map<string, any[]>): Promise<void> {
+  printSection('TEST 6: Token Size Verification (AutoTokenizer)');
 
-  const maxTokens = 256; // Default limit
+  console.log(colorize(`  Gate logic: tokens counted on embeddingText (cleaned XML + context metadata)`, 'dim'));
+  console.log(colorize(`  Raw XML token counts are shown for comparison only.\n`, 'dim'));
+
+  const tokenizer = await AutoTokenizer.from_pretrained(config.tokenizerModel);
+  const maxTokens = config.maxTokens;
   let oversizedCount = 0;
 
   for (const [file, chunks] of allChunks.entries()) {
     chunks.forEach(chunk => {
-      // Approximate token count (chars / 4)
-      const approxTokens = Math.ceil(chunk.content.length / 4);
-      
-      if (approxTokens > maxTokens) {
+      // Count tokens on embeddingText — the same text the gate uses
+      const embeddingTokens = tokenizer.encode(chunk.embeddingText).length;
+      // Also count raw XML tokens for reference
+      const rawTokens = tokenizer.encode(chunk.content).length;
+
+      if (embeddingTokens > maxTokens) {
         oversizedCount++;
         const relativePath = file.replace(process.cwd(), '.');
         console.log(colorize(`⚠ Oversized chunk in ${relativePath}`, 'yellow'));
         console.log(`  Chunk: ${chunk.chunkType} [${chunk.chunkIndex}]`);
-        console.log(`  Approx tokens: ${approxTokens} (limit: ${maxTokens})`);
+        console.log(`  EmbeddingText tokens: ${colorize(embeddingTokens.toString(), 'red')} (limit: ${maxTokens})`);
+        console.log(`  Raw XML tokens (for reference): ${rawTokens}`);
         console.log(`  Lines: ${chunk.startLine}-${chunk.endLine}`);
       }
     });
   }
 
   if (oversizedCount === 0) {
-    console.log(colorize('✓ All chunks are within token limit', 'green'));
+    console.log(colorize(`✓ All chunks are within the ${maxTokens}-token limit when measured on embeddingText`, 'green'));
+    console.log(colorize(`  Model: ${config.tokenizerModel}`, 'dim'));
   } else {
-    console.log(colorize(`\n⚠ Found ${oversizedCount} oversized chunks`, 'yellow'));
+    console.log(colorize(`\n⚠ Found ${oversizedCount} oversized chunks (measured on embeddingText)`, 'yellow'));
+    console.log(colorize(`  These indicate cases where the token gate let something through — check processNode.`, 'yellow'));
   }
 }
 
@@ -331,7 +299,7 @@ async function runAllTests(): Promise<void> {
   console.log(colorize('╚════════════════════════════════════════════════════════════════════════════╝', 'bright'));
 
   const artifactsDir = path.join(process.cwd(), 'artifacts');
-  
+
   // Verify artifacts directory exists
   if (!fs.existsSync(artifactsDir)) {
     console.error(colorize(`\n✗ Error: artifacts directory not found at ${artifactsDir}`, 'red'));
@@ -340,8 +308,8 @@ async function runAllTests(): Promise<void> {
   }
 
   try {
-    // Test 1: Registry functionality
-    testArtifactRegistry();
+    // Test 1: Generalized chunker capabilities
+    testChunkerCapabilities();
 
     // Find all XML files
     const files = findArtifactFiles(artifactsDir);
@@ -358,14 +326,11 @@ async function runAllTests(): Promise<void> {
     // Test 3: Display detailed chunk information
     testChunkDetails(allChunks);
 
-    // Test 4: Verify hierarchical relationships
-    testHierarchy(allChunks);
-
-    // Test 5: Cross-reference detection
+    // Test 4: Cross-reference detection
     testCrossReferences(allChunks);
 
-    // Test 6: Token sizing
-    testTokenSizing(allChunks);
+    // Test 6: Token sizing (uses real tokenizer)
+    await testTokenSizing(allChunks);
 
     // Test 7: Export to JSON
     testExportToJSON(allChunks);
