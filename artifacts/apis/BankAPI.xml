@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <api context="/bankapi" name="BankAPI" xmlns="http://ws.apache.org/ns/synapse">
-    <Custom.greet methods="GET" uri-template="/">
+    <resource methods="GET" uri-template="/">
         <inSequence>
             <payloadFactory media-type="json">
                 <format>{"greetings":"Welcome to O2 Bank !!"}</format>
@@ -9,7 +9,7 @@
         </inSequence>
         <faultSequence>
         </faultSequence>
-    </Custom.greet>
+    </resource>
     
     <resource methods="POST" uri-template="/deposit">
         <inSequence>

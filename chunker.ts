@@ -333,8 +333,10 @@ export class XMLChunker {
       const tagName = Object.keys(item).find(key => key !== ':@') || '';
       if (!tagName) continue;
 
-      // Skip XML declaration and other processing instructions
-      if (tagName.startsWith('?xml')) continue;
+      // Skip XML declaration, processing instructions, and #text pseudo-nodes
+      // (#text is created by fast-xml-parser for mixed content; it's not a real XML tag
+      //  and would cause findElementRange to search for a non-existent <#text> element)
+      if (tagName.startsWith('?xml') || tagName === '#text') continue;
 
       const element = item[tagName];
       const nodeAttrs = item[':@'] || {};
@@ -481,10 +483,10 @@ export class XMLChunker {
       context.references = chunkReferences;
     }
 
-    // Detect if this is a standalone artifact definition
-    const standaloneTypes = ['sequence', 'localEntry', 'endpoint', 'template'];
-    const isStandalone = standaloneTypes.includes(tagName);
-    const sequenceKey = isStandalone ? (attrs.name || attrs['@_name'] || attrs.key || attrs['@_key']) : undefined;
+    // Detect if this is a standalone artifact definition (registry-driven, no hardcoded list)
+    const sequenceKey = this.registry.isResourceType(tagName)
+      ? (attrs.name || attrs['@_name'] || attrs.key || attrs['@_key'])
+      : undefined;
 
     chunks.push({
       filePath,
@@ -497,7 +499,7 @@ export class XMLChunker {
       contentHash,
       context: { ...context, references: chunkReferences.length > 0 ? chunkReferences : undefined },
       sequenceKey,
-      isSequenceDefinition: isStandalone,
+      isSequenceDefinition: this.registry.isResourceType(tagName),
       referencedSequences: chunkReferences,
     });
   }
@@ -521,15 +523,6 @@ export class XMLChunker {
     // Should never reach here after initialize() — but throw loudly if it does
     // so the problem is visible rather than silently producing wrong counts.
     throw new Error('Tokenizer not initialized. Call initialize() before counting tokens.');
-  }
-
-  /**
-   * Extract node name from element attributes.
-   */
-  private getNodeName(tagName: string, element: any): string {
-    const attrs = this.extractAttributes(element);
-    return attrs.name || attrs['@_name'] || attrs.key || attrs['@_key'] ||
-      attrs.context || attrs['@_context'] || tagName;
   }
 
   /**
@@ -589,23 +582,6 @@ export class XMLChunker {
    */
   private formatContextKey(key: string): string {
     return key.charAt(0).toUpperCase() + key.slice(1);
-  }
-
-  private extractAttributes(element: any): Record<string, string> {
-    const attrs: Record<string, string> = {};
-
-    if (Array.isArray(element)) {
-      for (const item of element) {
-        if (item[':@']) {
-          Object.assign(attrs, item[':@']);
-          break;
-        }
-      }
-    } else if (element && element[':@']) {
-      Object.assign(attrs, element[':@']);
-    }
-
-    return attrs;
   }
 
   /**

@@ -1,13 +1,470 @@
 [
   {
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/AIAgentAPI.xml",
+    "chunkType": "log",
+    "chunkIndex": 0,
+    "startLine": 4,
+    "endLine": 7,
+    "content": "    <inSequence>\n      <log category=\"INFO\">\n        <message>AI Agent request received from user: ${payload.userID}</message>\n      </log>",
+    "embeddingText": "Api: AIAgentAPI context=/ai-agent Resource: methods=POST uri-template=/chat InSequence: inSequence inSequence log category=INFO message AI Agent request received from user: ${payload.userID}",
+    "contentHash": "9c92bf0a7d010dfc85ea931f77e55688f4dad5b629fbbbcf8bd845e55e73a46b",
+    "context": {
+      "artifact": {
+        "type": "api",
+        "name": "AIAgentAPI",
+        "xmlns": "http://ws.apache.org/ns/synapse",
+        "context": "/ai-agent"
+      },
+      "resource": {
+        "methods": "POST",
+        "uri-template": "/chat"
+      },
+      "inSequence": "inSequence"
+    },
+    "isSequenceDefinition": false,
+    "referencedSequences": []
+  },
+  {
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/AIAgentAPI.xml",
+    "chunkType": "connections",
+    "chunkIndex": 1,
+    "startLine": 10,
+    "endLine": 13,
+    "content": "        <connections>\n          <llmConfigKey>OPENAI_CONN</llmConfigKey>\n          <memoryConfigKey>FILE_MEMORY_CONN</memoryConfigKey>\n        </connections>",
+    "embeddingText": "Api: AIAgentAPI context=/ai-agent Resource: methods=POST uri-template=/chat InSequence: inSequence Ai.agent: ai.agent connections llmConfigKey OPENAI_CONN memoryConfigKey FILE_MEMORY_CONN",
+    "contentHash": "c3f8d9f78d5a45d5c2c09ee35b880432156fc8d8ad65625b64534bdd1b36c980",
+    "context": {
+      "artifact": {
+        "type": "api",
+        "name": "AIAgentAPI",
+        "xmlns": "http://ws.apache.org/ns/synapse",
+        "context": "/ai-agent"
+      },
+      "resource": {
+        "methods": "POST",
+        "uri-template": "/chat"
+      },
+      "inSequence": "inSequence",
+      "ai.agent": "ai.agent"
+    },
+    "isSequenceDefinition": false,
+    "referencedSequences": []
+  },
+  {
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/AIAgentAPI.xml",
+    "chunkType": "sessionId",
+    "chunkIndex": 2,
+    "startLine": 14,
+    "endLine": 14,
+    "content": "        <sessionId>{${payload.userID}}</sessionId>",
+    "embeddingText": "Api: AIAgentAPI context=/ai-agent Resource: methods=POST uri-template=/chat InSequence: inSequence Ai.agent: ai.agent sessionId {${payload.userID}}",
+    "contentHash": "9fad58482ffdc5c5268a9a80ddb957d2defaf5198821e6db4a8e50e4d4be42fe",
+    "context": {
+      "artifact": {
+        "type": "api",
+        "name": "AIAgentAPI",
+        "xmlns": "http://ws.apache.org/ns/synapse",
+        "context": "/ai-agent"
+      },
+      "resource": {
+        "methods": "POST",
+        "uri-template": "/chat"
+      },
+      "inSequence": "inSequence",
+      "ai.agent": "ai.agent"
+    },
+    "isSequenceDefinition": false,
+    "referencedSequences": []
+  },
+  {
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/AIAgentAPI.xml",
+    "chunkType": "role",
+    "chunkIndex": 3,
+    "startLine": 15,
+    "endLine": 15,
+    "content": "        <role>Bank Customer Service Assistant</role>",
+    "embeddingText": "Api: AIAgentAPI context=/ai-agent Resource: methods=POST uri-template=/chat InSequence: inSequence Ai.agent: ai.agent role Bank Customer Service Assistant",
+    "contentHash": "dd4debdb330ee3f67a3e7e65eb735435e2f592b56da64bef271d58fd58efa500",
+    "context": {
+      "artifact": {
+        "type": "api",
+        "name": "AIAgentAPI",
+        "xmlns": "http://ws.apache.org/ns/synapse",
+        "context": "/ai-agent"
+      },
+      "resource": {
+        "methods": "POST",
+        "uri-template": "/chat"
+      },
+      "inSequence": "inSequence",
+      "ai.agent": "ai.agent"
+    },
+    "isSequenceDefinition": false,
+    "referencedSequences": []
+  },
+  {
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/AIAgentAPI.xml",
+    "chunkType": "instructions",
+    "chunkIndex": 4,
+    "startLine": 16,
+    "endLine": 16,
+    "content": "        <instructions>You are a helpful banking assistant for O2 Bank. You can help customers check their account balance, view transaction history, and convert currencies. Always be polite, professional, and provide accurate information. When users ask about their account, use the available tools to fetch real-time data.</instructions>",
+    "embeddingText": "Api: AIAgentAPI context=/ai-agent Resource: methods=POST uri-template=/chat InSequence: inSequence Ai.agent: ai.agent instructions You are helpful banking assistant for O2 Bank. You can help customers check their account balance, view transaction history, and convert currencies. Always be polite, professional, and provide accurate information. When users ask about their account, use the available tools to fetch real-time data.",
+    "contentHash": "32285d44cde783b4e4510502e67ff029b8ed5b049cb0e520f058606e879385d3",
+    "context": {
+      "artifact": {
+        "type": "api",
+        "name": "AIAgentAPI",
+        "xmlns": "http://ws.apache.org/ns/synapse",
+        "context": "/ai-agent"
+      },
+      "resource": {
+        "methods": "POST",
+        "uri-template": "/chat"
+      },
+      "inSequence": "inSequence",
+      "ai.agent": "ai.agent"
+    },
+    "isSequenceDefinition": false,
+    "referencedSequences": []
+  },
+  {
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/AIAgentAPI.xml",
+    "chunkType": "prompt",
+    "chunkIndex": 5,
+    "startLine": 17,
+    "endLine": 17,
+    "content": "        <prompt>${payload.query}</prompt>",
+    "embeddingText": "Api: AIAgentAPI context=/ai-agent Resource: methods=POST uri-template=/chat InSequence: inSequence Ai.agent: ai.agent prompt ${payload.query}",
+    "contentHash": "2ba3d478c204e029c6bc65f2c2fdbcc1379d1b0d913bf435dcc8e439e74e77de",
+    "context": {
+      "artifact": {
+        "type": "api",
+        "name": "AIAgentAPI",
+        "xmlns": "http://ws.apache.org/ns/synapse",
+        "context": "/ai-agent"
+      },
+      "resource": {
+        "methods": "POST",
+        "uri-template": "/chat"
+      },
+      "inSequence": "inSequence",
+      "ai.agent": "ai.agent"
+    },
+    "isSequenceDefinition": false,
+    "referencedSequences": []
+  },
+  {
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/AIAgentAPI.xml",
+    "chunkType": "responseVariable",
+    "chunkIndex": 6,
+    "startLine": 18,
+    "endLine": 18,
+    "content": "        <responseVariable>ai_agent_response</responseVariable>",
+    "embeddingText": "Api: AIAgentAPI context=/ai-agent Resource: methods=POST uri-template=/chat InSequence: inSequence Ai.agent: ai.agent responseVariable ai_agent_response",
+    "contentHash": "9f0d02495b466802304ff9351745c626c1a6ae78a35b04f5b4bebba3dde05c9a",
+    "context": {
+      "artifact": {
+        "type": "api",
+        "name": "AIAgentAPI",
+        "xmlns": "http://ws.apache.org/ns/synapse",
+        "context": "/ai-agent"
+      },
+      "resource": {
+        "methods": "POST",
+        "uri-template": "/chat"
+      },
+      "inSequence": "inSequence",
+      "ai.agent": "ai.agent"
+    },
+    "isSequenceDefinition": false,
+    "referencedSequences": []
+  },
+  {
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/AIAgentAPI.xml",
+    "chunkType": "overwriteBody",
+    "chunkIndex": 7,
+    "startLine": 19,
+    "endLine": 19,
+    "content": "        <overwriteBody>false</overwriteBody>",
+    "embeddingText": "Api: AIAgentAPI context=/ai-agent Resource: methods=POST uri-template=/chat InSequence: inSequence Ai.agent: ai.agent overwriteBody false",
+    "contentHash": "86bb017925d330a838adb3927fcaaba51cf3fb317d2b43bfcd8460f4e6e72dc7",
+    "context": {
+      "artifact": {
+        "type": "api",
+        "name": "AIAgentAPI",
+        "xmlns": "http://ws.apache.org/ns/synapse",
+        "context": "/ai-agent"
+      },
+      "resource": {
+        "methods": "POST",
+        "uri-template": "/chat"
+      },
+      "inSequence": "inSequence",
+      "ai.agent": "ai.agent"
+    },
+    "isSequenceDefinition": false,
+    "referencedSequences": []
+  },
+  {
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/AIAgentAPI.xml",
+    "chunkType": "modelName",
+    "chunkIndex": 8,
+    "startLine": 20,
+    "endLine": 20,
+    "content": "        <modelName>gpt-4o</modelName>",
+    "embeddingText": "Api: AIAgentAPI context=/ai-agent Resource: methods=POST uri-template=/chat InSequence: inSequence Ai.agent: ai.agent modelName gpt-4o",
+    "contentHash": "dcbe3c52413c7a25ea317fa42ed307c8720b2d9164dc2b963cd3f0fecaf08471",
+    "context": {
+      "artifact": {
+        "type": "api",
+        "name": "AIAgentAPI",
+        "xmlns": "http://ws.apache.org/ns/synapse",
+        "context": "/ai-agent"
+      },
+      "resource": {
+        "methods": "POST",
+        "uri-template": "/chat"
+      },
+      "inSequence": "inSequence",
+      "ai.agent": "ai.agent"
+    },
+    "isSequenceDefinition": false,
+    "referencedSequences": []
+  },
+  {
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/AIAgentAPI.xml",
+    "chunkType": "temperature",
+    "chunkIndex": 9,
+    "startLine": 21,
+    "endLine": 21,
+    "content": "        <temperature>0.7</temperature>",
+    "embeddingText": "Api: AIAgentAPI context=/ai-agent Resource: methods=POST uri-template=/chat InSequence: inSequence Ai.agent: ai.agent temperature 0.7",
+    "contentHash": "0c86b08c10f1ebe32c15022cd1154dec6aaf3fb98727c64e8b06e8f07bda9ee5",
+    "context": {
+      "artifact": {
+        "type": "api",
+        "name": "AIAgentAPI",
+        "xmlns": "http://ws.apache.org/ns/synapse",
+        "context": "/ai-agent"
+      },
+      "resource": {
+        "methods": "POST",
+        "uri-template": "/chat"
+      },
+      "inSequence": "inSequence",
+      "ai.agent": "ai.agent"
+    },
+    "isSequenceDefinition": false,
+    "referencedSequences": []
+  },
+  {
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/AIAgentAPI.xml",
+    "chunkType": "maxTokens",
+    "chunkIndex": 10,
+    "startLine": 22,
+    "endLine": 22,
+    "content": "        <maxTokens>2000</maxTokens>",
+    "embeddingText": "Api: AIAgentAPI context=/ai-agent Resource: methods=POST uri-template=/chat InSequence: inSequence Ai.agent: ai.agent maxTokens 2000",
+    "contentHash": "5feaccffc893a320dc9679db576e836c1691bd03b616ebcbfc689b4b3f12bc3f",
+    "context": {
+      "artifact": {
+        "type": "api",
+        "name": "AIAgentAPI",
+        "xmlns": "http://ws.apache.org/ns/synapse",
+        "context": "/ai-agent"
+      },
+      "resource": {
+        "methods": "POST",
+        "uri-template": "/chat"
+      },
+      "inSequence": "inSequence",
+      "ai.agent": "ai.agent"
+    },
+    "isSequenceDefinition": false,
+    "referencedSequences": []
+  },
+  {
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/AIAgentAPI.xml",
+    "chunkType": "topP",
+    "chunkIndex": 11,
+    "startLine": 23,
+    "endLine": 23,
+    "content": "        <topP>1</topP>",
+    "embeddingText": "Api: AIAgentAPI context=/ai-agent Resource: methods=POST uri-template=/chat InSequence: inSequence Ai.agent: ai.agent topP 1",
+    "contentHash": "e35b4eb234149370ae141526b7bf1e7bb86e062b0784bbe18113fc8ec09535c4",
+    "context": {
+      "artifact": {
+        "type": "api",
+        "name": "AIAgentAPI",
+        "xmlns": "http://ws.apache.org/ns/synapse",
+        "context": "/ai-agent"
+      },
+      "resource": {
+        "methods": "POST",
+        "uri-template": "/chat"
+      },
+      "inSequence": "inSequence",
+      "ai.agent": "ai.agent"
+    },
+    "isSequenceDefinition": false,
+    "referencedSequences": []
+  },
+  {
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/AIAgentAPI.xml",
+    "chunkType": "frequencyPenalty",
+    "chunkIndex": 12,
+    "startLine": 24,
+    "endLine": 24,
+    "content": "        <frequencyPenalty>0</frequencyPenalty>",
+    "embeddingText": "Api: AIAgentAPI context=/ai-agent Resource: methods=POST uri-template=/chat InSequence: inSequence Ai.agent: ai.agent frequencyPenalty 0",
+    "contentHash": "59910d761419e16762f5437f428d3fe2788b2778a39548630ace8ef261fefb80",
+    "context": {
+      "artifact": {
+        "type": "api",
+        "name": "AIAgentAPI",
+        "xmlns": "http://ws.apache.org/ns/synapse",
+        "context": "/ai-agent"
+      },
+      "resource": {
+        "methods": "POST",
+        "uri-template": "/chat"
+      },
+      "inSequence": "inSequence",
+      "ai.agent": "ai.agent"
+    },
+    "isSequenceDefinition": false,
+    "referencedSequences": []
+  },
+  {
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/AIAgentAPI.xml",
+    "chunkType": "tools",
+    "chunkIndex": 13,
+    "startLine": 25,
+    "endLine": 29,
+    "content": "        <tools>\n          <tool name=\"GetAccountBalance\" template=\"GetAccountBalanceTool\" resultExpression=\"${payload}\" description=\"Retrieves the current account balance for a given account ID. Use this when the user asks about their balance or account information.\"/>\n          <tool name=\"GetTransactionHistory\" template=\"GetTransactionHistoryTool\" resultExpression=\"${payload}\" description=\"Retrieves the recent transaction history for a given account ID. Use this when the user asks about their transactions, recent activity, or transaction history.\"/>\n          <tool name=\"ConvertCurrency\" template=\"ConvertCurrencyTool\" resultExpression=\"${payload}\" description=\"Converts an amount from one currency to another using current exchange rates. Use this when the user asks to convert money between different currencies.\"/>\n        </tools>",
+    "embeddingText": "Api: AIAgentAPI context=/ai-agent Resource: methods=POST uri-template=/chat InSequence: inSequence Ai.agent: ai.agent tools tool name=GetAccountBalance template=GetAccountBalanceTool resultExpression=${payload} description=Retrieves the current account balance for given account ID. Use this when the user asks about their balance or account information./ tool name=GetTransactionHistory template=GetTransactionHistoryTool resultExpression=${payload} description=Retrieves the recent transaction history for given account ID. Use this when the user asks about their transactions, recent activity, or transaction history./ tool name=ConvertCurrency template=ConvertCurrencyTool resultExpression=${payload} description=Converts an amount from one currency to another using current exchange rates. Use this when the user asks to convert money between different currencies./",
+    "contentHash": "be7f446965b2b9c9992e1a51be6bb4202feffce7962e202dc068655f5a06b80b",
+    "context": {
+      "artifact": {
+        "type": "api",
+        "name": "AIAgentAPI",
+        "xmlns": "http://ws.apache.org/ns/synapse",
+        "context": "/ai-agent"
+      },
+      "resource": {
+        "methods": "POST",
+        "uri-template": "/chat"
+      },
+      "inSequence": "inSequence",
+      "ai.agent": "ai.agent"
+    },
+    "isSequenceDefinition": false,
+    "referencedSequences": []
+  },
+  {
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/AIAgentAPI.xml",
+    "chunkType": "payloadFactory",
+    "chunkIndex": 14,
+    "startLine": 32,
+    "endLine": 39,
+    "content": "      <payloadFactory media-type=\"json\">\n        <format>{\n          \"userID\": \"${payload.userID}\",\n          \"query\": \"${payload.query}\",\n          \"response\": \"${vars.ai_agent_response}\",\n          \"timestamp\": \"${formatDateTime(now(), 'yyyy-MM-dd HH:mm:ss')}\"\n        }</format>\n      </payloadFactory>",
+    "embeddingText": "Api: AIAgentAPI context=/ai-agent Resource: methods=POST uri-template=/chat InSequence: inSequence payloadFactory media-type=json format userID ${payload.userID} query ${payload.query} response ${vars.ai_agent_response} timestamp ${formatDateTime now yyyy-MM-dd HH:mm:ss",
+    "contentHash": "015f2069bdef9b4afb0997ddc69193a62c8e6e3279e8dad92523d6e6e73bb947",
+    "context": {
+      "artifact": {
+        "type": "api",
+        "name": "AIAgentAPI",
+        "xmlns": "http://ws.apache.org/ns/synapse",
+        "context": "/ai-agent"
+      },
+      "resource": {
+        "methods": "POST",
+        "uri-template": "/chat"
+      },
+      "inSequence": "inSequence"
+    },
+    "isSequenceDefinition": false,
+    "referencedSequences": []
+  },
+  {
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/AIAgentAPI.xml",
+    "chunkType": "log",
+    "chunkIndex": 15,
+    "startLine": 41,
+    "endLine": 43,
+    "content": "      <log category=\"INFO\">\n        <message>AI Agent response sent successfully</message>\n      </log>",
+    "embeddingText": "Api: AIAgentAPI context=/ai-agent Resource: methods=POST uri-template=/chat InSequence: inSequence log category=INFO message AI Agent response sent successfully",
+    "contentHash": "7d81e2b207d222b37bf5fb605073190e059a0414d177c33d5c464e5148d3d5dc",
+    "context": {
+      "artifact": {
+        "type": "api",
+        "name": "AIAgentAPI",
+        "xmlns": "http://ws.apache.org/ns/synapse",
+        "context": "/ai-agent"
+      },
+      "resource": {
+        "methods": "POST",
+        "uri-template": "/chat"
+      },
+      "inSequence": "inSequence"
+    },
+    "isSequenceDefinition": false,
+    "referencedSequences": []
+  },
+  {
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/AIAgentAPI.xml",
+    "chunkType": "faultSequence",
+    "chunkIndex": 16,
+    "startLine": 47,
+    "endLine": 59,
+    "content": "    <faultSequence>\n      <log category=\"ERROR\">\n        <message>AI Agent error: ${props.synapse.ERROR_MESSAGE}</message>\n      </log>\n      <payloadFactory media-type=\"json\">\n        <format>{\n          \"status\": \"error\",\n          \"message\": \"Failed to process your request. Please try again later.\",\n          \"error\": \"${props.synapse.ERROR_MESSAGE}\"\n        }</format>\n      </payloadFactory>\n      <respond/>\n    </faultSequence>",
+    "embeddingText": "Api: AIAgentAPI context=/ai-agent Resource: methods=POST uri-template=/chat faultSequence log category=ERROR message AI Agent error: ${props.synapse.ERROR_MESSAGE} payloadFactory media-type=json format status error message Failed to process your request. Please try again later. error ${props.synapse.ERROR_MESSAGE} respond",
+    "contentHash": "bb1bbb68597d43e23a65bc6f9f1d6a112f02a9a57a97a2d59ee4b2f2190a6af3",
+    "context": {
+      "artifact": {
+        "type": "api",
+        "name": "AIAgentAPI",
+        "xmlns": "http://ws.apache.org/ns/synapse",
+        "context": "/ai-agent"
+      },
+      "resource": {
+        "methods": "POST",
+        "uri-template": "/chat"
+      }
+    },
+    "isSequenceDefinition": false,
+    "referencedSequences": []
+  },
+  {
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/AIAgentAPI.xml",
+    "chunkType": "resource",
+    "chunkIndex": 17,
+    "startLine": 62,
+    "endLine": 75,
+    "content": "  <resource methods=\"GET\" uri-template=\"/health\">\n    <inSequence>\n      <payloadFactory media-type=\"json\">\n        <format>{\n          \"status\": \"healthy\",\n          \"service\": \"AI Agent API\",\n          \"timestamp\": \"${formatDateTime(now(), 'yyyy-MM-dd HH:mm:ss')}\"\n        }</format>\n      </payloadFactory>\n      <respond/>\n    </inSequence>\n    <faultSequence>\n    </faultSequence>\n  </resource>",
+    "embeddingText": "Api: AIAgentAPI context=/ai-agent resource methods=GET uri-template=/health inSequence payloadFactory media-type=json format status healthy service AI Agent API timestamp ${formatDateTime now yyyy-MM-dd HH:mm:ss respond faultSequence",
+    "contentHash": "7927aa54f2c650215a939ed399677bb009115d1120480e1f63d712407271c108",
+    "context": {
+      "artifact": {
+        "type": "api",
+        "name": "AIAgentAPI",
+        "xmlns": "http://ws.apache.org/ns/synapse",
+        "context": "/ai-agent"
+      }
+    },
+    "isSequenceDefinition": false,
+    "referencedSequences": []
+  },
+  {
     "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/BankAPI.xml",
-    "chunkType": "Custom.greet",
+    "chunkType": "resource",
     "chunkIndex": 0,
     "startLine": 3,
     "endLine": 12,
-    "content": "    <Custom.greet methods=\"GET\" uri-template=\"/\">\n        <inSequence>\n            <payloadFactory media-type=\"json\">\n                <format>{\"greetings\":\"Welcome to O2 Bank !!\"}</format>\n            </payloadFactory>\n            <respond/>\n        </inSequence>\n        <faultSequence>\n        </faultSequence>\n    </Custom.greet>",
-    "embeddingText": "Api: BankAPI context=/bankapi Custom.greet methods=GET uri-template=/ inSequence payloadFactory media-type=json format greetings Welcome to O2 Bank respond faultSequence",
-    "contentHash": "c236cd20a9bac9d2366bf5b7fd26e9952ad8b3fa527a299ce86130e4b33f3cee",
+    "content": "    <resource methods=\"GET\" uri-template=\"/\">\n        <inSequence>\n            <payloadFactory media-type=\"json\">\n                <format>{\"greetings\":\"Welcome to O2 Bank !!\"}</format>\n            </payloadFactory>\n            <respond/>\n        </inSequence>\n        <faultSequence>\n        </faultSequence>\n    </resource>",
+    "embeddingText": "Api: BankAPI context=/bankapi resource methods=GET uri-template=/ inSequence payloadFactory media-type=json format greetings Welcome to O2 Bank respond faultSequence",
+    "contentHash": "64a577df4a9bf77331a4a2fd9b5cfd923dd42f3335e8d833f667111cebe4cf90",
     "context": {
       "artifact": {
         "type": "api",
@@ -353,28 +810,6 @@
     ]
   },
   {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/data-sources/minura.xml",
-    "chunkType": "ENTC.agent",
-    "chunkIndex": 0,
-    "startLine": 2,
-    "endLine": 14,
-    "content": "<ENTC.agent key=\"CurrencyConverter\" xmlns=\"http://ws.apache.org/ns/synapse\">\n  <http.ashen>\n    <connectionType>HTTPS</connectionType>\n    <baseUrl>https://dev-tools.wso2.com/gs/helpers/v1.0</baseUrl>\n    <authType>None</authType>\n    <timeoutAction>Never</timeoutAction>\n    <retryCount>0</retryCount>\n    <retryDelay>0</retryDelay>\n    <suspendInitialDuration>-1</suspendInitialDuration>\n    <suspendProgressionFactor>1</suspendProgressionFactor>\n    <name>CurrencyConverter</name>\n  </http.ashen>\n</ENTC.agent>",
-    "embeddingText": "DataSource: CurrencyConverter ENTC.agent key=CurrencyConverter xmlns=http://ws.apache.org/ns/synapse http.ashen connectionType HTTPS baseUrl https://dev-tools.wso2.com/gs/helpers/v1.0 authType None timeoutAction Never retryCount 0 retryDelay 0 suspendInitialDuration -1 suspendProgressionFactor 1 name CurrencyConverter",
-    "contentHash": "f434541809dcf9a5ee3e98cc152966a37842a22569d7dde799fab927e2b553cf",
-    "context": {
-      "artifact": {
-        "type": "dataSource",
-        "name": "CurrencyConverter",
-        "xmlns": "http://ws.apache.org/ns/synapse",
-        "isCustom": true,
-        "rootTag": "ENTC.agent",
-        "inferredFromPath": true
-      }
-    },
-    "isSequenceDefinition": false,
-    "referencedSequences": []
-  },
-  {
     "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/local-entries/CurrencyConverter.xml",
     "chunkType": "localEntry",
     "chunkIndex": 0,
@@ -411,6 +846,46 @@
       }
     },
     "sequenceKey": "EmailConnection",
+    "isSequenceDefinition": true,
+    "referencedSequences": []
+  },
+  {
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/local-entries/FileMemoryConnection.xml",
+    "chunkType": "localEntry",
+    "chunkIndex": 0,
+    "startLine": 2,
+    "endLine": 7,
+    "content": "<localEntry key=\"FILE_MEMORY_CONN\" xmlns=\"http://ws.apache.org/ns/synapse\">\n  <ai.init>\n    <connectionType>FILE_MEMORY</connectionType>\n    <name>FILE_MEMORY_CONN</name>\n  </ai.init>\n</localEntry>",
+    "embeddingText": "LocalEntry: FILE_MEMORY_CONN localEntry key=FILE_MEMORY_CONN xmlns=http://ws.apache.org/ns/synapse ai.init connectionType FILE_MEMORY name FILE_MEMORY_CONN",
+    "contentHash": "a9be53b55031c2aa3d1d675980f7daf680d9d12b9421326c89ad4ad8fa9541ee",
+    "context": {
+      "artifact": {
+        "type": "localEntry",
+        "name": "FILE_MEMORY_CONN",
+        "xmlns": "http://ws.apache.org/ns/synapse"
+      }
+    },
+    "sequenceKey": "FILE_MEMORY_CONN",
+    "isSequenceDefinition": true,
+    "referencedSequences": []
+  },
+  {
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/local-entries/OpenAIConnection.xml",
+    "chunkType": "localEntry",
+    "chunkIndex": 0,
+    "startLine": 2,
+    "endLine": 9,
+    "content": "<localEntry key=\"OPENAI_CONN\" xmlns=\"http://ws.apache.org/ns/synapse\">\n  <ai.init>\n    <connectionType>OPEN_AI</connectionType>\n    <apiKey>${configs.openai_api_key}</apiKey>\n    <baseUrl>https://api.openai.com/v1</baseUrl>\n    <name>OPENAI_CONN</name>\n  </ai.init>\n</localEntry>",
+    "embeddingText": "LocalEntry: OPENAI_CONN localEntry key=OPENAI_CONN xmlns=http://ws.apache.org/ns/synapse ai.init connectionType OPEN_AI apiKey ${configs.openai_api_key} baseUrl https://api.openai.com/v1 name OPENAI_CONN",
+    "contentHash": "840cd96bb1496a8d9bc4b6a5b658ac3f1b1529419f742be33f4af791f9459370",
+    "context": {
+      "artifact": {
+        "type": "localEntry",
+        "name": "OPENAI_CONN",
+        "xmlns": "http://ws.apache.org/ns/synapse"
+      }
+    },
+    "sequenceKey": "OPENAI_CONN",
     "isSequenceDefinition": true,
     "referencedSequences": []
   },
@@ -610,6 +1085,86 @@
       }
     },
     "isSequenceDefinition": false,
+    "referencedSequences": []
+  },
+  {
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/templates/ConvertCurrencyTool.xml",
+    "chunkType": "localEntry",
+    "chunkIndex": 0,
+    "startLine": 2,
+    "endLine": 6,
+    "content": "<localEntry key=\"CurrencyConverter\" xmlns=\"http://ws.apache.org/ns/synapse\">\n  <undefined.init>\n    <CurrencyConverter xmlns=\"name\"/>\n  </undefined.init>\n</localEntry>",
+    "embeddingText": "LocalEntry: CurrencyConverter localEntry key=CurrencyConverter xmlns=http://ws.apache.org/ns/synapse undefined.init CurrencyConverter xmlns=name/",
+    "contentHash": "32853aef64bafd062621541760de068a58c6b0d364fa38c1bd73b9e73eeb7d11",
+    "context": {
+      "artifact": {
+        "type": "localEntry",
+        "name": "CurrencyConverter",
+        "xmlns": "http://ws.apache.org/ns/synapse"
+      }
+    },
+    "sequenceKey": "CurrencyConverter",
+    "isSequenceDefinition": true,
+    "referencedSequences": []
+  },
+  {
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/templates/CurrencyConverter.xml",
+    "chunkType": "localEntry",
+    "chunkIndex": 0,
+    "startLine": 2,
+    "endLine": 14,
+    "content": "<localEntry key=\"CurrencyConverter\" xmlns=\"http://ws.apache.org/ns/synapse\">\n  <ENTCinit>\n    <connectionType>HTTPS</connectionType>\n    <baseUrl>https://dev-tools.wso2.com/gs/helpers/v1.0</baseUrl>\n    <authType>None</authType>\n    <timeoutAction>Never</timeoutAction>\n    <retryCount>0</retryCount>\n    <retryDelay>0</retryDelay>\n    <suspendInitialDuration>-1</suspendInitialDuration>\n    <suspendProgressionFactor>1</suspendProgressionFactor>\n    <name>CurrencyConverter</name>\n  </ENTCinit>\n</localEntry>",
+    "embeddingText": "LocalEntry: CurrencyConverter localEntry key=CurrencyConverter xmlns=http://ws.apache.org/ns/synapse ENTCinit connectionType HTTPS baseUrl https://dev-tools.wso2.com/gs/helpers/v1.0 authType None timeoutAction Never retryCount 0 retryDelay 0 suspendInitialDuration -1 suspendProgressionFactor 1 name CurrencyConverter",
+    "contentHash": "883696f8609ae9527f9fd48b072e564af12c563fc0bd63d590b438153f6eb097",
+    "context": {
+      "artifact": {
+        "type": "localEntry",
+        "name": "CurrencyConverter",
+        "xmlns": "http://ws.apache.org/ns/synapse"
+      }
+    },
+    "sequenceKey": "CurrencyConverter",
+    "isSequenceDefinition": true,
+    "referencedSequences": []
+  },
+  {
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/templates/GetAccountBalanceTool.xml",
+    "chunkType": "template",
+    "chunkIndex": 0,
+    "startLine": 2,
+    "endLine": 15,
+    "content": "<template name=\"GetAccountBalanceTool\" xmlns=\"http://ws.apache.org/ns/synapse\">\n  <description>Retrieves the current account balance for a given account ID</description>\n  <parameter isMandatory=\"true\" name=\"accountId\" description=\"The account ID to check balance for\"/>\n  <sequence>\n    <payloadFactory media-type=\"json\">\n      <format>{\n        \"accountId\": \"${params.functionParams.accountId}\",\n        \"balance\": 5000.00,\n        \"currency\": \"USD\",\n        \"lastUpdated\": \"${formatDateTime(now(), 'yyyy-MM-dd HH:mm:ss')}\"\n      }</format>\n    </payloadFactory>\n  </sequence>\n</template>",
+    "embeddingText": "Template: GetAccountBalanceTool template name=GetAccountBalanceTool xmlns=http://ws.apache.org/ns/synapse description Retrieves the current account balance for given account ID parameter isMandatory=true name=accountId description=The account ID to check balance for/ sequence payloadFactory media-type=json format accountId ${params.functionParams.accountId} balance 5000.00, currency USD lastUpdated ${formatDateTime now yyyy-MM-dd HH:mm:ss",
+    "contentHash": "c5260aab9ba1875a05b428c0f69bd4f8c0418e55a01b715db5ac3b9daad18b1e",
+    "context": {
+      "artifact": {
+        "type": "template",
+        "name": "GetAccountBalanceTool",
+        "xmlns": "http://ws.apache.org/ns/synapse"
+      }
+    },
+    "sequenceKey": "GetAccountBalanceTool",
+    "isSequenceDefinition": true,
+    "referencedSequences": []
+  },
+  {
+    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/templates/GetTransactionHistoryTool.xml",
+    "chunkType": "template",
+    "chunkIndex": 0,
+    "startLine": 2,
+    "endLine": 26,
+    "content": "<template name=\"GetTransactionHistoryTool\" xmlns=\"http://ws.apache.org/ns/synapse\">\n  <description>Retrieves the transaction history for a given account ID</description>\n  <parameter isMandatory=\"true\" name=\"accountId\" description=\"The account ID to get transaction history for\"/>\n  <sequence>\n    <payloadFactory media-type=\"json\">\n      <format>{\n        \"accountId\": \"${params.functionParams.accountId}\",\n        \"transactions\": [\n          {\n            \"transactionId\": \"TXN001\",\n            \"type\": \"deposit\",\n            \"amount\": 1000.00,\n            \"date\": \"2024-01-15\"\n          },\n          {\n            \"transactionId\": \"TXN002\",\n            \"type\": \"withdrawal\",\n            \"amount\": 500.00,\n            \"date\": \"2024-01-16\"\n          }\n        ]\n      }</format>\n    </payloadFactory>\n  </sequence>\n</template>",
+    "embeddingText": "Template: GetTransactionHistoryTool template name=GetTransactionHistoryTool xmlns=http://ws.apache.org/ns/synapse description Retrieves the transaction history for given account ID parameter isMandatory=true name=accountId description=The account ID to get transaction history for/ sequence payloadFactory media-type=json format accountId ${params.functionParams.accountId} transactions transactionId TXN001 type deposit amount 1000.00, date 2024-01-15 }, transactionId TXN002 type withdrawal amount 500.00, date 2024-01-16",
+    "contentHash": "a1ebcee4e0a93db0facfdff9ed6fca338e495d5c3140ed40df03c102aa84d8c8",
+    "context": {
+      "artifact": {
+        "type": "template",
+        "name": "GetTransactionHistoryTool",
+        "xmlns": "http://ws.apache.org/ns/synapse"
+      }
+    },
+    "sequenceKey": "GetTransactionHistoryTool",
+    "isSequenceDefinition": true,
     "referencedSequences": []
   }
 ]

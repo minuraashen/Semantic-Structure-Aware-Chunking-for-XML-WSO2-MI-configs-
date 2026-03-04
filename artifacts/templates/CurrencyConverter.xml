@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ENTC.agent key="CurrencyConverter" xmlns="http://ws.apache.org/ns/synapse">
-  <http.ashen>
+<localEntry key="CurrencyConverter" xmlns="http://ws.apache.org/ns/synapse">
+  <ENTCinit>
     <connectionType>HTTPS</connectionType>
     <baseUrl>https://dev-tools.wso2.com/gs/helpers/v1.0</baseUrl>
     <authType>None</authType>
@@ -10,5 +10,5 @@
     <suspendInitialDuration>-1</suspendInitialDuration>
     <suspendProgressionFactor>1</suspendProgressionFactor>
     <name>CurrencyConverter</name>
-  </http.ashen>
-</ENTC.agent>
+  </ENTCinit>
+</localEntry>

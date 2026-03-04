@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<localEntry key="CurrencyConverter" xmlns="http://ws.apache.org/ns/synapse">
+  <undefined.init>
+    <CurrencyConverter xmlns="name"/>
+  </undefined.init>
+</localEntry>
