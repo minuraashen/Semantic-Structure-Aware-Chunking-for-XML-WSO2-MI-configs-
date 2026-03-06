@@ -1,5 +1,4 @@
 import * as fs from 'fs';
-import { createHash } from 'crypto';
 import { XMLParser } from 'fast-xml-parser';
 import { AutoTokenizer, PreTrainedTokenizer } from '@huggingface/transformers';
 import { config } from './config';
@@ -20,7 +19,7 @@ export interface XMLChunk {
   endLine: number;
   content: string;
   embeddingText: string;
-  contentHash: string;
+  contentHash?: string;
   context: SemanticContext;
   sequenceKey?: string;
   isSequenceDefinition?: boolean;
@@ -52,19 +51,6 @@ export interface SemanticContext {
   [key: string]: any;
 }
 
-/**
- * Compute a deterministic content hash for a chunk.
- * Hashes raw XML content + context.
- * Stored as `content_hash` in the DB — drives incremental update logic:
- * unchanged hash → reuse embedding, changed hash → re-embed.
- */
-function computeChunkHash(
-  xmlContent: string,
-  context: Record<string, any>
-): string {
-  const hashInput = JSON.stringify({ xml: xmlContent, context });
-  return createHash('sha256').update(hashInput).digest('hex');
-}
 
 interface LineRange {
   start: number;
@@ -210,8 +196,7 @@ export class XMLChunker {
     lines: string[],
     filePath: string,
     chunks: XMLChunk[],
-    context: SemanticContext,
-    parentTagName?: string
+    context: SemanticContext
   ): void {
     if (!Array.isArray(node)) return;
 
@@ -233,7 +218,7 @@ export class XMLChunker {
       // Use parent context (not updatedContext) — the chunk's own tag is already in content
       const range = this.findElementRange(tagName, lines);
       const content = this.extractContent(lines, range);
-      const embeddingText = this.createEmbeddingText(tagName, content, nodeAttrs, context);
+      const embeddingText = this.createEmbeddingText(content, context);
       const tokenCount = this.countTokens(embeddingText);
 
       if (tokenCount <= this.maxTokens) {
@@ -242,7 +227,7 @@ export class XMLChunker {
       } else if (Array.isArray(element)) {
         // Too large → descend into children
         const childChunksBefore = chunks.length;
-        this.processNode(element, lines, filePath, chunks, updatedContext, tagName);
+        this.processNode(element, lines, filePath, chunks, updatedContext);
 
         // Oversized leaf fallback: if no children produced chunks, force-emit this node
         if (chunks.length === childChunksBefore) {
@@ -313,14 +298,12 @@ export class XMLChunker {
   ): void {
     const chunkIndex = this.chunkCounter++;
 
-    const embeddingText = this.createEmbeddingText(tagName, content, attrs, context);
-    const contentHash = computeChunkHash(content, context);
+    const embeddingText = this.createEmbeddingText(content, context);
 
-    // Extract references from this chunk's content
+    // Extract references from this chunk's content.
+    // NOTE: We do NOT mutate the shared `context` object here — that would
+    // pollute the context passed to any sibling nodes processed afterwards.
     const chunkReferences = this.extractReferencesFromContent(content);
-    if (chunkReferences.length > 0) {
-      context.references = chunkReferences;
-    }
 
     // A chunk is a standalone artifact definition when its tag IS the root artifact tag.
     // This is true exactly when this chunk represents the top-level element of the file.
@@ -337,7 +320,6 @@ export class XMLChunker {
       endLine: range.end,
       content,
       embeddingText,
-      contentHash,
       context: { ...context, references: chunkReferences.length > 0 ? chunkReferences : undefined },
       sequenceKey,
       isSequenceDefinition: isDefinition,
@@ -354,11 +336,9 @@ export class XMLChunker {
    * token gate is exact — no char/4 approximation that can undercount.
    * `initialize()` must have been called before this (guaranteed by `chunkFile`).
    */
-  private countTokens(content: string, metadata: string = ''): number {
-    const fullText = (metadata ? metadata + ' ' : '') + content;
-
+  private countTokens(content: string): number {
     if (this.tokenizer) {
-      return this.tokenizer.encode(fullText).length;
+      return this.tokenizer.encode(content).length;
     }
 
     // Should never reach here after initialize() — but throw loudly if it does
@@ -469,73 +449,9 @@ export class XMLChunker {
     if (startLine === -1) startLine = 1;
     if (endLine === -1) endLine = startLine;
 
-    // GENERALIZABLE WRAPPER DETECTION:
-    // Expand range to include structural wrapper elements (onAccept, onReject, then, else, etc.)
-    // These are parent elements that have minimal/no attributes and provide structural context
-    const expandedRange = this.expandRangeForStructuralWrappers(startLine, endLine, lines);
-
-    return expandedRange;
+    return { start: startLine, end: endLine };
   }
 
-  /**
-   * Expand a range to include structural wrapper elements.
-   * Detects wrappers generically without hardcoding tag names.
-   */
-  private expandRangeForStructuralWrappers(startLine: number, endLine: number, lines: string[]): LineRange {
-    let newStart = startLine;
-    let newEnd = endLine;
-
-    // Look backwards for structural wrapper opening tags
-    // A structural wrapper is typically:
-    // - A simple opening tag with no or minimal attributes
-    // - Located immediately before our element (with possible whitespace)
-    if (startLine > 1) {
-      for (let i = startLine - 2; i >= 0 && i >= startLine - 5; i--) {
-        const line = lines[i].trim();
-
-        // Check if this line is a simple opening tag (e.g., <onAccept>, <then>, <else>)
-        // Pattern: <tagname> or <tagname >, but NOT tags with attributes like <tag attr="value">
-        const simpleOpeningTag = /^<(\w+:?\w*)>\s*$/;
-        const match = line.match(simpleOpeningTag);
-
-        if (match) {
-          // Found a structural wrapper, expand to include it
-          newStart = i + 1;
-          // Continue looking for more nested wrappers
-        } else if (line && !line.startsWith('<!--') && line !== '') {
-          // Hit a non-wrapper line, stop searching
-          break;
-        }
-      }
-    }
-
-    // Look forwards for corresponding closing tags
-    // Match each wrapper we found when expanding backwards
-    if (newStart < startLine && endLine < lines.length) {
-      const wrappersToClose = startLine - newStart;
-      let closedWrappers = 0;
-
-      for (let i = endLine; i < lines.length && i < endLine + 10; i++) {
-        const line = lines[i].trim();
-
-        // Check if this is a simple closing tag
-        const simpleClosingTag = /^<\/(\w+:?\w*)>\s*$/;
-        if (simpleClosingTag.test(line)) {
-          closedWrappers++;
-          newEnd = i + 1;
-
-          if (closedWrappers >= wrappersToClose) {
-            break;
-          }
-        } else if (line && !line.startsWith('<!--') && line !== '') {
-          // Hit a non-wrapper line before closing all wrappers
-          break;
-        }
-      }
-    }
-
-    return { start: newStart, end: newEnd };
-  }
 
   private extractContent(lines: string[], range: LineRange): string {
     return lines.slice(range.start - 1, range.end).join('\n');
@@ -545,17 +461,15 @@ export class XMLChunker {
 
   /**
    * Create natural text representation for embedding.
-   * Format: [JSON Context] + [Cleaned XML Content]
+   * Format: [Formatted Context Metadata] + [Cleaned XML Content tokens]
    *
    * Example:
-   *   Context: {"api":{"name":"BankAPI","context":"/bankapi"},"resource":{"method":"GET","uriTemplate":"/"}}
-   *   Content: <payloadFactory><format>{"greeting":"Hello"}</format></payloadFactory>
-   *   → {"api":{"name":"BankAPI","context":"/bankapi"},"resource":{"method":"GET"}} payloadFactory format greeting Hello
+   *   context → "Api: BankAPI context=/bankapi Resource: method=GET uriTemplate=/"
+   *   content → <payloadFactory><format>{"greeting":"Hello"}</format></payloadFactory>
+   *   → "Api: BankAPI context=/bankapi Resource: method=GET payloadFactory format greeting Hello"
    */
   private createEmbeddingText(
-    tagName: string,
     content: string,
-    attrs: Record<string, string>,
     context: SemanticContext
   ): string {
 

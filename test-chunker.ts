@@ -139,7 +139,6 @@ function testChunkDetails(allChunks: Map<string, any[]>): void {
       console.log(`\n${colorize(`Chunk #${index + 1}`, 'magenta')}`);
       console.log(`  Type: ${colorize(chunk.chunkType, 'yellow')}`);
       console.log(`  Lines: ${chunk.startLine}-${chunk.endLine} (${chunk.endLine - chunk.startLine + 1} lines)`);
-      console.log(`  Content Hash: ${colorize(chunk.contentHash.substring(0, 16) + '...', 'dim')}`);
 
       // Show context
       if (chunk.context.artifact) {
