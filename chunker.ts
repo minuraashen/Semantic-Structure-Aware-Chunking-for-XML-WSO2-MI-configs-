@@ -57,11 +57,30 @@ interface LineRange {
   end: number;
 }
 
+/**
+ * Holds accumulated small sibling nodes pending aggregation.
+ */
+interface AggregationBuffer {
+  contents: string[];      // raw XML content strings of each buffered element
+  startLine: number;       // line where the first element begins
+  endLine: number;         // line where the last element ends
+  lineCount: number;       // total lines across all buffered elements
+  tokenCount: number;      // token count of the combined embeddingText so far
+  references: string[];    // union of all cross-artifact references
+  contextPrefix: string;   // formatMetadata(context) — computed once, reused for all
+}
+
 export class XMLChunker {
   private chunkCounter = 0;
   private lastSearchPosition: number = 0;
   private readonly maxTokens: number;
   private tokenizer: PreTrainedTokenizer | null = null;
+
+  /**
+   * Minimum line span for a chunk to be emitted immediately without aggregation.
+   * Elements with fewer than MIN_CHUNK_LINES lines are candidates for sibling merging.
+   */
+  private readonly MIN_CHUNK_LINES = 5;
 
   constructor() {
     this.maxTokens = config.maxTokens;
@@ -186,10 +205,19 @@ export class XMLChunker {
   }
 
   /**
-   * PURE TREE TRAVERSAL with token gating
+   * PURE TREE TRAVERSAL with token gating + sibling aggregation
    *
    * Every XML tag is a potential chunk boundary — no heuristics, no registry rules.
    * Token count alone decides: fits → chunk, too big → descend into children.
+   *
+   * Consecutive siblings that fit the token limit are buffered together and emitted
+   * as a single aggregated chunk once the combined line count reaches MIN_CHUNK_LINES.
+   * This means a small <property> (1 line) CAN be co-aggregated with a larger sibling
+   * like <call-template> (5 lines) when they are next to each other — the buffer fires
+   * exactly when the combined lines first reach the threshold.
+   *
+   * Context metadata is prepended only once per aggregated group since all siblings
+   * share the same parent context.
    */
   private processNode(
     node: any,
@@ -199,6 +227,13 @@ export class XMLChunker {
     context: SemanticContext
   ): void {
     if (!Array.isArray(node)) return;
+
+    // Aggregation buffer: accumulates consecutive fit siblings until threshold is met
+    let buffer: AggregationBuffer | null = null;
+
+    // Compute the context prefix once — all siblings share the same parent context,
+    // so we only need this once and reuse it for every buffer token-count check.
+    const contextPrefix = this.formatMetadata(context);
 
     for (const item of node) {
       const tagName = Object.keys(item).find(key => key !== ':@') || '';
@@ -220,12 +255,68 @@ export class XMLChunker {
       const content = this.extractContent(lines, range);
       const embeddingText = this.createEmbeddingText(content, context);
       const tokenCount = this.countTokens(embeddingText);
+      const lineSpan = range.end - range.start + 1;
 
       if (tokenCount <= this.maxTokens) {
-        // Fits → emit this node as a chunk, stop descending
-        this.createChunk(tagName, nodeAttrs, content, range, filePath, chunks, context);
+        // --- This element FITS within the token limit ---
+        //
+        // ALL fit siblings are buffered together regardless of individual size.
+        // A large-but-fitting sibling (e.g. a 5-line call-template) can absorb
+        // preceding small siblings to jointly reach the MIN_CHUNK_LINES threshold.
+        // Only oversized elements (exceed maxTokens) break the aggregation run.
+
+        // Compute combined token count if we add this element to the buffer
+        const candidateContents = buffer ? [...buffer.contents, content] : [content];
+        const candidateEmbedding = this.createAggregatedEmbeddingText(candidateContents, contextPrefix);
+        const candidateTokens = this.countTokens(candidateEmbedding);
+        const candidateLines = (buffer ? buffer.lineCount : 0) + lineSpan;
+
+        if (buffer && candidateTokens > this.maxTokens) {
+          // Adding this element would exceed the token limit.
+          // Flush the existing buffer WITHOUT this element, then start a fresh buffer.
+          this.flushAggregationBuffer(buffer, filePath, chunks, context);
+          buffer = null;
+        }
+
+        const elementRefs = this.extractReferencesFromContent(content);
+
+        if (buffer === null) {
+          // Start a new buffer with this element
+          const soloTokens = this.countTokens(
+            this.createAggregatedEmbeddingText([content], contextPrefix)
+          );
+          buffer = {
+            contents: [content],
+            startLine: range.start,
+            endLine: range.end,
+            lineCount: lineSpan,
+            tokenCount: soloTokens,
+            references: elementRefs,
+            contextPrefix,
+          };
+        } else {
+          // Append to the existing buffer
+          buffer.contents.push(content);
+          buffer.endLine = range.end;
+          buffer.lineCount = candidateLines;
+          buffer.tokenCount = candidateTokens;
+          buffer.references = [...buffer.references, ...elementRefs];
+        }
+
+        // Flush once the combined line count reaches the minimum threshold
+        if (buffer.lineCount >= this.MIN_CHUNK_LINES) {
+          this.flushAggregationBuffer(buffer, filePath, chunks, context);
+          buffer = null;
+        }
+
       } else if (Array.isArray(element)) {
-        // Too large → descend into children
+        // --- OVERSIZED: exceeds token limit → descend into children ---
+        // Flush any pending buffer first (oversized element always breaks the sibling run)
+        if (buffer) {
+          this.flushAggregationBuffer(buffer, filePath, chunks, context);
+          buffer = null;
+        }
+
         const childChunksBefore = chunks.length;
         this.processNode(element, lines, filePath, chunks, updatedContext);
 
@@ -234,10 +325,132 @@ export class XMLChunker {
           this.createChunk(tagName, nodeAttrs, content, range, filePath, chunks, context);
         }
       } else {
-        // Leaf node (no children) that exceeds token limit → force-emit
+        // --- Leaf node (no children) that exceeds token limit → force-emit ---
+        if (buffer) {
+          this.flushAggregationBuffer(buffer, filePath, chunks, context);
+          buffer = null;
+        }
         this.createChunk(tagName, nodeAttrs, content, range, filePath, chunks, context);
       }
     }
+
+    // Flush any remaining buffered elements after all siblings are processed
+    if (buffer) {
+      this.flushAggregationBuffer(buffer, filePath, chunks, context);
+    }
+  }
+
+  /**
+   * Flush the aggregation buffer:
+   * - Single element → emit as a normal chunk (preserves original behavior)
+   * - Multiple elements → merge into one aggregated chunk
+   *
+   * The aggregated chunk uses:
+   *   - content: all buffered XML contents joined with '\n'
+   *   - embeddingText: context prefix (once) + combined cleaned content
+   *   - chunkType: 'aggregated'
+   *   - startLine / endLine: span of the first to last buffered element
+   *   - referencedSequences: union of all references found in buffered elements
+   */
+  private flushAggregationBuffer(
+    buffer: AggregationBuffer,
+    filePath: string,
+    chunks: XMLChunk[],
+    context: SemanticContext
+  ): void {
+    if (buffer.contents.length === 1) {
+      // Single buffered element — we don't have tagName/attrs here, so we emit
+      // a minimal aggregated chunk. The content and embedding text are correct.
+      const content = buffer.contents[0];
+      const embeddingText = this.createAggregatedEmbeddingText(buffer.contents, buffer.contextPrefix);
+      const chunkIndex = this.chunkCounter++;
+      const refs = buffer.references;
+
+      chunks.push({
+        filePath,
+        chunkType: 'aggregated',
+        chunkIndex,
+        startLine: buffer.startLine,
+        endLine: buffer.endLine,
+        content,
+        embeddingText,
+        context: { ...context, references: refs.length > 0 ? refs : undefined },
+        sequenceKey: undefined,
+        isSequenceDefinition: false,
+        referencedSequences: refs,
+      });
+    } else {
+      // Multiple elements — merge into one aggregated chunk
+      const mergedContent = buffer.contents.join('\n');
+      const embeddingText = this.createAggregatedEmbeddingText(buffer.contents, buffer.contextPrefix);
+      const chunkIndex = this.chunkCounter++;
+      const refs = [...new Set(buffer.references)];
+
+      chunks.push({
+        filePath,
+        chunkType: 'aggregated',
+        chunkIndex,
+        startLine: buffer.startLine,
+        endLine: buffer.endLine,
+        content: mergedContent,
+        embeddingText,
+        context: { ...context, references: refs.length > 0 ? refs : undefined },
+        sequenceKey: undefined,
+        isSequenceDefinition: false,
+        referencedSequences: refs,
+      });
+    }
+  }
+
+  /**
+   * Create embedding text for an aggregated chunk.
+   *
+   * Context is prepended only ONCE (shared by all siblings), then each element's
+   * cleaned content tokens are appended in order. This avoids context repetition
+   * that would bloat the embedding and degrade retrieval quality.
+   *
+   * @param contents  Raw XML strings of each buffered element
+   * @param contextPrefix  Pre-computed formatMetadata(context) string
+   */
+  private createAggregatedEmbeddingText(contents: string[], contextPrefix: string): string {
+    const tokens: string[] = contextPrefix ? [contextPrefix] : [];
+
+    for (const content of contents) {
+      // Re-use the same XML cleaning pipeline as createEmbeddingText,
+      // but without the context prefix (already added once above).
+      const jsonBlocks: string[] = [];
+      const jsonProtectedContent = content.replace(
+        /<(format|args)[^>]*>([\s\S]*?)<\/\1>/g,
+        (match, tag, jsonContent) => {
+          const trimmed = jsonContent.trim();
+          if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+            const placeholder = `__JSON_BLOCK_${jsonBlocks.length}__`;
+            jsonBlocks.push(`${tag} ${trimmed}`);
+            return placeholder;
+          }
+          return match;
+        }
+      );
+
+      const cleanedContent = jsonProtectedContent
+        .replace(/<([^>\/\s]+)([^>]*)>/g, ' $1 $2 ')
+        .replace(/<\/[^>]+>/g, ' ')
+        .replace(/<([^>\/\s]+)([^>]*)\s*\/>/g, ' $1 $2 ')
+        .replace(/="([^"]*)"/g, '=$1')
+        .replace(/='([^']*)'/g, '=$1')
+        .replace(/__JSON_BLOCK_(\d+)__/g, (_, idx) => ` ${jsonBlocks[parseInt(idx)]} `)
+        .replace(/[^\w\s=\$\{\}\[\]\/\-\.,:@]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+      const contentTokens = cleanedContent
+        .split(/\s+/)
+        .filter(t => (t.length > 1 || /^\d+$/.test(t)) && t.length < 100);
+
+      tokens.push(...contentTokens);
+    }
+
+    return tokens.join(' ');
   }
 
   /**
