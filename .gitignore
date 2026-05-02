@@ -3,3 +3,4 @@ dist/
 test-output/
 *.log
 .DS_Store
+artifacts-real/
