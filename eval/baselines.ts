@@ -10,6 +10,12 @@ export interface EvalChunk {
   embeddingText: string;
   startLine: number;
   endLine: number;
+  /** Cross-artifact references (structural chunker only). */
+  references?: string[];
+  /** Artifact this chunk belongs to (structural chunker only). */
+  artifactName?: string;
+  /** True when the chunk is a whole standalone artifact definition. */
+  isDefinition?: boolean;
 }
 
 function countTokens(tokenizer: PreTrainedTokenizer, text: string): number {
