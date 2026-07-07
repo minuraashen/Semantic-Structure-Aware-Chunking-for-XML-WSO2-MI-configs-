@@ -1,0 +1,87 @@
+{
+  "date": "2026-07-07T03:19:06.745Z",
+  "embeddingModel": "Xenova/all-MiniLM-L6-v2",
+  "maxTokens": 256,
+  "minTokens": 64,
+  "corpusFiles": 16,
+  "numQueries": 36,
+  "results": [
+    {
+      "method": "structural (ours)",
+      "numChunks": 34,
+      "meanTokens": 128.206,
+      "p95Tokens": 240,
+      "success1": 0.611,
+      "success5": 1,
+      "mrr10": 0.754,
+      "ndcg10": 0.81,
+      "lineRecall5": 0.977
+    },
+    {
+      "method": "ours w/o context",
+      "numChunks": 33,
+      "meanTokens": 116.03,
+      "p95Tokens": 231,
+      "success1": 0.611,
+      "success5": 0.917,
+      "mrr10": 0.734,
+      "ndcg10": 0.792,
+      "lineRecall5": 0.908
+    },
+    {
+      "method": "ours w/o cleanup",
+      "numChunks": 49,
+      "meanTokens": 145,
+      "p95Tokens": 244,
+      "success1": 0.667,
+      "success5": 0.944,
+      "mrr10": 0.792,
+      "ndcg10": 0.831,
+      "lineRecall5": 0.883
+    },
+    {
+      "method": "ours w/o aggregation",
+      "numChunks": 56,
+      "meanTokens": 88.518,
+      "p95Tokens": 224,
+      "success1": 0.639,
+      "success5": 0.889,
+      "mrr10": 0.742,
+      "ndcg10": 0.767,
+      "lineRecall5": 0.825
+    },
+    {
+      "method": "fixed-size 256",
+      "numChunks": 40,
+      "meanTokens": 203.125,
+      "p95Tokens": 255,
+      "success1": 0.472,
+      "success5": 0.889,
+      "mrr10": 0.654,
+      "ndcg10": 0.704,
+      "lineRecall5": 0.823
+    },
+    {
+      "method": "recursive-split 256",
+      "numChunks": 38,
+      "meanTokens": 184.605,
+      "p95Tokens": 255,
+      "success1": 0.556,
+      "success5": 0.917,
+      "mrr10": 0.718,
+      "ndcg10": 0.748,
+      "lineRecall5": 0.89
+    },
+    {
+      "method": "whole-file",
+      "numChunks": 16,
+      "meanTokens": 435.688,
+      "p95Tokens": 1469,
+      "success1": 0.528,
+      "success5": 0.917,
+      "mrr10": 0.702,
+      "ndcg10": 0.771,
+      "lineRecall5": 0.917
+    }
+  ]
+}

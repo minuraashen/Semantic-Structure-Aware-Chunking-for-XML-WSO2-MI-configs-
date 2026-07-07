@@ -26,4 +26,11 @@ export const config = {
 
   /** HuggingFace model ID used for tokenization */
   tokenizerModel: 'sentence-transformers/all-MiniLM-L6-v2',
+
+  /**
+   * Model used by the evaluation harness to embed chunks and queries.
+   * ONNX export of sentence-transformers/all-MiniLM-L6-v2 (same weights and
+   * tokenizer), runnable fully locally via @huggingface/transformers.
+   */
+  embeddingModel: 'Xenova/all-MiniLM-L6-v2',
 };
