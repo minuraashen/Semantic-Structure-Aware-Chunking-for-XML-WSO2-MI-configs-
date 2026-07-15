@@ -1,152 +1,143 @@
 # Semantic Structure-Aware XML Chunker for WSO2 Micro Integrator
 
-A pure parsed-tree, token-driven XML chunking algorithm specifically designed for WSO2 Micro Integrator (MI) configuration files. This tool intelligently breaks down complex XML artifacts into meaningful, context-rich chunks optimized for **RAG (Retrieval-Augmented Generation) systems** and **semantic code retrieval**.
+A structure-aware, token-budgeted XML chunking algorithm for WSO2 Micro Integrator (Synapse) configuration files, designed for **RAG (Retrieval-Augmented Generation)** and **semantic code retrieval**. The algorithm is artifact-agnostic — it works on any XML schema, since it operates purely on the parsed tree.
+
+Comes with an **evaluation harness** (baselines + labeled queries + metrics) that runs fully locally with lightweight embedding models, matching the privacy constraints of on-prem WSO2 MI deployments.
 
 ---
 
-## ⚠️ CRITICAL: Understanding Chunk Structure for Semantic Retrieval
-
-> **Chunks are NOT just XML portions!** Each chunk consists of **METADATA as CONTEXT** combined with **Cleaned XML Content**.
-
-### Embedding Text Formula
-
-For semantic retrieval operations, the embedding text for each chunk follows this structure:
+## How it works
 
 ```
-{ Context Metadata (JSON → Text) } + { Cleaned XML Content }
+XML source ──> sax parser ──> position-annotated element tree
+                                       │
+                    token-gated traversal (embedding-model tokenizer)
+                                       │
+              ┌────────────────────────┼─────────────────────────┐
+        fits budget               too large                 tiny siblings
+        → emit chunk            → descend into              → aggregate until
+                                  children                    minTokens reached
+                                       │
+                     embeddingText = context prefix + linearized content
 ```
 
-### Why This Matters
+1. **Position-annotated parse** (`xml-parser.ts`, built on [sax](https://github.com/isaacs/sax-js)). Every element carries its exact character offsets, so each chunk's `content` is an exact source slice with exact `startLine`/`endLine` — structure and content come from one representation, with no re-location step that could disagree with the tree.
 
-1. **Contextual Awareness**: The embedding text always starts with hierarchical context (API name, context path, resource method, URI template), ensuring semantic search understands WHERE in the configuration this chunk belongs.
-2. **Semantic Richness**: By converting both metadata and XML structure to natural text, embedding models can capture the full semantic meaning.
-3. **Better Retrieval**: When querying "How does BankAPI handle greetings?", the context-prefixed embedding ensures this chunk ranks highly due to both API name and content relevance.
+2. **Token-gated traversal** (`chunker.ts`). An element whose embedding text fits `maxTokens` (default 256, measured with the embedding model's own tokenizer) becomes a chunk; otherwise the traversal descends into its children. Oversized leaves are split into overlapping token-budgeted parts.
 
----
+3. **Sibling aggregation.** Consecutive small siblings are buffered until the combined content reaches `minTokens` (default 64) — so one-line elements (`<temperature>0.7</temperature>`) never become standalone noise chunks. Undersized tails merge backward into the preceding sibling chunk. Thresholds are token-based, so behavior does not depend on source formatting.
 
-## 🎯 Key Features
+4. **Context-enriched embedding text.** Every chunk's embedding text starts with a structurally derived context prefix — artifact metadata plus the (capped) ancestor path:
 
-### 1. **Pure Parsed-Tree Traversal**
-Unlike heuristic-based approaches, this algorithm uses pure XML tree traversal. 
-- **No Hardcoded Registries**: Works generically across any XML schema without requiring a predefined artifact registry.
-- **Dynamic Context**: Context and artifact metadata are read directly from the XML root element's attributes.
+   ```
+   api BankAPI context=/bankapi resource methods=POST uri-template=/deposit inSequence
+   http.post configKey=CurrencyConverter relativePath /currency/rate ...
+   ```
 
-### 2. **Token-Driven Boundary Detection**
-Every XML tag is a potential chunk boundary.
-- **Precise Sizing**: Token count alone decides chunking logic (default 256 tokens for `all-MiniLM-L6-v2`).
-- **Real Tokenizer**: Uses the actual Hugging Face tokenizer (`@huggingface/transformers`) to exact-match the embedding model's limits.
-- **Auto-Descent**: If a tree node fits within the token limit, it is emitted as a single chunk. If it exceeds the limit, the algorithm seamlessly descends into its children.
+   This is the deterministic, zero-LLM-cost analogue of contextual retrieval: the XML hierarchy already tells us where a chunk belongs.
 
-### 3. **Context-Enriched Embedding Text** ⭐
-- **Context-First Approach**: Each chunk's embedding text starts with structured context metadata.
-- **JSON Block Protection**: Intelligently preserves JSON inside `<format>` and `<args>` tags so structured payloads aren't destroyed during cleanup.
-- Maintains special characters in XPath expressions (`${}()[]`).
+5. **Content linearization.** Chunk content is converted to natural text directly from the parsed tree: tag names, `attr=value` pairs (entity-decoded, xmlns dropped), and text content in document order. JSON payloads inside `<format>`/`<args>` and CDATA sections are preserved verbatim. Synapse expression characters (`${} [] / . : @`) survive cleanup.
 
-### 4. **Cross-Artifact Reference Tracking**
-Automatically detects and tracks references between artifacts within the chunk content:
-- `<sequence key="SequenceName"/>` → Sequence references
-- `configKey="LocalEntryName"` → Local entry references
-- `<endpoint key="EndpointName"/>` → Endpoint references
-- `<call-template target="TemplateName"/>` → Template references
-- `useConfig="Name"` → Data service config references
-- `<call-query href="Name">` → Data service query references
+6. **Cross-artifact reference tracking.** References are extracted from the parsed tree (insensitive to attribute order): `<sequence key>`, `configKey`, `<endpoint key>`, `<call-template target>`, `useConfig`, `<call-query href>`.
 
----
-
-## 📊 Chunk Structure
-
-Each generated chunk contains comprehensive metadata:
+## Chunk structure
 
 ```typescript
 {
-  filePath: string;              // Source file path
-  chunkType: string;             // Specific tag type (e.g., resource, payloadFactory)
-  chunkIndex: number;            // Unique chunk identifier
-  startLine: number;             // Start line in source file
-  endLine: number;               // End line in source file
-  content: string;               // Original raw XML content
-  embeddingText: string;         // Cleaned text optimized for embeddings
-  context: {                     // Rich hierarchical context
-    artifact?: { type, name, ... },
-    references?: string[],       // Cross-artifact references
-    [key: string]: any           // Dynamic element-level contexts
+  filePath: string;            // repo-relative source path
+  chunkType: string;           // element tag, or 'aggregated'
+  memberTags?: string[];       // tags inside an aggregated chunk
+  chunkIndex: number;
+  part?: number;               // for split oversized leaves
+  startLine: number;           // exact source lines
+  endLine: number;
+  startOffset: number;         // exact source character span
+  endOffset: number;
+  content: string;             // exact source slice
+  embeddingText: string;       // context prefix + linearized content
+  contentHash: string;         // sha256 prefix, for deduplication
+  context: {
+    artifact: { type, name, ... },   // root element metadata
+    path: [{ tag, attrs }, ...],     // ancestor chain (capped)
+    references?: string[]
   },
-  sequenceKey?: string;          // For standalone definitions
-  isSequenceDefinition?: boolean,// True if chunk is the top-level artifact definition
-  referencedSequences?: string[] // All references in chunk
+  sequenceKey?: string;        // artifact name for whole-artifact chunks
+  isSequenceDefinition: boolean;
+  referencedSequences: string[];
 }
 ```
 
-## � Installation
+## Usage
 
 ```bash
 npm install
 ```
 
-## 🚀 Usage
-
-### Basic Usage
-
 ```typescript
 import { XMLChunker } from './chunker';
 
 const chunker = new XMLChunker();
-// Tokenizer is loaded automatically on the first run
-const chunks = await chunker.chunkFile('/path/to/artifact.xml');
+const chunks = await chunker.chunkFile('path/to/artifact.xml');
 
-console.log(`Generated ${chunks.length} chunks`);
-chunks.forEach(chunk => {
-  console.log(`${chunk.chunkType} at lines ${chunk.startLine}-${chunk.endLine}`);
-  console.log(`Embedding: ${chunk.embeddingText.substring(0, 80)}...`);
-});
+// Ablation switches (used by the evaluation harness):
+const noContext = new XMLChunker({ includeContext: false });
+const rawXml    = new XMLChunker({ cleanContent: false });
+const noAggr    = new XMLChunker({ aggregate: false });
 ```
 
-### Running Tests
+### Scripts
 
-```bash
-npm test
-```
+| Command | What it does |
+|---|---|
+| `npm test` | Unit test suite (25 tests: parser round-trips, adversarial XML, token-limit and coverage invariants, aggregation, references, ablations) |
+| `npm run demo` | Chunk everything in `artifacts/`, print detailed analysis, export `test-output/chunks.json` |
+| `npm run eval` | Retrieval evaluation: our chunker + 3 ablations vs fixed-size / recursive-split / whole-file baselines, on 36 labeled queries, swept across 5 lightweight local embedding models. Writes `eval/results.json` / `eval/results.md` |
 
-This comprehensive test suite will:
-- Process all XML files in the `artifacts/` folder
-- Verify structural chunking capabilities
-- Display detailed chunk analysis, statistics, and cross-references
-- Validate that all generated embedding texts strictly obey the token limit
-- Export generated chunks to `test-output/chunks.json`
-
-## 🔧 Configuration
-
-Edit `config.ts` to adjust settings like tokenizer model and sizing:
+## Configuration (`config.ts`)
 
 ```typescript
-// Example config.ts structure
 export const config = {
-  maxTokens: 256,
-  tokenizerModel: 'sentence-transformers/all-MiniLM-L6-v2'
+  maxTokens: 256,           // chunk budget (all-MiniLM-L6-v2 max sequence)
+  minTokens: 64,            // aggregation threshold (content tokens)
+  maxContextAncestors: 4,   // ancestor path cap in the context prefix
+  tokenizerModel: 'sentence-transformers/all-MiniLM-L6-v2',
+  embeddingModel: 'Xenova/all-MiniLM-L6-v2',   // eval default
 };
 ```
 
-## 📁 Project Structure
+## Evaluation
+
+The harness (`eval/`) compares, on a labeled query set over `artifacts/`:
+
+- **structural (ours)** — full pipeline
+- **ablations** — without context prefix / without cleanup / without aggregation
+- **baselines** — fixed-size 256-token windows, LangChain-style recursive splitter, whole-file
+
+Metrics: Success@1, Success@5, MRR@10, nDCG@10, and LineRecall@5 (fraction of gold lines covered by the top-5 retrieved chunks — rewards complete answers, penalizes fragmentation). Embedding models swept: all-MiniLM-L6-v2, all-MiniLM-L6-v2-code-search-512, bge-small-en-v1.5, e5-small-v2, gte-small — all ≤33M params, all running fully locally via ONNX.
+
+See `eval/results.md` for the current numbers.
+
+## Project structure
 
 ```
 .
-├── chunker.ts              # Main pure-tree chunking algorithm
-├── config.ts               # Configuration settings
-├── test-chunker.ts         # Comprehensive test suite
-├── package.json            # Dependencies and scripts
-├── tsconfig.json           # TypeScript configuration
-├── artifacts/              # Sample WSO2 MI XML files for testing
-├── test-output/            # Generated test results (chunks.json)
-└── README.md
+├── xml-parser.ts           # position-annotated XML tree (sax-based)
+├── chunker.ts              # chunking algorithm
+├── config.ts               # budgets and model IDs
+├── tests/unit-tests.ts     # assertion-based test suite
+├── test-chunker.ts         # demo / analysis script
+├── eval/
+│   ├── run-eval.ts         # multi-model retrieval evaluation
+│   ├── baselines.ts        # fixed-size, recursive-split, whole-file
+│   ├── queries.ts          # 36 labeled queries with gold line spans
+│   └── results.md          # latest results
+├── artifacts/              # sample WSO2 MI XML corpus
+└── test-output/            # exported chunks.json
 ```
 
-## 🤝 Contributing
+## References
 
-To extend the chunking algorithm, you can modify `chunker.ts` directly. Since the architecture no longer relies on a hardcoded artifact registry, most new structural patterns will be automatically supported by the dynamic context extraction and token-driven descent.
-
-
-## 📚 References
-
-- [WSO2 Micro Integrator Documentation](https://ei.docs.wso2.com/en/latest/micro-integrator/overview/introduction/)
-- [fast-xml-parser](https://github.com/NaturalIntelligence/fast-xml-parser)
-- [HuggingFace Transformers for Node](https://huggingface.co/docs/transformers.js)
+- [cAST: Enhancing Code Retrieval-Augmented Generation with Structural Chunking via Abstract Syntax Tree](https://arxiv.org/abs/2506.15655) (EMNLP 2025 Findings) — the closest prior work; split-then-merge tree chunking for code
+- [Anthropic: Contextual Retrieval](https://www.anthropic.com/news/contextual-retrieval) — LLM-generated chunk context; our prefix is its deterministic, structural analogue
+- [WSO2 Micro Integrator Documentation](https://mi.docs.wso2.com/)
+- [sax-js](https://github.com/isaacs/sax-js) · [Transformers.js](https://huggingface.co/docs/transformers.js)

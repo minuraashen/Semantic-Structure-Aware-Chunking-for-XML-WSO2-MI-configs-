@@ -1,525 +1,621 @@
 import * as fs from 'fs';
-import { XMLParser } from 'fast-xml-parser';
+import * as crypto from 'crypto';
 import { AutoTokenizer, PreTrainedTokenizer } from '@huggingface/transformers';
+import {
+  parseXML,
+  XMLDocument,
+  XMLElementNode,
+  XMLNode,
+  childElements,
+  localName,
+} from './xml-parser';
 import { config } from './config';
 
 /**
  * Semantic, Hierarchical, Structure-Aware XML Chunker for WSO2 MI artifacts
+ * (artifact-agnostic: works on any XML schema).
  *
- * Pure parsed-tree traversal — no external registry or heuristic rules.
- * Token count alone drives chunk boundaries; artifact metadata is read
- * directly from the XML root element's attributes.
+ * Pipeline per file:
+ *   1. Parse into a position-annotated element tree (sax-based; exact source
+ *      offsets per element — structure and content come from ONE representation).
+ *   2. Traverse top-down with a token gate: an element whose embedding text
+ *      fits within `maxTokens` becomes a chunk candidate; otherwise descend
+ *      into its children.
+ *   3. Aggregate consecutive small siblings until the combined embedding text
+ *      reaches `minTokens` (token-based, formatting-independent), so one-line
+ *      elements never become standalone noise chunks. An undersized tail is
+ *      merged backward into the preceding sibling chunk when it fits.
+ *   4. Each chunk's embedding text = [ancestor context prefix] + [linearized,
+ *      cleaned element content]. Context is derived structurally from the
+ *      ancestor path — no LLM calls (cf. contextual retrieval).
+ *
+ * Token counts always use the embedding model's own tokenizer, so the gate is
+ * exact with respect to what the model receives. Within a sibling list the
+ * gate is O(n): WordPiece token counts are additive across whitespace-joined
+ * segments, so buffered totals are running sums of per-element counts
+ * (verified by a unit test) instead of re-encoding the growing buffer.
  */
 
-export interface XMLChunk {
-  filePath: string;
-  chunkType: string;
-  chunkIndex: number;
-  startLine: number;
-  endLine: number;
-  content: string;
-  embeddingText: string;
-  contentHash?: string;
-  context: SemanticContext;
-  sequenceKey?: string;
-  isSequenceDefinition?: boolean;
-  referencedSequences?: string[];
+/** One ancestor on the path from the artifact root down to a chunk. */
+export interface AncestorEntry {
+  tag: string;
+  /** Ancestor attributes (xmlns declarations excluded). Empty for bare wrappers. */
+  attrs: Record<string, string>;
 }
 
 /**
- * Semantic context — fully generic, schema-agnostic.
- *
- * DESIGN: Only two explicit fields exist:
- *   - `artifact`: Root-level artifact metadata (read from the XML root element)
- *   - `references`: Cross-artifact references extracted from content
- *
- * All other context is stored dynamically via the `[key: string]: any` index
- * signature — making the chunker work identically for any XML schema.
+ * Semantic context attached to every chunk.
+ * `artifact` is root-level metadata read from the XML root element.
+ * `path` is the ordered ancestor chain (nearest last, capped at
+ * `maxContextAncestors`) — an array, so same-named ancestors at different
+ * depths never collide.
  */
 export interface SemanticContext {
-  // Root-level artifact metadata (always present)
-  artifact?: {
+  artifact: {
     type: string;
     name: string;
-    xmlns?: string;
-    [key: string]: any;
+    [key: string]: string;
   };
-  // Cross-artifact references extracted from chunk content
+  path: AncestorEntry[];
+  /** Cross-artifact references found in the chunk content. */
   references?: string[];
-  // DYNAMIC: All element-level contexts are stored here automatically
-  // Examples: { resource: { method: 'GET', uriTemplate: '/' }, filter: { source: '...' } }
-  [key: string]: any;
 }
 
+export interface XMLChunk {
+  filePath: string;
+  /** Tag name of the chunk's element, or 'aggregated' for merged sibling runs. */
+  chunkType: string;
+  /** Tags of the merged elements when chunkType === 'aggregated'. */
+  memberTags?: string[];
+  chunkIndex: number;
+  /** 1-based part number when an oversized leaf was split into several chunks. */
+  part?: number;
+  startLine: number;
+  endLine: number;
+  /** Exact character span in the source file. */
+  startOffset: number;
+  endOffset: number;
+  /** Raw XML content — the exact source text of the chunk's span. */
+  content: string;
+  /** Context-prefixed, cleaned text that is embedded. */
+  embeddingText: string;
+  /** sha256 of content (first 16 hex chars) for deduplication. */
+  contentHash: string;
+  context: SemanticContext;
+  /** Artifact name when this chunk is a whole standalone artifact definition. */
+  sequenceKey?: string;
+  isSequenceDefinition: boolean;
+  referencedSequences: string[];
+}
 
-interface LineRange {
-  start: number;
-  end: number;
+/**
+ * Ablation switches (all default true). Used by the evaluation harness to
+ * isolate the contribution of each component.
+ */
+export interface ChunkerOptions {
+  /** Prepend the ancestor context prefix to embedding text. */
+  includeContext?: boolean;
+  /** Linearize + clean XML for embedding text (false: raw XML is embedded). */
+  cleanContent?: boolean;
+  /** Aggregate small consecutive siblings (false: every fitting element is its own chunk). */
+  aggregate?: boolean;
+}
+
+interface BufferEntry {
+  el: XMLElementNode;
+  /** Element's linearized text (no context prefix). */
+  text: string;
+  /** Token count of `text` without special tokens. */
+  tokens: number;
+}
+
+interface ChunkState {
+  chunkIndex: number;
 }
 
 export class XMLChunker {
-  private chunkCounter = 0;
-  private lastSearchPosition: number = 0;
-  private readonly maxTokens: number;
   private tokenizer: PreTrainedTokenizer | null = null;
+  /** Number of special tokens ([CLS], [SEP]) the tokenizer adds per encode. */
+  private specialTokenCount = 0;
+  private readonly maxTokens: number = config.maxTokens;
+  private readonly minTokens: number;
+  private readonly maxContextAncestors: number = config.maxContextAncestors;
+  private readonly includeContext: boolean;
+  private readonly cleanContent: boolean;
 
-  constructor() {
-    this.maxTokens = config.maxTokens;
+  constructor(options: ChunkerOptions = {}) {
+    this.includeContext = options.includeContext !== false;
+    this.cleanContent = options.cleanContent !== false;
+    // aggregate=false ⇒ flush after every element (minTokens 0 disables buffering-up).
+    this.minTokens = options.aggregate === false ? 0 : config.minTokens;
   }
 
   /**
    * Load the embedding model tokenizer (idempotent — only loads once).
-   * Always uses the same model as the embedding pipeline so the token gate
-   * is consistent with what the model actually receives.
+   * Always the same model as the embedding pipeline, so the token gate is
+   * consistent with what the model actually receives.
    */
   async initialize(): Promise<void> {
     if (!this.tokenizer) {
       this.tokenizer = await AutoTokenizer.from_pretrained(config.tokenizerModel);
+      this.specialTokenCount = this.tokenizer.encode('').length;
     }
   }
 
   async chunkFile(filePath: string): Promise<XMLChunk[]> {
     await this.initialize();
-    this.chunkCounter = 0;
-    this.lastSearchPosition = 0;
-    const xmlContent = await fs.promises.readFile(filePath, 'utf-8');
-    const lines = xmlContent.split('\n');
+    const source = await fs.promises.readFile(filePath, 'utf-8');
+    return this.chunkSource(source, filePath);
+  }
 
-    const parser = new XMLParser({
-      ignoreAttributes: false,
-      attributeNamePrefix: '',
-      removeNSPrefix: false, // Must preserve namespace for accurate heuristics (e.g., wsp:Policy)
-      preserveOrder: true,
-      alwaysCreateTextNode: false,
-    });
+  /** Chunk XML given as a string (used by tests and the evaluation harness). */
+  async chunkText(source: string, filePath = '<memory>'): Promise<XMLChunk[]> {
+    await this.initialize();
+    return this.chunkSource(source, filePath);
+  }
 
-    const parsed = parser.parse(xmlContent);
+  private chunkSource(source: string, filePath: string): XMLChunk[] {
+    const doc = parseXML(source);
+    const root = doc.roots.find((n): n is XMLElementNode => n.kind === 'element');
+    if (!root) return [];
+
+    const context = this.buildRootContext(root);
     const chunks: XMLChunk[] = [];
+    const state: ChunkState = { chunkIndex: 0 };
 
-    // Build root context from the parsed tree
-    const rootContext = this.buildRootContext(parsed);
+    const prefix = this.contextPrefix(context);
+    const prefixTokens = this.countNoSpecial(prefix);
+    const rootText = this.elementText(root, doc);
+    const rootTokens = this.countNoSpecial(rootText);
 
-    this.processNode(parsed, lines, filePath, chunks, rootContext);
+    if (prefixTokens + rootTokens + this.specialTokenCount <= this.maxTokens) {
+      // Whole artifact fits in a single chunk.
+      this.emitChunk([{ el: root, text: rootText, tokens: rootTokens }], prefix, context, doc, filePath, chunks, state, true);
+    } else {
+      const children = childElements(root);
+      if (children.length > 0) {
+        this.processSiblings(children, context, doc, filePath, chunks, state);
+      }
+      if (chunks.length === 0) {
+        // Root has no element children (or none produced chunks) but is oversized.
+        this.emitOversizedParts(root, rootText, prefix, prefixTokens, context, doc, filePath, chunks, state);
+      }
+    }
 
     return chunks;
   }
 
   /**
-   * Build root context directly from the parsed XML tree.
-   * Reads the first real root element and captures its tag name + all attributes.
-   * No registry — the tree already has everything we need.
+   * Root artifact metadata, read directly from the root element.
+   * `name` falls back to `key` (local entries) and then to the tag itself.
    */
-  private buildRootContext(parsed: any): SemanticContext {
-    const context: SemanticContext = {};
-
-    if (!Array.isArray(parsed)) {
-      context.artifact = { type: 'unknown', name: 'unknown' };
-      return context;
+  private buildRootContext(root: XMLElementNode): SemanticContext {
+    const attrs: Record<string, string> = {};
+    for (const [k, v] of Object.entries(root.attrs)) {
+      if (!k.startsWith('xmlns')) attrs[k] = v;
     }
-
-    // Find the first real element (skip ?xml processing instructions)
-    const rootItem = parsed.find(item => {
-      const key = Object.keys(item).find(k => k !== ':@');
-      return key && !key.startsWith('?');
-    });
-
-    if (rootItem) {
-      const rootTag = Object.keys(rootItem).find(k => k !== ':@') || 'unknown';
-      const rootAttrs = this.extractAllAttributes(rootItem[':@'] || {});
-      const name = rootAttrs.name || rootAttrs.key || rootTag;
-      context.artifact = { type: rootTag, name, ...rootAttrs };
-    } else {
-      context.artifact = { type: 'unknown', name: 'unknown' };
-    }
-
-    return context;
-  }
-
-
-
-  /**
-   * Extract cross-artifact references from a chunk's XML content.
-   * Detects: sequence key, configKey (local entries), endpoint key,
-   *          call-template target, useConfig (data service), call-query href.
-   */
-  private extractReferencesFromContent(content: string): string[] {
-    const refs = new Set<string>();
-    let match;
-
-    // <sequence key="Name"/> → sequence reference
-    const sequenceRefPattern = /<sequence\s+key=["']([^"']+)["']\s*\/>/g;
-    while ((match = sequenceRefPattern.exec(content)) !== null) {
-      refs.add(`sequence:${match[1]}`);
-    }
-
-    // configKey="Name" → local entry reference (used by http.post, email.send, etc.)
-    const configKeyPattern = /configKey=["']([^"']+)["']/g;
-    while ((match = configKeyPattern.exec(content)) !== null) {
-      refs.add(`localEntry:${match[1]}`);
-    }
-
-    // <endpoint key="Name"/> → endpoint reference
-    const endpointRefPattern = /<endpoint\s+key=["']([^"']+)["']\s*\/>/g;
-    while ((match = endpointRefPattern.exec(content)) !== null) {
-      refs.add(`endpoint:${match[1]}`);
-    }
-
-    // <call-template target="Name"/> → template reference
-    const templateRefPattern = /<call-template\s+target=["']([^"']+)["']/g;
-    while ((match = templateRefPattern.exec(content)) !== null) {
-      refs.add(`template:${match[1]}`);
-    }
-
-    // useConfig="Name" → data service config reference
-    const useConfigPattern = /useConfig=["']([^"']+)["']/g;
-    while ((match = useConfigPattern.exec(content)) !== null) {
-      refs.add(`config:${match[1]}`);
-    }
-
-    // <call-query href="Name"> → data service query reference
-    const callQueryPattern = /<call-query\s+href=["']([^"']+)["']/g;
-    while ((match = callQueryPattern.exec(content)) !== null) {
-      refs.add(`query:${match[1]}`);
-    }
-
-    return Array.from(refs);
+    const name = attrs.name || attrs.key || root.tag;
+    return {
+      artifact: { type: root.tag, name, ...attrs },
+      path: [],
+    };
   }
 
   /**
-   * PURE TREE TRAVERSAL with token gating
+   * Token-gated traversal of one sibling list with aggregation.
    *
-   * Every XML tag is a potential chunk boundary — no heuristics, no registry rules.
-   * Token count alone decides: fits → chunk, too big → descend into children.
+   * - Element fits → buffered; buffer flushes when it reaches `minTokens`
+   *   (or would exceed `maxTokens` by absorbing the next element).
+   * - Element too large → flush buffer, descend into its children.
+   * - Undersized tail buffer → merged backward into the preceding sibling
+   *   chunk when the combined embedding text still fits (span stays
+   *   contiguous because both come from the same sibling run).
    */
-  private processNode(
-    node: any,
-    lines: string[],
+  private processSiblings(
+    els: XMLElementNode[],
+    context: SemanticContext,
+    doc: XMLDocument,
     filePath: string,
     chunks: XMLChunk[],
-    context: SemanticContext
+    state: ChunkState
   ): void {
-    if (!Array.isArray(node)) return;
+    const prefix = this.contextPrefix(context);
+    const prefixTokens = this.countNoSpecial(prefix);
 
-    for (const item of node) {
-      const tagName = Object.keys(item).find(key => key !== ':@') || '';
-      if (!tagName) continue;
+    let buffer: BufferEntry[] = [];
+    let bufferTokens = 0;
+    // Last chunk emitted at THIS level — backward-merge target for a small
+    // tail. Reset to null after descending, so merges never span an element
+    // that was chunked at a deeper level.
+    let lastChunk: XMLChunk | null = null;
 
-      // Skip XML declaration, processing instructions, and #text pseudo-nodes
-      // (#text is created by fast-xml-parser for mixed content — not a real XML tag)
-      if (tagName.startsWith('?xml') || tagName === '#text') continue;
+    // Returns the emitted chunk (or null if the buffer was empty) so callers
+    // can track it — TypeScript's flow analysis ignores closure assignments.
+    const flush = (): XMLChunk | null => {
+      if (buffer.length === 0) return null;
+      const emitted = this.emitChunk(buffer, prefix, context, doc, filePath, chunks, state, false);
+      buffer = [];
+      bufferTokens = 0;
+      return emitted;
+    };
 
-      const element = item[tagName];
-      const nodeAttrs = item[':@'] || {};
+    for (const el of els) {
+      const text = this.elementText(el, doc);
+      const tokens = this.countNoSpecial(text);
 
-      // Update context for this node — passed to children if we descend
-      const updatedContext = this.updateContext(tagName, nodeAttrs, context);
-
-      // Token gate: measure the full subtree content as embeddingText
-      // Use parent context (not updatedContext) — the chunk's own tag is already in content
-      const range = this.findElementRange(tagName, lines);
-      const content = this.extractContent(lines, range);
-      const embeddingText = this.createEmbeddingText(content, context);
-      const tokenCount = this.countTokens(embeddingText);
-
-      if (tokenCount <= this.maxTokens) {
-        // Fits → emit this node as a chunk, stop descending
-        this.createChunk(tagName, nodeAttrs, content, range, filePath, chunks, context);
-      } else if (Array.isArray(element)) {
-        // Too large → descend into children
-        const childChunksBefore = chunks.length;
-        this.processNode(element, lines, filePath, chunks, updatedContext);
-
-        // Oversized leaf fallback: if no children produced chunks, force-emit this node
-        if (chunks.length === childChunksBefore) {
-          this.createChunk(tagName, nodeAttrs, content, range, filePath, chunks, context);
+      if (prefixTokens + tokens + this.specialTokenCount > this.maxTokens) {
+        // Oversized element: flush pending buffer, then descend.
+        flush();
+        const children = childElements(el);
+        if (children.length > 0) {
+          const childContext = this.extendContext(context, el);
+          const before = chunks.length;
+          this.processSiblings(children, childContext, doc, filePath, chunks, state);
+          if (chunks.length === before) {
+            this.emitOversizedParts(el, text, prefix, prefixTokens, context, doc, filePath, chunks, state);
+          }
+        } else {
+          // Oversized leaf (huge text/attributes, no element children).
+          this.emitOversizedParts(el, text, prefix, prefixTokens, context, doc, filePath, chunks, state);
         }
-      } else {
-        // Leaf node (no children) that exceeds token limit → force-emit
-        this.createChunk(tagName, nodeAttrs, content, range, filePath, chunks, context);
+        lastChunk = null;
+        continue;
+      }
+
+      if (buffer.length > 0 && prefixTokens + bufferTokens + tokens + this.specialTokenCount > this.maxTokens) {
+        // Adding this element would exceed the budget — flush what we have.
+        const emitted = flush();
+        if (emitted) lastChunk = emitted;
+      }
+
+      buffer.push({ el, text, tokens });
+      bufferTokens += tokens;
+
+      // Content-token threshold (prefix excluded): a chunk must carry at
+      // least minTokens of content signal, regardless of prefix length.
+      if (bufferTokens >= this.minTokens) {
+        const emitted = flush();
+        if (emitted) lastChunk = emitted;
       }
     }
-  }
 
-  /**
-   * Update semantic context as we traverse the tree.
-   * FULLY GENERIC: reads directly from the parsed tree — no registry.
-   */
-  private updateContext(tagName: string, attrs: Record<string, string>, parentContext: SemanticContext): SemanticContext {
-    const newContext = { ...parentContext };
-    const localName = tagName.split(':').pop() || tagName;
-
-    // Skip the root artifact tag — context.artifact was already set by buildRootContext.
-    // Re-adding it here would duplicate it as a dynamic context key.
-    if (tagName === parentContext.artifact?.type || localName === parentContext.artifact?.type) {
-      return newContext;
-    }
-
-    // Generic context: capture all attributes for any element encountered during traversal.
-    // Any attribute could be semantically important (e.g., methods, uri-template, xpath).
-    const allAttrs = this.extractAllAttributes(attrs);
-
-    if (Object.keys(allAttrs).length > 0) {
-      newContext[localName] = allAttrs;
-    } else {
-      // No attributes (e.g., <then>, <else>, <inSequence>) — store as a string marker
-      newContext[localName] = localName;
-    }
-
-    return newContext;
-  }
-
-  /**
-   * Extract ALL non-internal attributes from an element, cleaning prefixes.
-   * Used for artifact-level elements where every attribute is configuration-critical.
-   */
-  private extractAllAttributes(attrs: Record<string, string>): Record<string, any> {
-    const allAttrs: Record<string, any> = {};
-    for (const [key, value] of Object.entries(attrs)) {
-      if (!key.startsWith(':@') && !key.startsWith('@_')) {
-        allAttrs[key] = value;
-      } else if (key.startsWith('@_')) {
-        allAttrs[key.substring(2)] = value;
+    // Tail: an undersized leftover buffer merges backward when possible.
+    if (buffer.length > 0) {
+      if (bufferTokens < this.minTokens && lastChunk !== null) {
+        const tailText = buffer.map((b) => b.text).filter(Boolean).join(' ');
+        const candidate = tailText ? `${lastChunk.embeddingText} ${tailText}` : lastChunk.embeddingText;
+        if (this.countTokens(candidate) <= this.maxTokens) {
+          this.mergeIntoChunk(lastChunk, buffer, candidate, doc);
+          return;
+        }
       }
+      flush();
     }
-    return allAttrs;
   }
 
-  /**
-   * Create a chunk from the current node
-   */
-  private createChunk(
-    tagName: string,
-    attrs: Record<string, string>,
-    content: string,
-    range: LineRange,
+  /** Emit one chunk from a buffered run of sibling elements. */
+  private emitChunk(
+    buffer: BufferEntry[],
+    prefix: string,
+    context: SemanticContext,
+    doc: XMLDocument,
     filePath: string,
     chunks: XMLChunk[],
-    context: SemanticContext
-  ): void {
-    const chunkIndex = this.chunkCounter++;
+    state: ChunkState,
+    isRootChunk: boolean
+  ): XMLChunk {
+    const first = buffer[0].el;
+    const last = buffer[buffer.length - 1].el;
+    const content = doc.source.slice(first.startOffset, last.endOffset);
+    const bodyText = buffer.map((b) => b.text).filter(Boolean).join(' ');
+    const embeddingText = [prefix, bodyText].filter(Boolean).join(' ');
 
-    const embeddingText = this.createEmbeddingText(content, context);
+    const refs = new Set<string>();
+    for (const entry of buffer) {
+      for (const r of this.extractReferences(entry.el)) refs.add(r);
+    }
+    const references = Array.from(refs);
 
-    // Extract references from this chunk's content.
-    // NOTE: We do NOT mutate the shared `context` object here — that would
-    // pollute the context passed to any sibling nodes processed afterwards.
-    const chunkReferences = this.extractReferencesFromContent(content);
-
-    // A chunk is a standalone artifact definition when its tag IS the root artifact tag.
-    // This is true exactly when this chunk represents the top-level element of the file.
-    const isDefinition = tagName === context.artifact?.type;
-    const sequenceKey = isDefinition
-      ? (attrs.name || attrs['@_name'] || attrs.key || attrs['@_key'])
-      : undefined;
-
-    chunks.push({
+    const aggregated = buffer.length > 1;
+    const chunk: XMLChunk = {
       filePath,
-      chunkType: tagName,
-      chunkIndex,
-      startLine: range.start,
-      endLine: range.end,
+      chunkType: aggregated ? 'aggregated' : first.tag,
+      ...(aggregated ? { memberTags: buffer.map((b) => b.el.tag) } : {}),
+      chunkIndex: state.chunkIndex++,
+      startLine: doc.lineOf(first.startOffset),
+      endLine: doc.lineOf(last.endOffset - 1),
+      startOffset: first.startOffset,
+      endOffset: last.endOffset,
       content,
       embeddingText,
-      context: { ...context, references: chunkReferences.length > 0 ? chunkReferences : undefined },
-      sequenceKey,
-      isSequenceDefinition: isDefinition,
-      referencedSequences: chunkReferences,
+      contentHash: this.hashContent(content),
+      context: {
+        artifact: context.artifact,
+        path: context.path,
+        ...(references.length > 0 ? { references } : {}),
+      },
+      ...(isRootChunk ? { sequenceKey: context.artifact.name } : {}),
+      isSequenceDefinition: isRootChunk,
+      referencedSequences: references,
+    };
+
+    chunks.push(chunk);
+    return chunk;
+  }
+
+  /**
+   * Merge an undersized tail buffer backward into the preceding sibling
+   * chunk. The merged span is contiguous source text (same sibling run), so
+   * `content` remains an exact source slice.
+   */
+  private mergeIntoChunk(
+    target: XMLChunk,
+    buffer: BufferEntry[],
+    mergedEmbeddingText: string,
+    doc: XMLDocument
+  ): void {
+    const last = buffer[buffer.length - 1].el;
+    target.memberTags = [
+      ...(target.memberTags ?? [target.chunkType]),
+      ...buffer.map((b) => b.el.tag),
+    ];
+    target.chunkType = 'aggregated';
+    target.endOffset = last.endOffset;
+    target.endLine = doc.lineOf(last.endOffset - 1);
+    target.content = doc.source.slice(target.startOffset, last.endOffset);
+    target.embeddingText = mergedEmbeddingText;
+    target.contentHash = this.hashContent(target.content);
+
+    const refs = new Set<string>(target.referencedSequences);
+    for (const entry of buffer) {
+      for (const r of this.extractReferences(entry.el)) refs.add(r);
+    }
+    const references = Array.from(refs);
+    target.referencedSequences = references;
+    if (references.length > 0) target.context.references = references;
+  }
+
+  /**
+   * An oversized element that cannot be descended into (leaf, or descent
+   * produced nothing) is split into multiple chunks by windowing its
+   * linearized text, each part staying within the token budget. All parts
+   * share the element's source span; `part` disambiguates them.
+   */
+  private emitOversizedParts(
+    el: XMLElementNode,
+    text: string,
+    prefix: string,
+    prefixTokens: number,
+    context: SemanticContext,
+    doc: XMLDocument,
+    filePath: string,
+    chunks: XMLChunk[],
+    state: ChunkState
+  ): void {
+    // Reserve room for the prefix; if a deep prefix leaves too little, drop it.
+    let effectivePrefix = prefix;
+    let budget = this.maxTokens - prefixTokens - this.specialTokenCount;
+    if (budget < 16) {
+      effectivePrefix = '';
+      budget = this.maxTokens - this.specialTokenCount;
+    }
+
+    const words = text.split(' ').filter(Boolean);
+    const wordTokens = words.map((w) => this.countNoSpecial(w));
+
+    // Greedy word windows with a small overlap so no phrase is cut without
+    // context on either side.
+    const OVERLAP_WORDS = 10;
+    const windows: string[] = [];
+    let start = 0;
+    while (start < words.length) {
+      let used = 0;
+      let end = start;
+      while (end < words.length && used + wordTokens[end] <= budget) {
+        used += wordTokens[end];
+        end++;
+      }
+      if (end === start) {
+        // Single word larger than the budget (e.g. a giant protected JSON
+        // token) — emit it alone; the embedding model truncates the excess.
+        end = start + 1;
+      }
+      windows.push(words.slice(start, end).join(' '));
+      if (end >= words.length) break;
+      start = Math.max(end - OVERLAP_WORDS, start + 1);
+    }
+
+    const content = doc.source.slice(el.startOffset, el.endOffset);
+    const references = this.extractReferences(el);
+    const startLine = doc.lineOf(el.startOffset);
+    const endLine = doc.lineOf(el.endOffset - 1);
+
+    windows.forEach((window, i) => {
+      chunks.push({
+        filePath,
+        chunkType: el.tag,
+        chunkIndex: state.chunkIndex++,
+        ...(windows.length > 1 ? { part: i + 1 } : {}),
+        startLine,
+        endLine,
+        startOffset: el.startOffset,
+        endOffset: el.endOffset,
+        content,
+        embeddingText: [effectivePrefix, window].filter(Boolean).join(' '),
+        contentHash: this.hashContent(content),
+        context: {
+          artifact: context.artifact,
+          path: context.path,
+          ...(references.length > 0 ? { references } : {}),
+        },
+        isSequenceDefinition: false,
+        referencedSequences: references,
+      });
     });
   }
 
-
-
   /**
-   * Count tokens using the embedding model's tokenizer.
-   *
-   * Always uses the same AutoTokenizer that the embedding model uses, so the
-   * token gate is exact — no char/4 approximation that can undercount.
-   * `initialize()` must have been called before this (guaranteed by `chunkFile`).
+   * Extend the ancestor path when descending into an element.
+   * Path entries are ordered (nearest ancestor last) and capped, so deep
+   * nesting cannot crowd chunk content out of the token budget.
    */
-  private countTokens(content: string): number {
-    if (this.tokenizer) {
-      return this.tokenizer.encode(content).length;
+  private extendContext(context: SemanticContext, el: XMLElementNode): SemanticContext {
+    const attrs: Record<string, string> = {};
+    for (const [k, v] of Object.entries(el.attrs)) {
+      if (!k.startsWith('xmlns')) attrs[k] = v;
     }
-
-    // Should never reach here after initialize() — but throw loudly if it does
-    // so the problem is visible rather than silently producing wrong counts.
-    throw new Error('Tokenizer not initialized. Call initialize() before counting tokens.');
+    const path = [...context.path, { tag: el.tag, attrs }];
+    return {
+      artifact: context.artifact,
+      path: path.length > this.maxContextAncestors ? path.slice(-this.maxContextAncestors) : path,
+    };
   }
 
   /**
-   * Format context metadata into text for token counting and embedding.
-   * FULLY GENERIC: Iterates all context keys uniformly.
-   * No hardcoded field-specific formatting.
+   * Format the context as a natural-text prefix for embedding.
+   * Example: "api BankAPI context=/bankapi resource methods=POST uri-template=/deposit inSequence"
+   * Attribute-less wrappers contribute just their tag name (no "x: x" noise).
    */
-  private formatMetadata(context: SemanticContext): string {
+  private contextPrefix(context: SemanticContext): string {
+    if (!this.includeContext) return '';
+
     const parts: string[] = [];
-
-    // 1. Artifact context (root-level metadata)
-    if (context.artifact) {
-      const { type, name, xmlns, ...rest } = context.artifact;
-      parts.push(`${this.formatContextKey(type)}: ${name}`);
-      // Include additional artifact attrs (context, transports, etc.)
-      const extraPairs = Object.entries(rest)
-        .filter(([k, v]) => v !== undefined && v !== null && v !== '' && k !== 'isCustom' && k !== 'rootTag' && k !== 'inferredFromPath')
-        .map(([k, v]) => `${k}=${v}`)
-        .join(' ');
-      if (extraPairs) parts.push(extraPairs);
-    }
-
-    // 2. DYNAMIC CONTEXT: Format ALL other context fields uniformly
-    //    This handles resource, sequence, filter, query, operation, and ANY arbitrary element
-    const skipKeys = new Set(['artifact', 'references']);
-
-    for (const [key, value] of Object.entries(context)) {
-      if (skipKeys.has(key) || value === undefined || value === null) continue;
-
-      const formattedKey = this.formatContextKey(key);
-
-      if (typeof value === 'string') {
-        // Simple string context (e.g., sequence name)
-        parts.push(`${formattedKey}: ${value}`);
-      } else if (typeof value === 'object' && !Array.isArray(value)) {
-        // Object context with attributes
-        const attrPairs = Object.entries(value)
-          .filter(([k, v]) => v !== undefined && v !== null && v !== '')
-          .map(([k, v]) => `${k}=${v}`)
-          .join(' ');
-        if (attrPairs) {
-          parts.push(`${formattedKey}: ${attrPairs}`);
-        }
+    const { type, name, ...rest } = context.artifact;
+    parts.push(type);
+    if (name && name !== type) parts.push(name);
+    for (const [k, v] of Object.entries(rest)) {
+      if (v !== undefined && v !== null && v !== '' && k !== 'name' && k !== 'key') {
+        parts.push(`${k}=${v}`);
       }
     }
 
-    // 3. References (if any)
-    if (context.references && context.references.length > 0) {
-      parts.push(`Uses: ${context.references.join(', ')}`);
+    for (const entry of context.path) {
+      parts.push(entry.tag);
+      for (const [k, v] of Object.entries(entry.attrs)) {
+        if (v !== '') parts.push(`${k}=${v}`);
+      }
     }
 
     return parts.join(' ');
   }
 
   /**
-   * Format context key for display (e.g., "filter" -> "Filter", "Policy" -> "Policy")
+   * The element's contribution to embedding text.
+   * cleanContent=true (default): tree linearization (see linearizeElement).
+   * cleanContent=false (ablation): whitespace-normalized raw source.
    */
-  private formatContextKey(key: string): string {
-    return key.charAt(0).toUpperCase() + key.slice(1);
-  }
-
-  /**
-   * Find the line range for an XML element.
-   * Automatically includes structural wrapper elements (onAccept, onReject, then, else, etc.)
-   */
-  private findElementRange(tagName: string, lines: string[]): LineRange {
-    let startLine = -1;
-    let endLine = -1;
-    let depth = 0;
-
-    for (let i = this.lastSearchPosition; i < lines.length; i++) {
-      const line = lines[i];
-
-      if (startLine === -1) {
-        const openPattern = new RegExp(`<${tagName}[\\s>/]`);
-        if (openPattern.test(line)) {
-          startLine = i + 1;
-          this.lastSearchPosition = i + 1;
-
-          if (line.includes('/>')) {
-            endLine = i + 1;
-            break;
-          }
-          depth = 1;
-        }
-      } else {
-        const openPattern = new RegExp(`<${tagName}[\\s>]`);
-        const closePattern = new RegExp(`</${tagName}>`);
-
-        if (openPattern.test(line) && !line.includes('/>')) {
-          depth++;
-        }
-        if (closePattern.test(line)) {
-          depth--;
-          if (depth === 0) {
-            endLine = i + 1;
-            break;
-          }
-        }
-      }
+  private elementText(el: XMLElementNode, doc: XMLDocument): string {
+    if (!this.cleanContent) {
+      return doc.source.slice(el.startOffset, el.endOffset).replace(/\s+/g, ' ').trim();
     }
-
-    if (startLine === -1) startLine = 1;
-    if (endLine === -1) endLine = startLine;
-
-    return { start: startLine, end: endLine };
+    return this.linearizeElement(el);
   }
-
-
-  private extractContent(lines: string[], range: LineRange): string {
-    return lines.slice(range.start - 1, range.end).join('\n');
-  }
-
-
 
   /**
-   * Create natural text representation for embedding.
-   * Format: [Formatted Context Metadata] + [Cleaned XML Content tokens]
-   *
-   * Example:
-   *   context → "Api: BankAPI context=/bankapi Resource: method=GET uriTemplate=/"
-   *   content → <payloadFactory><format>{"greeting":"Hello"}</format></payloadFactory>
-   *   → "Api: BankAPI context=/bankapi Resource: method=GET payloadFactory format greeting Hello"
+   * Linearize an element subtree into cleaned natural text directly from the
+   * parsed tree (no regex over raw XML): tag names, attribute name=value
+   * pairs (entity-decoded, xmlns dropped), and text content in document
+   * order. JSON payloads inside <format>/<args> and CDATA sections are
+   * preserved verbatim so structured payloads survive cleanup.
    */
-  private createEmbeddingText(
-    content: string,
-    context: SemanticContext
-  ): string {
+  private linearizeElement(el: XMLElementNode): string {
+    const segments: Array<{ text: string; protect: boolean }> = [];
 
-    // Start with formatted context metadata as text
-    const contextStr = this.formatMetadata(context);
-    const tokens: string[] = contextStr ? [contextStr] : [];
-
-    // JSON BLOCK PROTECTION: Preserve JSON inside format/args tags before cleaning
-    // This prevents breaking structured payloads in embedding text
-    const jsonBlocks: string[] = [];
-    const jsonProtectedContent = content.replace(
-      /<(format|args)[^>]*>([\s\S]*?)<\/\1>/g,
-      (match, tag, jsonContent) => {
-        // Check if the content looks like JSON
-        const trimmed = jsonContent.trim();
-        if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
-          const placeholder = `__JSON_BLOCK_${jsonBlocks.length}__`;
-          jsonBlocks.push(`${tag} ${trimmed}`);
-          return placeholder;
-        }
-        return match;
+    const visit = (node: XMLNode): void => {
+      if (node.kind === 'text') {
+        const trimmed = node.text.trim();
+        if (trimmed) segments.push({ text: trimmed, protect: node.cdata });
+        return;
       }
-    );
 
-    // Comprehensive XML preprocessing: Remove all angle brackets and create natural text
-    const cleanedContent = jsonProtectedContent
-      // Extract tag names and attributes from opening tags: <tag attr="val"> → tag attr="val"
-      .replace(/<([^>\/\s]+)([^>]*)>/g, ' $1 $2 ')
-      // Remove closing tags: </tag> → (empty)
-      .replace(/<\/[^>]+>/g, ' ')
-      // Extract from self-closing tags: <tag attr="val"/> → tag attr="val"
-      .replace(/<([^>\/\s]+)([^>]*)\s*\/>/g, ' $1 $2 ')
-      // Clean up attribute formatting: attr="value" → attr=value
-      .replace(/="([^"]*)"/g, '=$1')
-      .replace(/='([^']*)'/g, '=$1')
-      // Restore JSON blocks
-      .replace(/__JSON_BLOCK_(\d+)__/g, (_, idx) => ` ${jsonBlocks[parseInt(idx)]} `)
-      // Remove remaining special characters but preserve $, {, }, [, ] for expressions and paths
+      segments.push({ text: node.tag, protect: false });
+      for (const [k, v] of Object.entries(node.attrs)) {
+        if (k.startsWith('xmlns')) continue;
+        segments.push({ text: v === '' ? k : `${k}=${v}`, protect: false });
+      }
+
+      // JSON payload protection: keep structured payloads intact.
+      const local = localName(node.tag);
+      if (local === 'format' || local === 'args') {
+        const inner = node.children
+          .filter((c): c is Extract<XMLNode, { kind: 'text' }> => c.kind === 'text')
+          .map((c) => c.text)
+          .join(' ')
+          .trim();
+        if (inner.startsWith('{') || inner.startsWith('[')) {
+          segments.push({ text: inner.replace(/\s+/g, ' '), protect: true });
+          return; // do not recurse — the payload was consumed verbatim
+        }
+      }
+
+      for (const child of node.children) visit(child);
+    };
+
+    visit(el);
+
+    const cleaned = segments
+      .map((s) => (s.protect ? s.text.replace(/\s+/g, ' ').trim() : this.cleanSegment(s.text)))
+      .filter(Boolean);
+
+    return cleaned.join(' ');
+  }
+
+  /**
+   * Clean one unprotected text segment: strip symbols that carry no
+   * embedding signal while preserving $ { } [ ] / - . , : @ used in synapse
+   * expressions and paths; then drop 1-char non-numeric fragments.
+   */
+  private cleanSegment(s: string): string {
+    return s
       .replace(/[^\w\s=\$\{\}\[\]\/\-\.,:@]/g, ' ')
-      // Normalize whitespace
-      .replace(/\s+/g, ' ')
-      .trim();
-
-    // Split into meaningful tokens
-    const contentTokens = cleanedContent
       .split(/\s+/)
-      .filter(t => (t.length > 1 || /^\d+$/.test(t)) && t.length < 100); // Preserve numeric values (e.g. 0, 1) and longer tokens
+      .filter((t) => (t.length > 1 || /^\d+$/.test(t)) && t.length < 100)
+      .join(' ');
+  }
 
-    tokens.push(...contentTokens);
+  /**
+   * Cross-artifact references, extracted from the parsed tree — insensitive
+   * to attribute order and tag formatting (the previous regex approach
+   * required e.g. `key` to be the first attribute).
+   */
+  private extractReferences(el: XMLElementNode): string[] {
+    const refs = new Set<string>();
 
-    return tokens.join(' ');
+    const visit = (node: XMLElementNode): void => {
+      const local = localName(node.tag);
+      const a = node.attrs;
+      if (local === 'sequence' && a.key) refs.add(`sequence:${a.key}`);
+      if (a.configKey) refs.add(`localEntry:${a.configKey}`);
+      if (local === 'endpoint' && a.key) refs.add(`endpoint:${a.key}`);
+      if (local === 'call-template' && a.target) refs.add(`template:${a.target}`);
+      if (a.useConfig) refs.add(`config:${a.useConfig}`);
+      if (local === 'call-query' && a.href) refs.add(`query:${a.href}`);
+      for (const child of childElements(node)) visit(child);
+    };
+
+    visit(el);
+    return Array.from(refs);
+  }
+
+  /** Exact token count including special tokens — what the model receives. */
+  private countTokens(text: string): number {
+    if (!this.tokenizer) {
+      throw new Error('Tokenizer not initialized. Call initialize() before counting tokens.');
+    }
+    return this.tokenizer.encode(text).length;
+  }
+
+  /**
+   * Token count without special tokens. Additive across whitespace-joined
+   * segments for WordPiece tokenizers (asserted in unit tests), which makes
+   * sibling-buffer gating O(n) instead of re-encoding the growing buffer.
+   */
+  private countNoSpecial(text: string): number {
+    if (text === '') return 0;
+    return this.countTokens(text) - this.specialTokenCount;
+  }
+
+  private hashContent(content: string): string {
+    return crypto.createHash('sha256').update(content).digest('hex').slice(0, 16);
   }
 }

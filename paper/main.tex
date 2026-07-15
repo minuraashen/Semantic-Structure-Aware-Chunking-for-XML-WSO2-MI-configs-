@@ -1,0 +1,275 @@
+% ============================================================
+% IEEE conference format (MERCon / ICSE-ASE short-paper style)
+% Single-file: paste into Overleaf as main.tex and compile
+% (pdfLaTeX, no extra files needed).
+% ============================================================
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{url}
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\begin{document}
+
+\title{Deterministic Structural Context Enrichment for Retrieval over XML Integration Configurations}
+
+\author{
+\IEEEauthorblockN{Minura Samaramanna}
+\IEEEauthorblockA{\textit{Department of Electronic and Telecommunication Engineering} \\
+\textit{University of Moratuwa}\\
+Moratuwa, Sri Lanka \\
+samaramannama.22@uom.lk}
+% Add co-authors / supervisor blocks here as needed:
+% \and
+% \IEEEauthorblockN{Supervisor Name}
+% \IEEEauthorblockA{...}
+}
+
+\maketitle
+
+\begin{abstract}
+Retrieval-augmented generation (RAG) over integration configurations---such as WSO2 Micro Integrator (Synapse) XML artifacts---faces two constraints that general-purpose RAG does not: configurations are deeply hierarchical, so naive chunking severs elements from the context that gives them meaning; and enterprise privacy requirements mandate fully on-premise pipelines, ruling out both large embedding models and LLM-assisted preprocessing. We present a structure-aware chunking algorithm that (i) derives every chunk from a position-annotated XML parse, so each chunk is an exact source span; (ii) sizes chunks with the embedding model's own tokenizer, descending the element tree when a subtree exceeds the budget and aggregating small siblings until a minimum token mass is reached; and (iii) prepends to each chunk a \emph{deterministic context prefix}---artifact metadata plus the ancestor element path---obtained purely structurally, providing the benefit of contextual retrieval without any LLM calls or data egress. On a benchmark of 36 labeled queries over a WSO2 MI corpus, swept across five lightweight ($\leq$33M-parameter) local embedding models, our method achieves the best nDCG@10 on four of five models (mean 0.881 vs.\ 0.855 for the strongest baseline) and near-perfect Success@5 (mean 0.994). Ablations attribute the gains to both the context prefix ($-0.046$ nDCG when removed) and sibling aggregation ($-0.050$ nDCG, $-0.100$ LineRecall@5 when removed). We release the chunker, benchmark, and evaluation harness.
+\end{abstract}
+
+\begin{IEEEkeywords}
+retrieval-augmented generation, chunking, semantic code retrieval, XML, WSO2 Micro Integrator, embeddings
+\end{IEEEkeywords}
+
+\section{Introduction}
+Enterprise integration platforms such as WSO2 Micro Integrator (MI) describe APIs, mediation sequences, data services, and connections in XML (Synapse) configuration files. AI assistants for such platforms depend on retrieving the \emph{right fragment of the right artifact} given a natural-language question (``What happens when a transfer amount is negative?'', ``Which SMTP server sends notification emails?''). The retrieval quality of such assistants is bounded by how the configuration corpus is chunked for embedding.
+
+Chunking XML configurations is harder than chunking prose, and different from chunking program code:
+\begin{itemize}
+  \item \textbf{Meaning is positional.} \texttt{<respond/>} inside a \texttt{faultSequence} means something entirely different from the same element inside an \texttt{inSequence}. A chunk that loses its ancestor path loses its meaning.
+  \item \textbf{Fragment noise.} Configuration elements are frequently one line long (\texttt{<temperature>0.7</temperature>}). Emitting them as chunks floods the index with fragments that embed poorly and dilute rankings.
+  \item \textbf{Privacy constraints.} MI deployments are commonly on-premise; both the embedding model and any preprocessing must run locally. This rules out the LLM-generated chunk context of contextual retrieval~\cite{anthropic2024contextual} and pushes model choice toward small ($\leq$33M-parameter) encoders with 256--512-token windows, making economical use of every token critical.
+\end{itemize}
+
+We address these with a chunker built on three ideas. \textbf{(i) Position-annotated parsing:} a single SAX pass produces an element tree in which every node carries its exact character offsets; chunk content is an exact source slice by construction, eliminating the separate ``locate the element in the text'' step whose failure modes (nested same-name tags, multi-line opening tags, regex metacharacters in tag names such as \texttt{http.post}) we observed in a prior line-regex implementation. \textbf{(ii) Token-gated traversal with sibling aggregation:} a subtree whose embedding text fits the token budget (measured with the embedding model's own tokenizer) becomes one chunk; oversized subtrees are descended into; consecutive small siblings are buffered until a minimum token mass is reached. This is the split-then-merge strategy of cAST~\cite{zhang2025cast}, adapted from program ASTs to markup and augmented with a minimum-mass rule. \textbf{(iii) Deterministic structural context enrichment:} each chunk's embedding text is prefixed with the artifact's root metadata and the (capped) ancestor path, e.g.\ \texttt{api BankAPI context=/bankapi resource methods=POST uri-template=/deposit inSequence}---the deterministic analogue of contextual retrieval~\cite{anthropic2024contextual}, read off the tree at zero cost and with zero data egress.
+
+\textbf{Contributions.}
+\begin{enumerate}
+  \item A structure-aware, token-budgeted XML chunking algorithm with deterministic context enrichment, implemented for WSO2 MI but schema-agnostic (\S\ref{sec:method}).
+  \item A labeled retrieval benchmark for Synapse configurations---36 natural-language queries with gold line spans over a 16-artifact corpus---and an evaluation harness with fixed-size, recursive-split, and whole-file baselines plus per-component ablations (\S\ref{sec:benchmark}).
+  \item An evaluation across five lightweight, fully local embedding models showing consistent gains and attributing them to individual components (\S\ref{sec:results}), including an honest negative result for retrieval-time reference-graph expansion.
+\end{enumerate}
+
+\section{Related Work}
+\textbf{Structure-aware chunking for code.} cAST~\cite{zhang2025cast} chunks source code by recursively splitting oversized AST nodes and greedily merging small siblings under a size budget, improving RepoEval Recall@5 by 4.3 points and SWE-bench Pass@1 by 2.67 points. Our traversal is in the same split-then-merge family; we differ in domain (XML configuration rather than program code), in enforcing budgets with the embedding model's own tokenizer, in minimum-token-mass aggregation with backward tail merging, and---chiefly---in the deterministic context prefix, which has no analogue in cAST.
+
+\textbf{Context enrichment.} Contextual retrieval~\cite{anthropic2024contextual} prepends an LLM-generated situating sentence to each chunk before embedding, reducing retrieval failures by up to 49\%. This requires a frontier-model call per chunk with the full document in context---unavailable in privacy-constrained on-prem deployments. We show that for hierarchical configuration formats, a structurally derived prefix captures much of the same signal for free.
+
+\textbf{Hierarchical retrieval.} LlamaIndex's \texttt{HierarchicalNodeParser} with auto-merging retrieval~\cite{llamaindex} keeps parent--child links between chunks and merges children into parents at retrieval time. We instead flatten ancestry into the embedding text, which requires no special retriever and works with any vector store.
+
+\textbf{Recursive and semantic splitters.} LangChain's \texttt{RecursiveCharacterTextSplitter}~\cite{langchain} with markup separators is the common practical baseline for XML; we include it and show it fragments mid-element. Embedding-similarity ``semantic chunking'' targets prose topic shifts and does not respect markup structure.
+
+\textbf{WSO2 tooling.} WSO2's AI integration guides describe generic document chunkers for RAG knowledge bases~\cite{wso2rag}; we are not aware of published work on chunking the Synapse configuration language itself, nor of a public retrieval benchmark for it.
+
+\section{Method}\label{sec:method}
+
+\subsection{Position-Annotated Parse}
+We parse each artifact with a SAX parser (strict mode) and build an element tree in which every element records its exact character span, from its opening \texttt{<} to the end of its closing tag. Text nodes carry entity-decoded content and a CDATA flag; line numbers derive from offsets; malformed XML fails loudly. Because chunk content is always \texttt{source.slice(start, end)}, three invariants hold by construction and are enforced by tests: (a) content equals the exact source span; (b) reported line ranges are exact; (c) every leaf element of the source is covered by the chunks whose spans contain it.
+
+\subsection{Token-Gated Traversal with Sibling Aggregation}
+Let $T(x)$ be the token count of text $x$ under the embedding model's tokenizer, $M$ the budget (256), and $m$ the minimum content mass (64). Algorithm~\ref{alg:chunking} sketches the traversal.
+
+\begin{algorithm}[t]
+\caption{Structure-aware chunking with aggregation}\label{alg:chunking}
+\begin{algorithmic}[1]
+\Procedure{ChunkArtifact}{$root$}
+  \State $ctx \gets$ metadata from $root$ attributes
+  \If{$T(\mathrm{prefix}(ctx) \,\Vert\, \mathrm{lin}(root)) \leq M$}
+    \State emit whole artifact as one chunk
+  \Else
+    \State \Call{Siblings}{children($root$), $ctx$}
+  \EndIf
+\EndProcedure
+\Procedure{Siblings}{$els$, $ctx$}
+  \State $buf \gets [\,]$
+  \For{$el \in els$}
+    \State $t \gets \mathrm{lin}(el)$
+    \If{$T(\mathrm{prefix}(ctx) \,\Vert\, t) > M$} \Comment{oversized}
+      \State \Call{Flush}{$buf$}
+      \If{$el$ has element children}
+        \State \Call{Siblings}{children($el$), $ctx + el$}
+      \Else
+        \State emit windowed parts of $t$
+      \EndIf
+    \Else
+      \If{$T(\mathrm{prefix}(ctx) \,\Vert\, buf \,\Vert\, t) > M$} \Call{Flush}{$buf$} \EndIf
+      \State $buf \gets buf + [el]$
+      \If{$T_{\mathrm{content}}(buf) \geq m$} \Call{Flush}{$buf$} \EndIf
+    \EndIf
+  \EndFor
+  \If{$0 < T_{\mathrm{content}}(buf) < m$ \textbf{and} merged text fits $M$}
+    \State merge $buf$ backward into last chunk at this level
+  \Else
+    \State \Call{Flush}{$buf$}
+  \EndIf
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+Aggregated chunks record their member tags and remain contiguous source spans (the backward merge extends the previous chunk's span). Oversized leaves---e.g.\ a very long \texttt{<instructions>} text---are split into overlapping token-budgeted windows sharing the element's span. Within a sibling list, gating is $O(n)$ in tokenizer calls: WordPiece token counts are additive across whitespace-joined segments (verified by a unit test), so buffered totals are running sums of per-element counts.
+
+\subsection{Deterministic Context Prefix}
+The context of a chunk is (a) the root artifact's tag and attributes and (b) the ancestor path from root to chunk, each ancestor contributing its tag and non-namespace attributes. The path is an ordered list (same-named ancestors at different depths never collide), capped at the nearest $k{=}4$ ancestors so deep nesting cannot crowd content out of the budget. Attribute-less wrappers contribute only their tag name. The minimum-mass rule is computed on content tokens only, so a long prefix cannot legitimize a trivial chunk.
+
+\subsection{Content Linearization}
+Chunk content is converted to natural text directly from the parse tree---tag names, \\texttt{attr=value} pairs (entity-decoded, \\texttt{xmlns} dropped), and text content in document order---rather than by regex over raw XML. JSON payloads inside \\texttt{<format>}/\\texttt{<args>} and CDATA sections are preserved verbatim; other segments are stripped of symbols carrying no embedding signal while preserving Synapse expression characters (\\verb|$ { } [ ] / . : @|). Entity decoding matters: \\verb|${vars.amount &gt; 0}| is decoded before cleanup, avoiding a spurious \\texttt{gt} token in the embedding text.
+
+\subsection{Cross-Artifact References}
+Synapse artifacts reference each other (\texttt{sequence key}, \texttt{configKey}, \texttt{call-template target}, \texttt{useConfig}, \texttt{call-query href}, \texttt{endpoint key}). These are extracted from the parse tree---insensitive to attribute order---and attached to each chunk, enabling dependency navigation and graph-expanded retrieval (\S\ref{sec:refexp}).
+
+\section{Benchmark}\label{sec:benchmark}
+\textbf{Corpus.} 16 WSO2 MI artifacts ($\sim$570 lines): 2 REST APIs (including an AI-agent API), 1 data service, 5 mediation sequences, 4 connection local-entries, and 4 templates (two of which are malformed placeholder artifacts retained as realistic distractors).
+
+\textbf{Queries.} 36 natural-language queries, each labeled with one or more gold spans (file + inclusive line range). Queries mix vocabulary that appears verbatim in the configs with paraphrases that do not (``system prompt'', ``JDBC driver'', ``rate limit''). A retrieved chunk is relevant iff it comes from a gold file and overlaps the gold range. Labels were authored by inspecting the corpus (see \S\ref{sec:limitations}).
+
+\textbf{Metrics.} Success@1 and Success@5 ($\geq$1 relevant chunk in top-$k$); MRR@10; binary nDCG@10 (ideal DCG uses the number of relevant chunks in the evaluated method's index, capped at 10); and LineRecall@5---the fraction of gold lines covered by the union of the top-5 chunks' spans, rewarding \emph{complete} answers and penalizing fragmentation.
+
+\textbf{Methods.} \emph{structural (ours)}: full pipeline; three ablations: \emph{w/o context} (no prefix), \emph{w/o cleanup} (raw XML as embedding text), \emph{w/o aggregation} (every fitting element chunks alone); three baselines: \emph{fixed-size} (256-token line-packed windows, 4-line overlap), \emph{recursive-split} (LangChain-style separators, greedy re-merge to 256 tokens), and \emph{whole-file}; plus \emph{ref-expansion} (\S\ref{sec:refexp}).
+
+\textbf{Models.} Five lightweight encoders, all $\leq$33M parameters, all run locally via ONNX: all-MiniLM-L6-v2 (256-token window), an all-MiniLM code-search fine-tune (512), bge-small-en-v1.5, e5-small-v2, and gte-small (512 each; documented query/passage prefixes applied). Chunking is held fixed (MiniLM tokenizer, budget 256, accepted by every model) so the sweep isolates the embedding model.
+
+\section{Results}\label{sec:results}
+
+\subsection{Main Results}
+Table~\ref{tab:summary} shows metrics averaged over the five embedding models; Table~\ref{tab:permodel} gives per-model results. Our method has the best nDCG@10 on four of five models and ties on the fifth (bge-small: 0.884 vs.\ 0.885 whole-file). Success@5 is 1.000 on four of five models.
+
+\begin{table}[t]
+\caption{Mean over five embedding models (36 queries).}
+\label{tab:summary}
+\centering
+\begin{tabular}{lccccc}
+\toprule
+Method & S@1 & S@5 & MRR & nDCG & LineRec@5 \\
+\midrule
+\textbf{structural (ours)} & \textbf{.756} & \textbf{.994} & \textbf{.850} & \textbf{.881} & \textbf{.972} \\
+whole-file        & .706 & .955 & .812 & .855 & .955 \\
+recursive-split   & .667 & .950 & .800 & .796 & .924 \\
+fixed-size        & .666 & .950 & .835 & .799 & .911 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table*}[t]
+\caption{Per-model results. Chunk counts: ours 34, fixed-size 40, recursive 38, whole-file 16.}
+\label{tab:permodel}
+\centering
+\begin{tabular}{llccccc}
+\toprule
+Model & Method & S@1 & S@5 & MRR@10 & nDCG@10 & LineRec@5 \\
+\midrule
+all-MiniLM-L6-v2 & \textbf{ours} & \textbf{.611} & \textbf{1.000} & \textbf{.754} & \textbf{.810} & \textbf{.977} \\
+ & fixed-size & .472 & .889 & .654 & .704 & .823 \\
+ & recursive & .556 & .917 & .718 & .748 & .890 \\
+ & whole-file & .528 & .917 & .702 & .771 & .917 \\
+\midrule
+MiniLM-code-search-512 & \textbf{ours} & .778 & \textbf{1.000} & \textbf{.874} & \textbf{.902} & \textbf{.984} \\
+ & fixed-size & .722 & .944 & .834 & .839 & .929 \\
+ & recursive & .639 & .944 & .780 & .789 & .912 \\
+ & whole-file & \textbf{.806} & .944 & .870 & .898 & .944 \\
+\midrule
+bge-small-en-v1.5 & \textbf{ours} & \textbf{.778} & \textbf{1.000} & \textbf{.857} & .884 & .977 \\
+ & fixed-size & .750 & .972 & .844 & .832 & .926 \\
+ & recursive & .722 & .972 & .818 & .829 & .966 \\
+ & whole-file & .750 & 1.000 & .850 & \textbf{.885} & \textbf{1.000} \\
+\midrule
+e5-small-v2 & \textbf{ours} & \textbf{.833} & .972 & \textbf{.896} & \textbf{.922} & \textbf{.956} \\
+ & fixed-size & .694 & .972 & .820 & .815 & .955 \\
+ & recursive & .778 & .944 & .856 & .846 & .924 \\
+ & whole-file & .722 & .944 & .816 & .855 & .944 \\
+\midrule
+gte-small & \textbf{ours} & \textbf{.778} & \textbf{1.000} & \textbf{.868} & \textbf{.886} & .964 \\
+ & fixed-size & .694 & .972 & .822 & .805 & .922 \\
+ & recursive & .639 & .972 & .769 & .767 & .915 \\
+ & whole-file & .722 & .972 & .824 & .865 & \textbf{.972} \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+Two observations. First, the code-search MiniLM fine-tune lifts \emph{every} method substantially over base MiniLM (ours: S@1 $0.611 \rightarrow 0.778$), indicating that model choice and chunking are complementary levers. Second, whole-file embedding is a deceptively strong baseline \emph{on this corpus} because most artifacts fit a 512-token window; it cannot scale to production-size artifacts (its p95 chunk length is already 1{,}469 tokens under the MiniLM tokenizer---nearly $6\times$ the base model's window, silently truncated) and it forces file-granularity retrieval on the downstream LLM.
+
+\subsection{Ablations}
+Table~\ref{tab:ablations} isolates each component, averaged over the five models. The context prefix is the largest single contributor to ranking quality (strongest on gte-small: nDCG $0.886 \rightarrow 0.783$), and consistent in direction on every model. Aggregation is the largest contributor to answer completeness (LineRecall $-0.100$ when removed) and shrinks the index by 39\% (34 vs.\ 56 chunks). Cleanup is the most nuanced: raw XML embeds reasonably well on these encoders and occasionally wins S@1, but cleaned text is denser---the cleaned index needs 34 chunks where the raw one needs 49 ($+44\%$)---and wins on S@5 and LineRecall. The linearization's primary benefit is token economy, which matters most at small window sizes.
+
+\begin{table}[t]
+\caption{Ablations, mean over five models.}
+\label{tab:ablations}
+\centering
+\begin{tabular}{lccccc}
+\toprule
+Variant & \#Chunks & nDCG & $\Delta$ & LineRec@5 & $\Delta$ \\
+\midrule
+ours (full)        & 34 & .881 & --- & .972 & --- \\
+w/o context prefix & 33 & .835 & $-.046$ & .946 & $-.026$ \\
+w/o aggregation    & 56 & .831 & $-.050$ & .872 & $-.100$ \\
+w/o cleanup        & 49 & .855 & $-.026$ & .911 & $-.061$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+On this corpus the full pipeline emits 34 chunks (mean 128 tokens, range 27--252, all within budget---an enforced invariant). Without aggregation the same corpus yields 56 chunks with mean 89 tokens, including one-line fragments such as \texttt{<temperature>0.7</temperature>}---the noise the aggregation rule exists to remove.
+
+\subsection{Reference-Graph Expansion: A Negative Result}\label{sec:refexp}
+We evaluated one-hop expansion at retrieval time: each top-5 chunk's cross-artifact references are resolved to their definition chunks, injected into the ranking immediately after the referring chunk. Across all five models this was neutral to marginally negative (e.g., e5-small nDCG $0.922 \rightarrow 0.920$). The explanation is visible in the embedding text: the context prefix and linearized content already contain the reference keys (\texttt{configKey=CurrencyConverter}), so dense retrieval surfaces the referenced artifacts unaided, and injected chunks occasionally displace relevant ones. We retain reference extraction as chunk metadata---it supports dependency navigation and explanation---but on corpora of this size, graph expansion is not a retrieval win. Whether it helps at scale, where referenced definitions are less likely to rank in the top-5 by similarity alone, is an open question.
+
+\section{Limitations}\label{sec:limitations}
+\textbf{Scale.} The corpus (16 artifacts, $\sim$570 lines) and query set (36) constitute a pilot benchmark; differences of a few points should be read as consistent trends across five models rather than statistically established margins. \textbf{Label provenance.} Queries and gold spans were authored by the evaluators with knowledge of the corpus; an independently labeled, larger query set is needed for stronger claims. \textbf{Corpus-dependent baselines.} Whole-file competitiveness follows from small artifact sizes here; production Synapse artifacts are frequently much larger, where whole-file embedding degrades by construction. \textbf{Attribute-value flattening.} Linearization renders \texttt{attr="two words"} as \texttt{attr=two words}, losing value boundaries; the cleanup ablation bounds the aggregate effect but does not isolate it. \textbf{Single task.} We measure retrieval only; end-to-end RAG answer quality is future work.
+
+\section{Conclusion}
+For hierarchical configuration languages, the situating context that contextual retrieval buys with an LLM call per chunk can be read directly off the parse tree. Combined with tokenizer-exact budgeting and token-mass sibling aggregation over a position-annotated parse, this yields consistent retrieval gains over standard baselines across five lightweight, fully local embedding models---the regime that privacy-constrained integration platforms actually operate in. The chunker, benchmark, and harness are released for reproduction and extension; scaling the corpus with public Synapse projects and adding LLM-judged end-to-end evaluation are the immediate next steps.
+
+\begin{thebibliography}{9}
+
+\bibitem{zhang2025cast}
+Y.~Zhang, X.~Zhao, Z.~Z.~Wang, C.~Yang, J.~Wei, and T.~Wu,
+``cAST: Enhancing code retrieval-augmented generation with structural chunking via abstract syntax tree,''
+in \emph{Findings of the Association for Computational Linguistics: EMNLP}, 2025.
+[Online]. Available: \url{https://arxiv.org/abs/2506.15655}
+
+\bibitem{anthropic2024contextual}
+Anthropic, ``Introducing contextual retrieval,'' 2024.
+[Online]. Available: \url{https://www.anthropic.com/news/contextual-retrieval}
+
+\bibitem{llamaindex}
+LlamaIndex, ``HierarchicalNodeParser and auto-merging retrieval.''
+[Online]. Available: \url{https://docs.llamaindex.ai/en/stable/api_reference/node_parsers/hierarchical/}
+
+\bibitem{langchain}
+LangChain, ``RecursiveCharacterTextSplitter.''
+[Online]. Available: \url{https://python.langchain.com/docs/how_to/recursive_text_splitter/}
+
+\bibitem{wso2rag}
+WSO2, ``WSO2 Integrator: RAG ingestion.''
+[Online]. Available: \url{https://bi.docs.wso2.com/integration-guides/ai/rag/rag-ingestion/}
+
+\bibitem{minilm}
+W.~Wang, F.~Wei, L.~Dong, H.~Bao, N.~Yang, and M.~Zhou,
+``MiniLM: Deep self-attention distillation for task-agnostic compression of pre-trained transformers,''
+in \emph{Advances in Neural Information Processing Systems}, 2020.
+
+\bibitem{bge}
+S.~Xiao, Z.~Liu, P.~Zhang, and N.~Muennighoff,
+``C-Pack: Packaged resources to advance general Chinese embedding,'' 2023.
+[Online]. Available: \url{https://huggingface.co/BAAI/bge-small-en-v1.5}
+
+\bibitem{e5}
+L.~Wang, N.~Yang, X.~Huang, B.~Jiao, L.~Yang, D.~Jiang, R.~Majumder, and F.~Wei,
+``Text embeddings by weakly-supervised contrastive pre-training,'' 2022.
+[Online]. Available: \url{https://huggingface.co/intfloat/e5-small-v2}
+
+\end{thebibliography}
+
+\end{document}

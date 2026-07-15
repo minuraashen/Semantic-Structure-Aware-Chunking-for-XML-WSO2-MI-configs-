@@ -1,505 +1,270 @@
 [
   {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/AIAgentAPI.xml",
+    "filePath": "artifacts/apis/AIAgentAPI.xml",
     "chunkType": "log",
     "chunkIndex": 0,
     "startLine": 5,
     "endLine": 7,
-    "content": "      <log category=\"INFO\">\n        <message>AI Agent request received from user: ${payload.userID}</message>\n      </log>",
-    "embeddingText": "Api: AIAgentAPI context=/ai-agent Resource: methods=POST uri-template=/chat InSequence: inSequence log category=INFO message AI Agent request received from user: ${payload.userID}",
+    "startOffset": 199,
+    "endOffset": 317,
+    "content": "<log category=\"INFO\">\r\n        <message>AI Agent request received from user: ${payload.userID}</message>\r\n      </log>",
+    "embeddingText": "api AIAgentAPI context=/ai-agent resource methods=POST uri-template=/chat inSequence log category=INFO message AI Agent request received from user: ${payload.userID}",
+    "contentHash": "323c96b9f5a20662",
     "context": {
       "artifact": {
         "type": "api",
         "name": "AIAgentAPI",
-        "context": "/ai-agent",
-        "xmlns": "http://ws.apache.org/ns/synapse"
+        "context": "/ai-agent"
       },
-      "resource": {
-        "methods": "POST",
-        "uri-template": "/chat"
-      },
-      "inSequence": "inSequence"
+      "path": [
+        {
+          "tag": "resource",
+          "attrs": {
+            "methods": "POST",
+            "uri-template": "/chat"
+          }
+        },
+        {
+          "tag": "inSequence",
+          "attrs": {}
+        }
+      ]
     },
     "isSequenceDefinition": false,
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/AIAgentAPI.xml",
-    "chunkType": "connections",
+    "filePath": "artifacts/apis/AIAgentAPI.xml",
+    "chunkType": "aggregated",
+    "memberTags": [
+      "connections",
+      "sessionId",
+      "role",
+      "instructions"
+    ],
     "chunkIndex": 1,
     "startLine": 10,
-    "endLine": 13,
-    "content": "        <connections>\n          <llmConfigKey>OPENAI_CONN</llmConfigKey>\n          <memoryConfigKey>FILE_MEMORY_CONN</memoryConfigKey>\n        </connections>",
-    "embeddingText": "Api: AIAgentAPI context=/ai-agent Resource: methods=POST uri-template=/chat InSequence: inSequence Ai.agent: ai.agent connections llmConfigKey OPENAI_CONN memoryConfigKey FILE_MEMORY_CONN",
-    "context": {
-      "artifact": {
-        "type": "api",
-        "name": "AIAgentAPI",
-        "context": "/ai-agent",
-        "xmlns": "http://ws.apache.org/ns/synapse"
-      },
-      "resource": {
-        "methods": "POST",
-        "uri-template": "/chat"
-      },
-      "inSequence": "inSequence",
-      "ai.agent": "ai.agent"
-    },
-    "isSequenceDefinition": false,
-    "referencedSequences": []
-  },
-  {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/AIAgentAPI.xml",
-    "chunkType": "sessionId",
-    "chunkIndex": 2,
-    "startLine": 14,
-    "endLine": 14,
-    "content": "        <sessionId>{${payload.userID}}</sessionId>",
-    "embeddingText": "Api: AIAgentAPI context=/ai-agent Resource: methods=POST uri-template=/chat InSequence: inSequence Ai.agent: ai.agent sessionId {${payload.userID}}",
-    "context": {
-      "artifact": {
-        "type": "api",
-        "name": "AIAgentAPI",
-        "context": "/ai-agent",
-        "xmlns": "http://ws.apache.org/ns/synapse"
-      },
-      "resource": {
-        "methods": "POST",
-        "uri-template": "/chat"
-      },
-      "inSequence": "inSequence",
-      "ai.agent": "ai.agent"
-    },
-    "isSequenceDefinition": false,
-    "referencedSequences": []
-  },
-  {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/AIAgentAPI.xml",
-    "chunkType": "role",
-    "chunkIndex": 3,
-    "startLine": 15,
-    "endLine": 15,
-    "content": "        <role>Bank Customer Service Assistant</role>",
-    "embeddingText": "Api: AIAgentAPI context=/ai-agent Resource: methods=POST uri-template=/chat InSequence: inSequence Ai.agent: ai.agent role Bank Customer Service Assistant",
-    "context": {
-      "artifact": {
-        "type": "api",
-        "name": "AIAgentAPI",
-        "context": "/ai-agent",
-        "xmlns": "http://ws.apache.org/ns/synapse"
-      },
-      "resource": {
-        "methods": "POST",
-        "uri-template": "/chat"
-      },
-      "inSequence": "inSequence",
-      "ai.agent": "ai.agent"
-    },
-    "isSequenceDefinition": false,
-    "referencedSequences": []
-  },
-  {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/AIAgentAPI.xml",
-    "chunkType": "instructions",
-    "chunkIndex": 4,
-    "startLine": 16,
     "endLine": 16,
-    "content": "        <instructions>You are a helpful banking assistant for O2 Bank. You can help customers check their account balance, view transaction history, and convert currencies. Always be polite, professional, and provide accurate information. When users ask about their account, use the available tools to fetch real-time data.</instructions>",
-    "embeddingText": "Api: AIAgentAPI context=/ai-agent Resource: methods=POST uri-template=/chat InSequence: inSequence Ai.agent: ai.agent instructions You are helpful banking assistant for O2 Bank. You can help customers check their account balance, view transaction history, and convert currencies. Always be polite, professional, and provide accurate information. When users ask about their account, use the available tools to fetch real-time data.",
+    "startOffset": 353,
+    "endOffset": 951,
+    "content": "<connections>\r\n          <llmConfigKey>OPENAI_CONN</llmConfigKey>\r\n          <memoryConfigKey>FILE_MEMORY_CONN</memoryConfigKey>\r\n        </connections>\r\n        <sessionId>{${payload.userID}}</sessionId>\r\n        <role>Bank Customer Service Assistant</role>\r\n        <instructions>You are a helpful banking assistant for O2 Bank. You can help customers check their account balance, view transaction history, and convert currencies. Always be polite, professional, and provide accurate information. When users ask about their account, use the available tools to fetch real-time data.</instructions>",
+    "embeddingText": "api AIAgentAPI context=/ai-agent resource methods=POST uri-template=/chat inSequence ai.agent connections llmConfigKey OPENAI_CONN memoryConfigKey FILE_MEMORY_CONN sessionId {${payload.userID}} role Bank Customer Service Assistant instructions You are helpful banking assistant for O2 Bank. You can help customers check their account balance, view transaction history, and convert currencies. Always be polite, professional, and provide accurate information. When users ask about their account, use the available tools to fetch real-time data.",
+    "contentHash": "e15dad4dc5cb0a82",
     "context": {
       "artifact": {
         "type": "api",
         "name": "AIAgentAPI",
-        "context": "/ai-agent",
-        "xmlns": "http://ws.apache.org/ns/synapse"
+        "context": "/ai-agent"
       },
-      "resource": {
-        "methods": "POST",
-        "uri-template": "/chat"
-      },
-      "inSequence": "inSequence",
-      "ai.agent": "ai.agent"
+      "path": [
+        {
+          "tag": "resource",
+          "attrs": {
+            "methods": "POST",
+            "uri-template": "/chat"
+          }
+        },
+        {
+          "tag": "inSequence",
+          "attrs": {}
+        },
+        {
+          "tag": "ai.agent",
+          "attrs": {}
+        }
+      ]
     },
     "isSequenceDefinition": false,
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/AIAgentAPI.xml",
-    "chunkType": "prompt",
-    "chunkIndex": 5,
+    "filePath": "artifacts/apis/AIAgentAPI.xml",
+    "chunkType": "aggregated",
+    "memberTags": [
+      "prompt",
+      "responseVariable",
+      "overwriteBody",
+      "modelName",
+      "temperature",
+      "maxTokens",
+      "topP",
+      "frequencyPenalty",
+      "tools"
+    ],
+    "chunkIndex": 2,
     "startLine": 17,
-    "endLine": 17,
-    "content": "        <prompt>${payload.query}</prompt>",
-    "embeddingText": "Api: AIAgentAPI context=/ai-agent Resource: methods=POST uri-template=/chat InSequence: inSequence Ai.agent: ai.agent prompt ${payload.query}",
-    "context": {
-      "artifact": {
-        "type": "api",
-        "name": "AIAgentAPI",
-        "context": "/ai-agent",
-        "xmlns": "http://ws.apache.org/ns/synapse"
-      },
-      "resource": {
-        "methods": "POST",
-        "uri-template": "/chat"
-      },
-      "inSequence": "inSequence",
-      "ai.agent": "ai.agent"
-    },
-    "isSequenceDefinition": false,
-    "referencedSequences": []
-  },
-  {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/AIAgentAPI.xml",
-    "chunkType": "responseVariable",
-    "chunkIndex": 6,
-    "startLine": 18,
-    "endLine": 18,
-    "content": "        <responseVariable>ai_agent_response</responseVariable>",
-    "embeddingText": "Api: AIAgentAPI context=/ai-agent Resource: methods=POST uri-template=/chat InSequence: inSequence Ai.agent: ai.agent responseVariable ai_agent_response",
-    "context": {
-      "artifact": {
-        "type": "api",
-        "name": "AIAgentAPI",
-        "context": "/ai-agent",
-        "xmlns": "http://ws.apache.org/ns/synapse"
-      },
-      "resource": {
-        "methods": "POST",
-        "uri-template": "/chat"
-      },
-      "inSequence": "inSequence",
-      "ai.agent": "ai.agent"
-    },
-    "isSequenceDefinition": false,
-    "referencedSequences": []
-  },
-  {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/AIAgentAPI.xml",
-    "chunkType": "overwriteBody",
-    "chunkIndex": 7,
-    "startLine": 19,
-    "endLine": 19,
-    "content": "        <overwriteBody>false</overwriteBody>",
-    "embeddingText": "Api: AIAgentAPI context=/ai-agent Resource: methods=POST uri-template=/chat InSequence: inSequence Ai.agent: ai.agent overwriteBody false",
-    "context": {
-      "artifact": {
-        "type": "api",
-        "name": "AIAgentAPI",
-        "context": "/ai-agent",
-        "xmlns": "http://ws.apache.org/ns/synapse"
-      },
-      "resource": {
-        "methods": "POST",
-        "uri-template": "/chat"
-      },
-      "inSequence": "inSequence",
-      "ai.agent": "ai.agent"
-    },
-    "isSequenceDefinition": false,
-    "referencedSequences": []
-  },
-  {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/AIAgentAPI.xml",
-    "chunkType": "modelName",
-    "chunkIndex": 8,
-    "startLine": 20,
-    "endLine": 20,
-    "content": "        <modelName>gpt-4o</modelName>",
-    "embeddingText": "Api: AIAgentAPI context=/ai-agent Resource: methods=POST uri-template=/chat InSequence: inSequence Ai.agent: ai.agent modelName gpt-4o",
-    "context": {
-      "artifact": {
-        "type": "api",
-        "name": "AIAgentAPI",
-        "context": "/ai-agent",
-        "xmlns": "http://ws.apache.org/ns/synapse"
-      },
-      "resource": {
-        "methods": "POST",
-        "uri-template": "/chat"
-      },
-      "inSequence": "inSequence",
-      "ai.agent": "ai.agent"
-    },
-    "isSequenceDefinition": false,
-    "referencedSequences": []
-  },
-  {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/AIAgentAPI.xml",
-    "chunkType": "temperature",
-    "chunkIndex": 9,
-    "startLine": 21,
-    "endLine": 21,
-    "content": "        <temperature>0.7</temperature>",
-    "embeddingText": "Api: AIAgentAPI context=/ai-agent Resource: methods=POST uri-template=/chat InSequence: inSequence Ai.agent: ai.agent temperature 0.7",
-    "context": {
-      "artifact": {
-        "type": "api",
-        "name": "AIAgentAPI",
-        "context": "/ai-agent",
-        "xmlns": "http://ws.apache.org/ns/synapse"
-      },
-      "resource": {
-        "methods": "POST",
-        "uri-template": "/chat"
-      },
-      "inSequence": "inSequence",
-      "ai.agent": "ai.agent"
-    },
-    "isSequenceDefinition": false,
-    "referencedSequences": []
-  },
-  {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/AIAgentAPI.xml",
-    "chunkType": "maxTokens",
-    "chunkIndex": 10,
-    "startLine": 22,
-    "endLine": 22,
-    "content": "        <maxTokens>2000</maxTokens>",
-    "embeddingText": "Api: AIAgentAPI context=/ai-agent Resource: methods=POST uri-template=/chat InSequence: inSequence Ai.agent: ai.agent maxTokens 2000",
-    "context": {
-      "artifact": {
-        "type": "api",
-        "name": "AIAgentAPI",
-        "context": "/ai-agent",
-        "xmlns": "http://ws.apache.org/ns/synapse"
-      },
-      "resource": {
-        "methods": "POST",
-        "uri-template": "/chat"
-      },
-      "inSequence": "inSequence",
-      "ai.agent": "ai.agent"
-    },
-    "isSequenceDefinition": false,
-    "referencedSequences": []
-  },
-  {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/AIAgentAPI.xml",
-    "chunkType": "topP",
-    "chunkIndex": 11,
-    "startLine": 23,
-    "endLine": 23,
-    "content": "        <topP>1</topP>",
-    "embeddingText": "Api: AIAgentAPI context=/ai-agent Resource: methods=POST uri-template=/chat InSequence: inSequence Ai.agent: ai.agent topP 1",
-    "context": {
-      "artifact": {
-        "type": "api",
-        "name": "AIAgentAPI",
-        "context": "/ai-agent",
-        "xmlns": "http://ws.apache.org/ns/synapse"
-      },
-      "resource": {
-        "methods": "POST",
-        "uri-template": "/chat"
-      },
-      "inSequence": "inSequence",
-      "ai.agent": "ai.agent"
-    },
-    "isSequenceDefinition": false,
-    "referencedSequences": []
-  },
-  {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/AIAgentAPI.xml",
-    "chunkType": "frequencyPenalty",
-    "chunkIndex": 12,
-    "startLine": 24,
-    "endLine": 24,
-    "content": "        <frequencyPenalty>0</frequencyPenalty>",
-    "embeddingText": "Api: AIAgentAPI context=/ai-agent Resource: methods=POST uri-template=/chat InSequence: inSequence Ai.agent: ai.agent frequencyPenalty 0",
-    "context": {
-      "artifact": {
-        "type": "api",
-        "name": "AIAgentAPI",
-        "context": "/ai-agent",
-        "xmlns": "http://ws.apache.org/ns/synapse"
-      },
-      "resource": {
-        "methods": "POST",
-        "uri-template": "/chat"
-      },
-      "inSequence": "inSequence",
-      "ai.agent": "ai.agent"
-    },
-    "isSequenceDefinition": false,
-    "referencedSequences": []
-  },
-  {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/AIAgentAPI.xml",
-    "chunkType": "tools",
-    "chunkIndex": 13,
-    "startLine": 25,
     "endLine": 29,
-    "content": "        <tools>\n          <tool name=\"GetAccountBalance\" template=\"GetAccountBalanceTool\" resultExpression=\"${payload}\" description=\"Retrieves the current account balance for a given account ID. Use this when the user asks about their balance or account information.\"/>\n          <tool name=\"GetTransactionHistory\" template=\"GetTransactionHistoryTool\" resultExpression=\"${payload}\" description=\"Retrieves the recent transaction history for a given account ID. Use this when the user asks about their transactions, recent activity, or transaction history.\"/>\n          <tool name=\"ConvertCurrency\" template=\"ConvertCurrencyTool\" resultExpression=\"${payload}\" description=\"Converts an amount from one currency to another using current exchange rates. Use this when the user asks to convert money between different currencies.\"/>\n        </tools>",
-    "embeddingText": "Api: AIAgentAPI context=/ai-agent Resource: methods=POST uri-template=/chat InSequence: inSequence Ai.agent: ai.agent tools tool name=GetAccountBalance template=GetAccountBalanceTool resultExpression=${payload} description=Retrieves the current account balance for given account ID. Use this when the user asks about their balance or account information./ tool name=GetTransactionHistory template=GetTransactionHistoryTool resultExpression=${payload} description=Retrieves the recent transaction history for given account ID. Use this when the user asks about their transactions, recent activity, or transaction history./ tool name=ConvertCurrency template=ConvertCurrencyTool resultExpression=${payload} description=Converts an amount from one currency to another using current exchange rates. Use this when the user asks to convert money between different currencies./",
+    "startOffset": 961,
+    "endOffset": 2141,
+    "content": "<prompt>${payload.query}</prompt>\r\n        <responseVariable>ai_agent_response</responseVariable>\r\n        <overwriteBody>false</overwriteBody>\r\n        <modelName>gpt-4o</modelName>\r\n        <temperature>0.7</temperature>\r\n        <maxTokens>2000</maxTokens>\r\n        <topP>1</topP>\r\n        <frequencyPenalty>0</frequencyPenalty>\r\n        <tools>\r\n          <tool name=\"GetAccountBalance\" template=\"GetAccountBalanceTool\" resultExpression=\"${payload}\" description=\"Retrieves the current account balance for a given account ID. Use this when the user asks about their balance or account information.\"/>\r\n          <tool name=\"GetTransactionHistory\" template=\"GetTransactionHistoryTool\" resultExpression=\"${payload}\" description=\"Retrieves the recent transaction history for a given account ID. Use this when the user asks about their transactions, recent activity, or transaction history.\"/>\r\n          <tool name=\"ConvertCurrency\" template=\"ConvertCurrencyTool\" resultExpression=\"${payload}\" description=\"Converts an amount from one currency to another using current exchange rates. Use this when the user asks to convert money between different currencies.\"/>\r\n        </tools>",
+    "embeddingText": "api AIAgentAPI context=/ai-agent resource methods=POST uri-template=/chat inSequence ai.agent prompt ${payload.query} responseVariable ai_agent_response overwriteBody false modelName gpt-4o temperature 0.7 maxTokens 2000 topP 1 frequencyPenalty 0 tools tool name=GetAccountBalance template=GetAccountBalanceTool resultExpression=${payload} description=Retrieves the current account balance for given account ID. Use this when the user asks about their balance or account information. tool name=GetTransactionHistory template=GetTransactionHistoryTool resultExpression=${payload} description=Retrieves the recent transaction history for given account ID. Use this when the user asks about their transactions, recent activity, or transaction history. tool name=ConvertCurrency template=ConvertCurrencyTool resultExpression=${payload} description=Converts an amount from one currency to another using current exchange rates. Use this when the user asks to convert money between different currencies.",
+    "contentHash": "9636b5628ba03b14",
     "context": {
       "artifact": {
         "type": "api",
         "name": "AIAgentAPI",
-        "context": "/ai-agent",
-        "xmlns": "http://ws.apache.org/ns/synapse"
+        "context": "/ai-agent"
       },
-      "resource": {
-        "methods": "POST",
-        "uri-template": "/chat"
-      },
-      "inSequence": "inSequence",
-      "ai.agent": "ai.agent"
+      "path": [
+        {
+          "tag": "resource",
+          "attrs": {
+            "methods": "POST",
+            "uri-template": "/chat"
+          }
+        },
+        {
+          "tag": "inSequence",
+          "attrs": {}
+        },
+        {
+          "tag": "ai.agent",
+          "attrs": {}
+        }
+      ]
     },
     "isSequenceDefinition": false,
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/AIAgentAPI.xml",
-    "chunkType": "payloadFactory",
-    "chunkIndex": 14,
+    "filePath": "artifacts/apis/AIAgentAPI.xml",
+    "chunkType": "aggregated",
+    "chunkIndex": 3,
     "startLine": 32,
-    "endLine": 39,
-    "content": "      <payloadFactory media-type=\"json\">\n        <format>{\n          \"userID\": \"${payload.userID}\",\n          \"query\": \"${payload.query}\",\n          \"response\": \"${vars.ai_agent_response}\",\n          \"timestamp\": \"${formatDateTime(now(), 'yyyy-MM-dd HH:mm:ss')}\"\n        }</format>\n      </payloadFactory>",
-    "embeddingText": "Api: AIAgentAPI context=/ai-agent Resource: methods=POST uri-template=/chat InSequence: inSequence payloadFactory media-type=json format userID ${payload.userID} query ${payload.query} response ${vars.ai_agent_response} timestamp ${formatDateTime now yyyy-MM-dd HH:mm:ss",
-    "context": {
-      "artifact": {
-        "type": "api",
-        "name": "AIAgentAPI",
-        "context": "/ai-agent",
-        "xmlns": "http://ws.apache.org/ns/synapse"
-      },
-      "resource": {
-        "methods": "POST",
-        "uri-template": "/chat"
-      },
-      "inSequence": "inSequence"
-    },
-    "isSequenceDefinition": false,
-    "referencedSequences": []
-  },
-  {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/AIAgentAPI.xml",
-    "chunkType": "log",
-    "chunkIndex": 15,
-    "startLine": 41,
-    "endLine": 43,
-    "content": "      <log category=\"INFO\">\n        <message>AI Agent response sent successfully</message>\n      </log>",
-    "embeddingText": "Api: AIAgentAPI context=/ai-agent Resource: methods=POST uri-template=/chat InSequence: inSequence log category=INFO message AI Agent response sent successfully",
-    "context": {
-      "artifact": {
-        "type": "api",
-        "name": "AIAgentAPI",
-        "context": "/ai-agent",
-        "xmlns": "http://ws.apache.org/ns/synapse"
-      },
-      "resource": {
-        "methods": "POST",
-        "uri-template": "/chat"
-      },
-      "inSequence": "inSequence"
-    },
-    "isSequenceDefinition": false,
-    "referencedSequences": []
-  },
-  {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/AIAgentAPI.xml",
-    "chunkType": "respond",
-    "chunkIndex": 16,
-    "startLine": 45,
     "endLine": 45,
-    "content": "      <respond/>",
-    "embeddingText": "Api: AIAgentAPI context=/ai-agent Resource: methods=POST uri-template=/chat InSequence: inSequence respond",
+    "startOffset": 2176,
+    "endOffset": 2623,
+    "content": "<payloadFactory media-type=\"json\">\r\n        <format>{\r\n          \"userID\": \"${payload.userID}\",\r\n          \"query\": \"${payload.query}\",\r\n          \"response\": \"${vars.ai_agent_response}\",\r\n          \"timestamp\": \"${formatDateTime(now(), 'yyyy-MM-dd HH:mm:ss')}\"\r\n        }</format>\r\n      </payloadFactory>\r\n      \r\n      <log category=\"INFO\">\r\n        <message>AI Agent response sent successfully</message>\r\n      </log>\r\n      \r\n      <respond/>",
+    "embeddingText": "api AIAgentAPI context=/ai-agent resource methods=POST uri-template=/chat inSequence payloadFactory media-type=json format { \"userID\": \"${payload.userID}\", \"query\": \"${payload.query}\", \"response\": \"${vars.ai_agent_response}\", \"timestamp\": \"${formatDateTime(now(), 'yyyy-MM-dd HH:mm:ss')}\" } log category=INFO message AI Agent response sent successfully respond",
+    "contentHash": "cbb7c086c49e022b",
     "context": {
       "artifact": {
         "type": "api",
         "name": "AIAgentAPI",
-        "context": "/ai-agent",
-        "xmlns": "http://ws.apache.org/ns/synapse"
+        "context": "/ai-agent"
       },
-      "resource": {
-        "methods": "POST",
-        "uri-template": "/chat"
-      },
-      "inSequence": "inSequence"
+      "path": [
+        {
+          "tag": "resource",
+          "attrs": {
+            "methods": "POST",
+            "uri-template": "/chat"
+          }
+        },
+        {
+          "tag": "inSequence",
+          "attrs": {}
+        }
+      ]
     },
     "isSequenceDefinition": false,
-    "referencedSequences": []
+    "referencedSequences": [],
+    "memberTags": [
+      "payloadFactory",
+      "log",
+      "respond"
+    ]
   },
   {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/AIAgentAPI.xml",
+    "filePath": "artifacts/apis/AIAgentAPI.xml",
     "chunkType": "faultSequence",
-    "chunkIndex": 17,
+    "chunkIndex": 4,
     "startLine": 47,
     "endLine": 59,
-    "content": "    <faultSequence>\n      <log category=\"ERROR\">\n        <message>AI Agent error: ${props.synapse.ERROR_MESSAGE}</message>\n      </log>\n      <payloadFactory media-type=\"json\">\n        <format>{\n          \"status\": \"error\",\n          \"message\": \"Failed to process your request. Please try again later.\",\n          \"error\": \"${props.synapse.ERROR_MESSAGE}\"\n        }</format>\n      </payloadFactory>\n      <respond/>\n    </faultSequence>",
-    "embeddingText": "Api: AIAgentAPI context=/ai-agent Resource: methods=POST uri-template=/chat faultSequence log category=ERROR message AI Agent error: ${props.synapse.ERROR_MESSAGE} payloadFactory media-type=json format status error message Failed to process your request. Please try again later. error ${props.synapse.ERROR_MESSAGE} respond",
+    "startOffset": 2648,
+    "endOffset": 3092,
+    "content": "<faultSequence>\r\n      <log category=\"ERROR\">\r\n        <message>AI Agent error: ${props.synapse.ERROR_MESSAGE}</message>\r\n      </log>\r\n      <payloadFactory media-type=\"json\">\r\n        <format>{\r\n          \"status\": \"error\",\r\n          \"message\": \"Failed to process your request. Please try again later.\",\r\n          \"error\": \"${props.synapse.ERROR_MESSAGE}\"\r\n        }</format>\r\n      </payloadFactory>\r\n      <respond/>\r\n    </faultSequence>",
+    "embeddingText": "api AIAgentAPI context=/ai-agent resource methods=POST uri-template=/chat faultSequence log category=ERROR message AI Agent error: ${props.synapse.ERROR_MESSAGE} payloadFactory media-type=json format { \"status\": \"error\", \"message\": \"Failed to process your request. Please try again later.\", \"error\": \"${props.synapse.ERROR_MESSAGE}\" } respond",
+    "contentHash": "645c2973350b2b21",
     "context": {
       "artifact": {
         "type": "api",
         "name": "AIAgentAPI",
-        "context": "/ai-agent",
-        "xmlns": "http://ws.apache.org/ns/synapse"
+        "context": "/ai-agent"
       },
-      "resource": {
-        "methods": "POST",
-        "uri-template": "/chat"
-      }
+      "path": [
+        {
+          "tag": "resource",
+          "attrs": {
+            "methods": "POST",
+            "uri-template": "/chat"
+          }
+        }
+      ]
     },
     "isSequenceDefinition": false,
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/AIAgentAPI.xml",
+    "filePath": "artifacts/apis/AIAgentAPI.xml",
     "chunkType": "resource",
-    "chunkIndex": 18,
+    "chunkIndex": 5,
     "startLine": 62,
     "endLine": 75,
-    "content": "  <resource methods=\"GET\" uri-template=\"/health\">\n    <inSequence>\n      <payloadFactory media-type=\"json\">\n        <format>{\n          \"status\": \"healthy\",\n          \"service\": \"AI Agent API\",\n          \"timestamp\": \"${formatDateTime(now(), 'yyyy-MM-dd HH:mm:ss')}\"\n        }</format>\n      </payloadFactory>\n      <respond/>\n    </inSequence>\n    <faultSequence>\n    </faultSequence>\n  </resource>",
-    "embeddingText": "Api: AIAgentAPI context=/ai-agent resource methods=GET uri-template=/health inSequence payloadFactory media-type=json format status healthy service AI Agent API timestamp ${formatDateTime now yyyy-MM-dd HH:mm:ss respond faultSequence",
+    "startOffset": 3115,
+    "endOffset": 3525,
+    "content": "<resource methods=\"GET\" uri-template=\"/health\">\r\n    <inSequence>\r\n      <payloadFactory media-type=\"json\">\r\n        <format>{\r\n          \"status\": \"healthy\",\r\n          \"service\": \"AI Agent API\",\r\n          \"timestamp\": \"${formatDateTime(now(), 'yyyy-MM-dd HH:mm:ss')}\"\r\n        }</format>\r\n      </payloadFactory>\r\n      <respond/>\r\n    </inSequence>\r\n    <faultSequence>\r\n    </faultSequence>\r\n  </resource>",
+    "embeddingText": "api AIAgentAPI context=/ai-agent resource methods=GET uri-template=/health inSequence payloadFactory media-type=json format { \"status\": \"healthy\", \"service\": \"AI Agent API\", \"timestamp\": \"${formatDateTime(now(), 'yyyy-MM-dd HH:mm:ss')}\" } respond faultSequence",
+    "contentHash": "612607fd112bf69f",
     "context": {
       "artifact": {
         "type": "api",
         "name": "AIAgentAPI",
-        "context": "/ai-agent",
-        "xmlns": "http://ws.apache.org/ns/synapse"
-      }
+        "context": "/ai-agent"
+      },
+      "path": []
     },
     "isSequenceDefinition": false,
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/BankAPI.xml",
+    "filePath": "artifacts/apis/BankAPI.xml",
     "chunkType": "resource",
     "chunkIndex": 0,
     "startLine": 3,
     "endLine": 12,
-    "content": "    <resource methods=\"GET\" uri-template=\"/\">\n        <inSequence>\n            <payloadFactory media-type=\"json\">\n                <format>{\"greetings\":\"Welcome to O2 Bank !!\"}</format>\n            </payloadFactory>\n            <respond/>\n        </inSequence>\n        <faultSequence>\n        </faultSequence>\n    </resource>",
-    "embeddingText": "Api: BankAPI context=/bankapi resource methods=GET uri-template=/ inSequence payloadFactory media-type=json format greetings Welcome to O2 Bank respond faultSequence",
+    "startOffset": 125,
+    "endOffset": 454,
+    "content": "<resource methods=\"GET\" uri-template=\"/\">\r\n        <inSequence>\r\n            <payloadFactory media-type=\"json\">\r\n                <format>{\"greetings\":\"Welcome to O2 Bank !!\"}</format>\r\n            </payloadFactory>\r\n            <respond/>\r\n        </inSequence>\r\n        <faultSequence>\r\n        </faultSequence>\r\n    </resource>",
+    "embeddingText": "api BankAPI context=/bankapi resource methods=GET uri-template=/ inSequence payloadFactory media-type=json format {\"greetings\":\"Welcome to O2 Bank !!\"} respond faultSequence",
+    "contentHash": "eea1ec4c0ffe624e",
     "context": {
       "artifact": {
         "type": "api",
         "name": "BankAPI",
-        "context": "/bankapi",
-        "xmlns": "http://ws.apache.org/ns/synapse"
-      }
+        "context": "/bankapi"
+      },
+      "path": []
     },
     "isSequenceDefinition": false,
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/BankAPI.xml",
+    "filePath": "artifacts/apis/BankAPI.xml",
     "chunkType": "inSequence",
     "chunkIndex": 1,
     "startLine": 15,
     "endLine": 47,
-    "content": "        <inSequence>\n            <variable name=\"originalAmount\" expression=\"${payload.amount}\" type=\"DOUBLE\"/>\n            <variable name=\"currency\" expression=\"${payload.currency}\" type=\"STRING\"/>\n            \n            <http.post configKey=\"CurrencyConverter\">\n                <relativePath>/currency/rate</relativePath>\n                <headers>[]</headers>\n                <requestBodyType>JSON</requestBodyType>\n                <requestBodyJson>{\n                    \"fromCurrency\": \"${vars.currency}\",\n                    \"toCurrency\": \"USD\"\n                }</requestBodyJson>\n                <responseVariable>conversionRate</responseVariable>\n                <overwriteBody>false</overwriteBody>\n            </http.post>\n            \n            <variable name=\"rate\" expression=\"${vars.conversionRate.rate}\" type=\"DOUBLE\"/>\n            <variable name=\"amountInUSD\" expression=\"${vars.originalAmount * vars.rate}\" type=\"DOUBLE\"/>\n            \n            <payloadFactory media-type=\"json\">\n                <format>{\n                    \"status\": \"success\",\n                    \"message\": \"Deposit processed successfully\",\n                    \"transaction\": {\n                        \"originalAmount\": ${vars.originalAmount},\n                        \"currency\": \"${vars.currency}\",\n                        \"amountInUSD\": ${vars.amountInUSD},\n                        \"conversionRate\": ${vars.rate}\n                    }\n                }</format>\n            </payloadFactory>\n            <respond/>\n        </inSequence>",
-    "embeddingText": "Api: BankAPI context=/bankapi Resource: methods=POST uri-template=/deposit inSequence variable name=originalAmount expression=${payload.amount} type=DOUBLE/ variable name=currency expression=${payload.currency} type=STRING/ http.post configKey=CurrencyConverter relativePath /currency/rate headers [] requestBodyType JSON requestBodyJson fromCurrency ${vars.currency} toCurrency USD responseVariable conversionRate overwriteBody false variable name=rate expression=${vars.conversionRate.rate} type=DOUBLE/ variable name=amountInUSD expression=${vars.originalAmount vars.rate} type=DOUBLE/ payloadFactory media-type=json format status success message Deposit processed successfully transaction originalAmount ${vars.originalAmount}, currency ${vars.currency} amountInUSD ${vars.amountInUSD}, conversionRate ${vars.rate} respond",
+    "startOffset": 525,
+    "endOffset": 2080,
+    "content": "<inSequence>\r\n            <variable name=\"originalAmount\" expression=\"${payload.amount}\" type=\"DOUBLE\"/>\r\n            <variable name=\"currency\" expression=\"${payload.currency}\" type=\"STRING\"/>\r\n            \r\n            <http.post configKey=\"CurrencyConverter\">\r\n                <relativePath>/currency/rate</relativePath>\r\n                <headers>[]</headers>\r\n                <requestBodyType>JSON</requestBodyType>\r\n                <requestBodyJson>{\r\n                    \"fromCurrency\": \"${vars.currency}\",\r\n                    \"toCurrency\": \"USD\"\r\n                }</requestBodyJson>\r\n                <responseVariable>conversionRate</responseVariable>\r\n                <overwriteBody>false</overwriteBody>\r\n            </http.post>\r\n            \r\n            <variable name=\"rate\" expression=\"${vars.conversionRate.rate}\" type=\"DOUBLE\"/>\r\n            <variable name=\"amountInUSD\" expression=\"${vars.originalAmount * vars.rate}\" type=\"DOUBLE\"/>\r\n            \r\n            <payloadFactory media-type=\"json\">\r\n                <format>{\r\n                    \"status\": \"success\",\r\n                    \"message\": \"Deposit processed successfully\",\r\n                    \"transaction\": {\r\n                        \"originalAmount\": ${vars.originalAmount},\r\n                        \"currency\": \"${vars.currency}\",\r\n                        \"amountInUSD\": ${vars.amountInUSD},\r\n                        \"conversionRate\": ${vars.rate}\r\n                    }\r\n                }</format>\r\n            </payloadFactory>\r\n            <respond/>\r\n        </inSequence>",
+    "embeddingText": "api BankAPI context=/bankapi resource methods=POST uri-template=/deposit inSequence variable name=originalAmount expression=${payload.amount} type=DOUBLE variable name=currency expression=${payload.currency} type=STRING http.post configKey=CurrencyConverter relativePath /currency/rate headers [] requestBodyType JSON requestBodyJson fromCurrency ${vars.currency} toCurrency USD responseVariable conversionRate overwriteBody false variable name=rate expression=${vars.conversionRate.rate} type=DOUBLE variable name=amountInUSD expression=${vars.originalAmount vars.rate} type=DOUBLE payloadFactory media-type=json format { \"status\": \"success\", \"message\": \"Deposit processed successfully\", \"transaction\": { \"originalAmount\": ${vars.originalAmount}, \"currency\": \"${vars.currency}\", \"amountInUSD\": ${vars.amountInUSD}, \"conversionRate\": ${vars.rate} } } respond",
+    "contentHash": "b4092d8f22be8cbf",
     "context": {
       "artifact": {
         "type": "api",
         "name": "BankAPI",
-        "context": "/bankapi",
-        "xmlns": "http://ws.apache.org/ns/synapse"
+        "context": "/bankapi"
       },
-      "resource": {
-        "methods": "POST",
-        "uri-template": "/deposit"
-      },
+      "path": [
+        {
+          "tag": "resource",
+          "attrs": {
+            "methods": "POST",
+            "uri-template": "/deposit"
+          }
+        }
+      ],
       "references": [
         "localEntry:CurrencyConverter"
       ]
@@ -510,117 +275,204 @@
     ]
   },
   {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/BankAPI.xml",
+    "filePath": "artifacts/apis/BankAPI.xml",
     "chunkType": "faultSequence",
     "chunkIndex": 2,
     "startLine": 48,
     "endLine": 59,
-    "content": "        <faultSequence>\n            <log category=\"ERROR\">\n                <message>Deposit failed: ${props.synapse.ERROR_MESSAGE}</message>\n            </log>\n            <payloadFactory media-type=\"json\">\n                <format>{\n                    \"status\": \"error\",\n                    \"message\": \"Deposit processing failed\"\n                }</format>\n            </payloadFactory>\n            <respond/>\n        </faultSequence>",
-    "embeddingText": "Api: BankAPI context=/bankapi Resource: methods=POST uri-template=/deposit faultSequence log category=ERROR message Deposit failed: ${props.synapse.ERROR_MESSAGE} payloadFactory media-type=json format status error message Deposit processing failed respond",
+    "startOffset": 2090,
+    "endOffset": 2528,
+    "content": "<faultSequence>\r\n            <log category=\"ERROR\">\r\n                <message>Deposit failed: ${props.synapse.ERROR_MESSAGE}</message>\r\n            </log>\r\n            <payloadFactory media-type=\"json\">\r\n                <format>{\r\n                    \"status\": \"error\",\r\n                    \"message\": \"Deposit processing failed\"\r\n                }</format>\r\n            </payloadFactory>\r\n            <respond/>\r\n        </faultSequence>",
+    "embeddingText": "api BankAPI context=/bankapi resource methods=POST uri-template=/deposit faultSequence log category=ERROR message Deposit failed: ${props.synapse.ERROR_MESSAGE} payloadFactory media-type=json format { \"status\": \"error\", \"message\": \"Deposit processing failed\" } respond",
+    "contentHash": "5f58730c17e8b7d1",
     "context": {
       "artifact": {
         "type": "api",
         "name": "BankAPI",
-        "context": "/bankapi",
-        "xmlns": "http://ws.apache.org/ns/synapse"
+        "context": "/bankapi"
       },
-      "resource": {
-        "methods": "POST",
-        "uri-template": "/deposit"
-      }
+      "path": [
+        {
+          "tag": "resource",
+          "attrs": {
+            "methods": "POST",
+            "uri-template": "/deposit"
+          }
+        }
+      ]
     },
     "isSequenceDefinition": false,
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/BankAPI.xml",
+    "filePath": "artifacts/apis/BankAPI.xml",
     "chunkType": "resource",
     "chunkIndex": 3,
     "startLine": 62,
     "endLine": 78,
-    "content": "    <resource methods=\"GET\" uri-template=\"/balance/{accountId}\">\n        <inSequence>\n            <variable name=\"accountId\" expression=\"${params.pathParams.accountId}\" type=\"STRING\"/>\n            \n            <payloadFactory media-type=\"json\">\n                <format>{\n                    \"accountId\": \"${vars.accountId}\",\n                    \"balance\": 5000.00,\n                    \"currency\": \"USD\",\n                    \"lastUpdated\": \"${formatDateTime(now(), 'yyyy-MM-dd HH:mm:ss')}\"\n                }</format>\n            </payloadFactory>\n            <respond/>\n        </inSequence>\n        <faultSequence>\n        </faultSequence>\n    </resource>",
-    "embeddingText": "Api: BankAPI context=/bankapi resource methods=GET uri-template=/balance/{accountId} inSequence variable name=accountId expression=${params.pathParams.accountId} type=STRING/ payloadFactory media-type=json format accountId ${vars.accountId} balance 5000.00, currency USD lastUpdated ${formatDateTime now yyyy-MM-dd HH:mm:ss respond faultSequence",
+    "startOffset": 2557,
+    "endOffset": 3224,
+    "content": "<resource methods=\"GET\" uri-template=\"/balance/{accountId}\">\r\n        <inSequence>\r\n            <variable name=\"accountId\" expression=\"${params.pathParams.accountId}\" type=\"STRING\"/>\r\n            \r\n            <payloadFactory media-type=\"json\">\r\n                <format>{\r\n                    \"accountId\": \"${vars.accountId}\",\r\n                    \"balance\": 5000.00,\r\n                    \"currency\": \"USD\",\r\n                    \"lastUpdated\": \"${formatDateTime(now(), 'yyyy-MM-dd HH:mm:ss')}\"\r\n                }</format>\r\n            </payloadFactory>\r\n            <respond/>\r\n        </inSequence>\r\n        <faultSequence>\r\n        </faultSequence>\r\n    </resource>",
+    "embeddingText": "api BankAPI context=/bankapi resource methods=GET uri-template=/balance/{accountId} inSequence variable name=accountId expression=${params.pathParams.accountId} type=STRING payloadFactory media-type=json format { \"accountId\": \"${vars.accountId}\", \"balance\": 5000.00, \"currency\": \"USD\", \"lastUpdated\": \"${formatDateTime(now(), 'yyyy-MM-dd HH:mm:ss')}\" } respond faultSequence",
+    "contentHash": "2f6acb11819d4755",
     "context": {
       "artifact": {
         "type": "api",
         "name": "BankAPI",
-        "context": "/bankapi",
-        "xmlns": "http://ws.apache.org/ns/synapse"
-      }
+        "context": "/bankapi"
+      },
+      "path": []
     },
     "isSequenceDefinition": false,
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/BankAPI.xml",
-    "chunkType": "resource",
+    "filePath": "artifacts/apis/BankAPI.xml",
+    "chunkType": "aggregated",
+    "memberTags": [
+      "variable",
+      "variable",
+      "variable"
+    ],
     "chunkIndex": 4,
-    "startLine": 80,
-    "endLine": 120,
-    "content": "    <resource methods=\"POST\" uri-template=\"/transfer\">\n        <inSequence>\n            <variable name=\"fromAccount\" expression=\"${payload.fromAccount}\" type=\"STRING\"/>\n            <variable name=\"toAccount\" expression=\"${payload.toAccount}\" type=\"STRING\"/>\n            <variable name=\"amount\" expression=\"${payload.amount}\" type=\"DOUBLE\"/>\n            \n            <filter xpath=\"${vars.amount &gt; 0}\">\n                <then>\n                    <payloadFactory media-type=\"json\">\n                        <format>{\n                            \"status\": \"success\",\n                            \"message\": \"Transfer completed successfully\",\n                            \"transaction\": {\n                                \"transactionId\": \"TXN${now()}\",\n                                \"fromAccount\": \"${vars.fromAccount}\",\n                                \"toAccount\": \"${vars.toAccount}\",\n                                \"amount\": ${vars.amount},\n                                \"timestamp\": \"${formatDateTime(now(), 'yyyy-MM-dd HH:mm:ss')}\"\n                            }\n                        }</format>\n                    </payloadFactory>\n                    <respond/>\n                </then>\n                <else>\n                    <throwError type=\"VALIDATION_ERROR\" errorMessage=\"Transfer amount must be greater than zero\"/>\n                </else>\n            </filter>\n        </inSequence>\n        <faultSequence>\n            <log category=\"ERROR\">\n                <message>Transfer failed: ${props.synapse.ERROR_MESSAGE}</message>\n            </log>\n            <payloadFactory media-type=\"json\">\n                <format>{\n                    \"status\": \"error\",\n                    \"message\": \"Transfer processing failed\"\n                }</format>\n            </payloadFactory>\n            <respond/>\n        </faultSequence>\n    </resource>",
-    "embeddingText": "Api: BankAPI context=/bankapi resource methods=POST uri-template=/transfer inSequence variable name=fromAccount expression=${payload.fromAccount} type=STRING/ variable name=toAccount expression=${payload.toAccount} type=STRING/ variable name=amount expression=${payload.amount} type=DOUBLE/ filter xpath=${vars.amount gt 0} then payloadFactory media-type=json format status success message Transfer completed successfully transaction transactionId TXN${now fromAccount ${vars.fromAccount} toAccount ${vars.toAccount} amount ${vars.amount}, timestamp ${formatDateTime now yyyy-MM-dd HH:mm:ss respond else throwError type=VALIDATION_ERROR errorMessage=Transfer amount must be greater than zero/ faultSequence log category=ERROR message Transfer failed: ${props.synapse.ERROR_MESSAGE} payloadFactory media-type=json format status error message Transfer processing failed respond",
+    "startLine": 82,
+    "endLine": 84,
+    "startOffset": 3322,
+    "endOffset": 3576,
+    "content": "<variable name=\"fromAccount\" expression=\"${payload.fromAccount}\" type=\"STRING\"/>\r\n            <variable name=\"toAccount\" expression=\"${payload.toAccount}\" type=\"STRING\"/>\r\n            <variable name=\"amount\" expression=\"${payload.amount}\" type=\"DOUBLE\"/>",
+    "embeddingText": "api BankAPI context=/bankapi resource methods=POST uri-template=/transfer inSequence variable name=fromAccount expression=${payload.fromAccount} type=STRING variable name=toAccount expression=${payload.toAccount} type=STRING variable name=amount expression=${payload.amount} type=DOUBLE",
+    "contentHash": "43070afb45c08b93",
     "context": {
       "artifact": {
         "type": "api",
         "name": "BankAPI",
-        "context": "/bankapi",
-        "xmlns": "http://ws.apache.org/ns/synapse"
-      }
+        "context": "/bankapi"
+      },
+      "path": [
+        {
+          "tag": "resource",
+          "attrs": {
+            "methods": "POST",
+            "uri-template": "/transfer"
+          }
+        },
+        {
+          "tag": "inSequence",
+          "attrs": {}
+        }
+      ]
     },
     "isSequenceDefinition": false,
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/apis/BankAPI.xml",
-    "chunkType": "resource",
+    "filePath": "artifacts/apis/BankAPI.xml",
+    "chunkType": "filter",
     "chunkIndex": 5,
+    "startLine": 86,
+    "endLine": 106,
+    "startOffset": 3604,
+    "endOffset": 4637,
+    "content": "<filter xpath=\"${vars.amount &gt; 0}\">\r\n                <then>\r\n                    <payloadFactory media-type=\"json\">\r\n                        <format>{\r\n                            \"status\": \"success\",\r\n                            \"message\": \"Transfer completed successfully\",\r\n                            \"transaction\": {\r\n                                \"transactionId\": \"TXN${now()}\",\r\n                                \"fromAccount\": \"${vars.fromAccount}\",\r\n                                \"toAccount\": \"${vars.toAccount}\",\r\n                                \"amount\": ${vars.amount},\r\n                                \"timestamp\": \"${formatDateTime(now(), 'yyyy-MM-dd HH:mm:ss')}\"\r\n                            }\r\n                        }</format>\r\n                    </payloadFactory>\r\n                    <respond/>\r\n                </then>\r\n                <else>\r\n                    <throwError type=\"VALIDATION_ERROR\" errorMessage=\"Transfer amount must be greater than zero\"/>\r\n                </else>\r\n            </filter>",
+    "embeddingText": "api BankAPI context=/bankapi resource methods=POST uri-template=/transfer inSequence filter xpath=${vars.amount 0} then payloadFactory media-type=json format { \"status\": \"success\", \"message\": \"Transfer completed successfully\", \"transaction\": { \"transactionId\": \"TXN${now()}\", \"fromAccount\": \"${vars.fromAccount}\", \"toAccount\": \"${vars.toAccount}\", \"amount\": ${vars.amount}, \"timestamp\": \"${formatDateTime(now(), 'yyyy-MM-dd HH:mm:ss')}\" } } respond else throwError type=VALIDATION_ERROR errorMessage=Transfer amount must be greater than zero",
+    "contentHash": "c11e495c9875e9d9",
+    "context": {
+      "artifact": {
+        "type": "api",
+        "name": "BankAPI",
+        "context": "/bankapi"
+      },
+      "path": [
+        {
+          "tag": "resource",
+          "attrs": {
+            "methods": "POST",
+            "uri-template": "/transfer"
+          }
+        },
+        {
+          "tag": "inSequence",
+          "attrs": {}
+        }
+      ]
+    },
+    "isSequenceDefinition": false,
+    "referencedSequences": []
+  },
+  {
+    "filePath": "artifacts/apis/BankAPI.xml",
+    "chunkType": "faultSequence",
+    "chunkIndex": 6,
+    "startLine": 108,
+    "endLine": 119,
+    "startOffset": 4670,
+    "endOffset": 5110,
+    "content": "<faultSequence>\r\n            <log category=\"ERROR\">\r\n                <message>Transfer failed: ${props.synapse.ERROR_MESSAGE}</message>\r\n            </log>\r\n            <payloadFactory media-type=\"json\">\r\n                <format>{\r\n                    \"status\": \"error\",\r\n                    \"message\": \"Transfer processing failed\"\r\n                }</format>\r\n            </payloadFactory>\r\n            <respond/>\r\n        </faultSequence>",
+    "embeddingText": "api BankAPI context=/bankapi resource methods=POST uri-template=/transfer faultSequence log category=ERROR message Transfer failed: ${props.synapse.ERROR_MESSAGE} payloadFactory media-type=json format { \"status\": \"error\", \"message\": \"Transfer processing failed\" } respond",
+    "contentHash": "0c0c34f79e208a89",
+    "context": {
+      "artifact": {
+        "type": "api",
+        "name": "BankAPI",
+        "context": "/bankapi"
+      },
+      "path": [
+        {
+          "tag": "resource",
+          "attrs": {
+            "methods": "POST",
+            "uri-template": "/transfer"
+          }
+        }
+      ]
+    },
+    "isSequenceDefinition": false,
+    "referencedSequences": []
+  },
+  {
+    "filePath": "artifacts/apis/BankAPI.xml",
+    "chunkType": "resource",
+    "chunkIndex": 7,
     "startLine": 122,
     "endLine": 149,
-    "content": "    <resource methods=\"GET\" uri-template=\"/transactions/{accountId}\">\n        <inSequence>\n            <variable name=\"accountId\" expression=\"${params.pathParams.accountId}\" type=\"STRING\"/>\n            \n            <payloadFactory media-type=\"json\">\n                <format>{\n                    \"accountId\": \"${vars.accountId}\",\n                    \"transactions\": [\n                        {\n                            \"transactionId\": \"TXN001\",\n                            \"type\": \"deposit\",\n                            \"amount\": 1000.00,\n                            \"date\": \"2024-01-15\"\n                        },\n                        {\n                            \"transactionId\": \"TXN002\",\n                            \"type\": \"withdrawal\",\n                            \"amount\": 500.00,\n                            \"date\": \"2024-01-16\"\n                        }\n                    ]\n                }</format>\n            </payloadFactory>\n            <respond/>\n        </inSequence>\n        <faultSequence>\n        </faultSequence>\n    </resource>",
-    "embeddingText": "Api: BankAPI context=/bankapi resource methods=GET uri-template=/transactions/{accountId} inSequence variable name=accountId expression=${params.pathParams.accountId} type=STRING/ payloadFactory media-type=json format accountId ${vars.accountId} transactions transactionId TXN001 type deposit amount 1000.00, date 2024-01-15 }, transactionId TXN002 type withdrawal amount 500.00, date 2024-01-16 respond faultSequence",
+    "startOffset": 5139,
+    "endOffset": 6221,
+    "content": "<resource methods=\"GET\" uri-template=\"/transactions/{accountId}\">\r\n        <inSequence>\r\n            <variable name=\"accountId\" expression=\"${params.pathParams.accountId}\" type=\"STRING\"/>\r\n            \r\n            <payloadFactory media-type=\"json\">\r\n                <format>{\r\n                    \"accountId\": \"${vars.accountId}\",\r\n                    \"transactions\": [\r\n                        {\r\n                            \"transactionId\": \"TXN001\",\r\n                            \"type\": \"deposit\",\r\n                            \"amount\": 1000.00,\r\n                            \"date\": \"2024-01-15\"\r\n                        },\r\n                        {\r\n                            \"transactionId\": \"TXN002\",\r\n                            \"type\": \"withdrawal\",\r\n                            \"amount\": 500.00,\r\n                            \"date\": \"2024-01-16\"\r\n                        }\r\n                    ]\r\n                }</format>\r\n            </payloadFactory>\r\n            <respond/>\r\n        </inSequence>\r\n        <faultSequence>\r\n        </faultSequence>\r\n    </resource>",
+    "embeddingText": "api BankAPI context=/bankapi resource methods=GET uri-template=/transactions/{accountId} inSequence variable name=accountId expression=${params.pathParams.accountId} type=STRING payloadFactory media-type=json format { \"accountId\": \"${vars.accountId}\", \"transactions\": [ { \"transactionId\": \"TXN001\", \"type\": \"deposit\", \"amount\": 1000.00, \"date\": \"2024-01-15\" }, { \"transactionId\": \"TXN002\", \"type\": \"withdrawal\", \"amount\": 500.00, \"date\": \"2024-01-16\" } ] } respond faultSequence",
+    "contentHash": "46647510d8387d34",
     "context": {
       "artifact": {
         "type": "api",
         "name": "BankAPI",
-        "context": "/bankapi",
-        "xmlns": "http://ws.apache.org/ns/synapse"
-      }
+        "context": "/bankapi"
+      },
+      "path": []
     },
     "isSequenceDefinition": false,
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/data-services/BankDataService.xml",
-    "chunkType": "config",
+    "filePath": "artifacts/data-services/BankDataService.xml",
+    "chunkType": "aggregated",
+    "memberTags": [
+      "config",
+      "query"
+    ],
     "chunkIndex": 0,
     "startLine": 2,
-    "endLine": 7,
-    "content": "    <config id=\"BankDB\">\n        <property name=\"driverClassName\">com.mysql.jdbc.Driver</property>\n        <property name=\"url\">jdbc:mysql://localhost:3306/bankdb</property>\n        <property name=\"username\">bankuser</property>\n        <property name=\"password\">bankpass</property>\n    </config>",
-    "embeddingText": "Data: BankDataService serviceNamespace=http://ws.wso2.org/dataservice config id=BankDB property name=driverClassName com.mysql.jdbc.Driver property name=url jdbc:mysql://localhost:3306/bankdb property name=username bankuser property name=password bankpass",
-    "context": {
-      "artifact": {
-        "type": "data",
-        "name": "BankDataService",
-        "serviceNamespace": "http://ws.wso2.org/dataservice"
-      }
-    },
-    "isSequenceDefinition": false,
-    "referencedSequences": []
-  },
-  {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/data-services/BankDataService.xml",
-    "chunkType": "query",
-    "chunkIndex": 1,
-    "startLine": 9,
     "endLine": 16,
-    "content": "    <query id=\"getAccountBalance\" useConfig=\"BankDB\">\n        <sql>SELECT balance, currency FROM accounts WHERE account_id = ?</sql>\n        <param name=\"accountId\" sqlType=\"STRING\"/>\n        <result element=\"Account\" rowName=\"AccountInfo\">\n            <element column=\"balance\" name=\"balance\" xsdType=\"double\"/>\n            <element column=\"currency\" name=\"currency\" xsdType=\"string\"/>\n        </result>\n    </query>",
-    "embeddingText": "Data: BankDataService serviceNamespace=http://ws.wso2.org/dataservice query id=getAccountBalance useConfig=BankDB sql SELECT balance, currency FROM accounts WHERE account_id param name=accountId sqlType=STRING/ result element=Account rowName=AccountInfo element column=balance name=balance xsdType=double/ element column=currency name=currency xsdType=string/",
+    "startOffset": 85,
+    "endOffset": 813,
+    "content": "<config id=\"BankDB\">\r\n        <property name=\"driverClassName\">com.mysql.jdbc.Driver</property>\r\n        <property name=\"url\">jdbc:mysql://localhost:3306/bankdb</property>\r\n        <property name=\"username\">bankuser</property>\r\n        <property name=\"password\">bankpass</property>\r\n    </config>\r\n    \r\n    <query id=\"getAccountBalance\" useConfig=\"BankDB\">\r\n        <sql>SELECT balance, currency FROM accounts WHERE account_id = ?</sql>\r\n        <param name=\"accountId\" sqlType=\"STRING\"/>\r\n        <result element=\"Account\" rowName=\"AccountInfo\">\r\n            <element column=\"balance\" name=\"balance\" xsdType=\"double\"/>\r\n            <element column=\"currency\" name=\"currency\" xsdType=\"string\"/>\r\n        </result>\r\n    </query>",
+    "embeddingText": "data BankDataService serviceNamespace=http://ws.wso2.org/dataservice config id=BankDB property name=driverClassName com.mysql.jdbc.Driver property name=url jdbc:mysql://localhost:3306/bankdb property name=username bankuser property name=password bankpass query id=getAccountBalance useConfig=BankDB sql SELECT balance, currency FROM accounts WHERE account_id param name=accountId sqlType=STRING result element=Account rowName=AccountInfo element column=balance name=balance xsdType=double element column=currency name=currency xsdType=string",
+    "contentHash": "08566dd260153805",
     "context": {
       "artifact": {
         "type": "data",
         "name": "BankDataService",
         "serviceNamespace": "http://ws.wso2.org/dataservice"
       },
+      "path": [],
       "references": [
         "config:BankDB"
       ]
@@ -631,65 +483,54 @@
     ]
   },
   {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/data-services/BankDataService.xml",
+    "filePath": "artifacts/data-services/BankDataService.xml",
+    "chunkType": "aggregated",
+    "memberTags": [
+      "query",
+      "query"
+    ],
+    "chunkIndex": 1,
+    "startLine": 18,
+    "endLine": 31,
+    "startOffset": 825,
+    "endOffset": 1557,
+    "content": "<query id=\"updateAccountBalance\" useConfig=\"BankDB\">\r\n        <sql>UPDATE accounts SET balance = ?, last_updated = NOW() WHERE account_id = ?</sql>\r\n        <param name=\"balance\" sqlType=\"DOUBLE\"/>\r\n        <param name=\"accountId\" sqlType=\"STRING\"/>\r\n    </query>\r\n    \r\n    <query id=\"insertTransaction\" useConfig=\"BankDB\">\r\n        <sql>INSERT INTO transactions (transaction_id, account_id, type, amount, currency, timestamp) VALUES (?, ?, ?, ?, ?, NOW())</sql>\r\n        <param name=\"transactionId\" sqlType=\"STRING\"/>\r\n        <param name=\"accountId\" sqlType=\"STRING\"/>\r\n        <param name=\"type\" sqlType=\"STRING\"/>\r\n        <param name=\"amount\" sqlType=\"DOUBLE\"/>\r\n        <param name=\"currency\" sqlType=\"STRING\"/>\r\n    </query>",
+    "embeddingText": "data BankDataService serviceNamespace=http://ws.wso2.org/dataservice query id=updateAccountBalance useConfig=BankDB sql UPDATE accounts SET balance last_updated NOW WHERE account_id param name=balance sqlType=DOUBLE param name=accountId sqlType=STRING query id=insertTransaction useConfig=BankDB sql INSERT INTO transactions transaction_id, account_id, type, amount, currency, timestamp VALUES NOW param name=transactionId sqlType=STRING param name=accountId sqlType=STRING param name=type sqlType=STRING param name=amount sqlType=DOUBLE param name=currency sqlType=STRING",
+    "contentHash": "ab082ae531599826",
+    "context": {
+      "artifact": {
+        "type": "data",
+        "name": "BankDataService",
+        "serviceNamespace": "http://ws.wso2.org/dataservice"
+      },
+      "path": [],
+      "references": [
+        "config:BankDB"
+      ]
+    },
+    "isSequenceDefinition": false,
+    "referencedSequences": [
+      "config:BankDB"
+    ]
+  },
+  {
+    "filePath": "artifacts/data-services/BankDataService.xml",
     "chunkType": "query",
     "chunkIndex": 2,
-    "startLine": 18,
-    "endLine": 22,
-    "content": "    <query id=\"updateAccountBalance\" useConfig=\"BankDB\">\n        <sql>UPDATE accounts SET balance = ?, last_updated = NOW() WHERE account_id = ?</sql>\n        <param name=\"balance\" sqlType=\"DOUBLE\"/>\n        <param name=\"accountId\" sqlType=\"STRING\"/>\n    </query>",
-    "embeddingText": "Data: BankDataService serviceNamespace=http://ws.wso2.org/dataservice query id=updateAccountBalance useConfig=BankDB sql UPDATE accounts SET balance last_updated NOW WHERE account_id param name=balance sqlType=DOUBLE/ param name=accountId sqlType=STRING/",
-    "context": {
-      "artifact": {
-        "type": "data",
-        "name": "BankDataService",
-        "serviceNamespace": "http://ws.wso2.org/dataservice"
-      },
-      "references": [
-        "config:BankDB"
-      ]
-    },
-    "isSequenceDefinition": false,
-    "referencedSequences": [
-      "config:BankDB"
-    ]
-  },
-  {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/data-services/BankDataService.xml",
-    "chunkType": "query",
-    "chunkIndex": 3,
-    "startLine": 24,
-    "endLine": 31,
-    "content": "    <query id=\"insertTransaction\" useConfig=\"BankDB\">\n        <sql>INSERT INTO transactions (transaction_id, account_id, type, amount, currency, timestamp) VALUES (?, ?, ?, ?, ?, NOW())</sql>\n        <param name=\"transactionId\" sqlType=\"STRING\"/>\n        <param name=\"accountId\" sqlType=\"STRING\"/>\n        <param name=\"type\" sqlType=\"STRING\"/>\n        <param name=\"amount\" sqlType=\"DOUBLE\"/>\n        <param name=\"currency\" sqlType=\"STRING\"/>\n    </query>",
-    "embeddingText": "Data: BankDataService serviceNamespace=http://ws.wso2.org/dataservice query id=insertTransaction useConfig=BankDB sql INSERT INTO transactions transaction_id, account_id, type, amount, currency, timestamp VALUES NOW param name=transactionId sqlType=STRING/ param name=accountId sqlType=STRING/ param name=type sqlType=STRING/ param name=amount sqlType=DOUBLE/ param name=currency sqlType=STRING/",
-    "context": {
-      "artifact": {
-        "type": "data",
-        "name": "BankDataService",
-        "serviceNamespace": "http://ws.wso2.org/dataservice"
-      },
-      "references": [
-        "config:BankDB"
-      ]
-    },
-    "isSequenceDefinition": false,
-    "referencedSequences": [
-      "config:BankDB"
-    ]
-  },
-  {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/data-services/BankDataService.xml",
-    "chunkType": "query",
-    "chunkIndex": 4,
     "startLine": 33,
     "endLine": 43,
-    "content": "    <query id=\"getTransactionHistory\" useConfig=\"BankDB\">\n        <sql>SELECT transaction_id, type, amount, currency, timestamp FROM transactions WHERE account_id = ? ORDER BY timestamp DESC LIMIT 10</sql>\n        <param name=\"accountId\" sqlType=\"STRING\"/>\n        <result element=\"Transactions\" rowName=\"Transaction\">\n            <element column=\"transaction_id\" name=\"transactionId\" xsdType=\"string\"/>\n            <element column=\"type\" name=\"type\" xsdType=\"string\"/>\n            <element column=\"amount\" name=\"amount\" xsdType=\"double\"/>\n            <element column=\"currency\" name=\"currency\" xsdType=\"string\"/>\n            <element column=\"timestamp\" name=\"date\" xsdType=\"string\"/>\n        </result>\n    </query>",
-    "embeddingText": "Data: BankDataService serviceNamespace=http://ws.wso2.org/dataservice query id=getTransactionHistory useConfig=BankDB sql SELECT transaction_id, type, amount, currency, timestamp FROM transactions WHERE account_id ORDER BY timestamp DESC LIMIT 10 param name=accountId sqlType=STRING/ result element=Transactions rowName=Transaction element column=transaction_id name=transactionId xsdType=string/ element column=type name=type xsdType=string/ element column=amount name=amount xsdType=double/ element column=currency name=currency xsdType=string/ element column=timestamp name=date xsdType=string/",
+    "startOffset": 1569,
+    "endOffset": 2290,
+    "content": "<query id=\"getTransactionHistory\" useConfig=\"BankDB\">\r\n        <sql>SELECT transaction_id, type, amount, currency, timestamp FROM transactions WHERE account_id = ? ORDER BY timestamp DESC LIMIT 10</sql>\r\n        <param name=\"accountId\" sqlType=\"STRING\"/>\r\n        <result element=\"Transactions\" rowName=\"Transaction\">\r\n            <element column=\"transaction_id\" name=\"transactionId\" xsdType=\"string\"/>\r\n            <element column=\"type\" name=\"type\" xsdType=\"string\"/>\r\n            <element column=\"amount\" name=\"amount\" xsdType=\"double\"/>\r\n            <element column=\"currency\" name=\"currency\" xsdType=\"string\"/>\r\n            <element column=\"timestamp\" name=\"date\" xsdType=\"string\"/>\r\n        </result>\r\n    </query>",
+    "embeddingText": "data BankDataService serviceNamespace=http://ws.wso2.org/dataservice query id=getTransactionHistory useConfig=BankDB sql SELECT transaction_id, type, amount, currency, timestamp FROM transactions WHERE account_id ORDER BY timestamp DESC LIMIT 10 param name=accountId sqlType=STRING result element=Transactions rowName=Transaction element column=transaction_id name=transactionId xsdType=string element column=type name=type xsdType=string element column=amount name=amount xsdType=double element column=currency name=currency xsdType=string element column=timestamp name=date xsdType=string",
+    "contentHash": "c039e633acaf0eb8",
     "context": {
       "artifact": {
         "type": "data",
         "name": "BankDataService",
         "serviceNamespace": "http://ws.wso2.org/dataservice"
       },
+      "path": [],
       "references": [
         "config:BankDB"
       ]
@@ -700,337 +541,296 @@
     ]
   },
   {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/data-services/BankDataService.xml",
-    "chunkType": "operation",
-    "chunkIndex": 5,
+    "filePath": "artifacts/data-services/BankDataService.xml",
+    "chunkType": "aggregated",
+    "memberTags": [
+      "operation",
+      "operation"
+    ],
+    "chunkIndex": 3,
     "startLine": 45,
-    "endLine": 49,
-    "content": "    <operation name=\"getAccountBalance\">\n        <call-query href=\"getAccountBalance\">\n            <with-param name=\"accountId\" query-param=\"accountId\"/>\n        </call-query>\n    </operation>",
-    "embeddingText": "Data: BankDataService serviceNamespace=http://ws.wso2.org/dataservice operation name=getAccountBalance call-query href=getAccountBalance with-param name=accountId query-param=accountId/",
-    "context": {
-      "artifact": {
-        "type": "data",
-        "name": "BankDataService",
-        "serviceNamespace": "http://ws.wso2.org/dataservice"
-      },
-      "references": [
-        "query:getAccountBalance"
-      ]
-    },
-    "isSequenceDefinition": false,
-    "referencedSequences": [
-      "query:getAccountBalance"
-    ]
-  },
-  {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/data-services/BankDataService.xml",
-    "chunkType": "operation",
-    "chunkIndex": 6,
-    "startLine": 51,
     "endLine": 56,
-    "content": "    <operation name=\"updateAccountBalance\">\n        <call-query href=\"updateAccountBalance\">\n            <with-param name=\"balance\" query-param=\"balance\"/>\n            <with-param name=\"accountId\" query-param=\"accountId\"/>\n        </call-query>\n    </operation>",
-    "embeddingText": "Data: BankDataService serviceNamespace=http://ws.wso2.org/dataservice operation name=updateAccountBalance call-query href=updateAccountBalance with-param name=balance query-param=balance/ with-param name=accountId query-param=accountId/",
+    "startOffset": 2302,
+    "endOffset": 2768,
+    "content": "<operation name=\"getAccountBalance\">\r\n        <call-query href=\"getAccountBalance\">\r\n            <with-param name=\"accountId\" query-param=\"accountId\"/>\r\n        </call-query>\r\n    </operation>\r\n    \r\n    <operation name=\"updateAccountBalance\">\r\n        <call-query href=\"updateAccountBalance\">\r\n            <with-param name=\"balance\" query-param=\"balance\"/>\r\n            <with-param name=\"accountId\" query-param=\"accountId\"/>\r\n        </call-query>\r\n    </operation>",
+    "embeddingText": "data BankDataService serviceNamespace=http://ws.wso2.org/dataservice operation name=getAccountBalance call-query href=getAccountBalance with-param name=accountId query-param=accountId operation name=updateAccountBalance call-query href=updateAccountBalance with-param name=balance query-param=balance with-param name=accountId query-param=accountId",
+    "contentHash": "0aa0322ffb52e862",
     "context": {
       "artifact": {
         "type": "data",
         "name": "BankDataService",
         "serviceNamespace": "http://ws.wso2.org/dataservice"
       },
+      "path": [],
       "references": [
+        "query:getAccountBalance",
         "query:updateAccountBalance"
       ]
     },
     "isSequenceDefinition": false,
     "referencedSequences": [
+      "query:getAccountBalance",
       "query:updateAccountBalance"
     ]
   },
   {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/data-services/BankDataService.xml",
-    "chunkType": "operation",
-    "chunkIndex": 7,
+    "filePath": "artifacts/data-services/BankDataService.xml",
+    "chunkType": "aggregated",
+    "chunkIndex": 4,
     "startLine": 58,
-    "endLine": 66,
-    "content": "    <operation name=\"insertTransaction\">\n        <call-query href=\"insertTransaction\">\n            <with-param name=\"transactionId\" query-param=\"transactionId\"/>\n            <with-param name=\"accountId\" query-param=\"accountId\"/>\n            <with-param name=\"type\" query-param=\"type\"/>\n            <with-param name=\"amount\" query-param=\"amount\"/>\n            <with-param name=\"currency\" query-param=\"currency\"/>\n        </call-query>\n    </operation>",
-    "embeddingText": "Data: BankDataService serviceNamespace=http://ws.wso2.org/dataservice operation name=insertTransaction call-query href=insertTransaction with-param name=transactionId query-param=transactionId/ with-param name=accountId query-param=accountId/ with-param name=type query-param=type/ with-param name=amount query-param=amount/ with-param name=currency query-param=currency/",
-    "context": {
-      "artifact": {
-        "type": "data",
-        "name": "BankDataService",
-        "serviceNamespace": "http://ws.wso2.org/dataservice"
-      },
-      "references": [
-        "query:insertTransaction"
-      ]
-    },
-    "isSequenceDefinition": false,
-    "referencedSequences": [
-      "query:insertTransaction"
-    ]
-  },
-  {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/data-services/BankDataService.xml",
-    "chunkType": "operation",
-    "chunkIndex": 8,
-    "startLine": 68,
     "endLine": 72,
-    "content": "    <operation name=\"getTransactionHistory\">\n        <call-query href=\"getTransactionHistory\">\n            <with-param name=\"accountId\" query-param=\"accountId\"/>\n        </call-query>\n    </operation>",
-    "embeddingText": "Data: BankDataService serviceNamespace=http://ws.wso2.org/dataservice operation name=getTransactionHistory call-query href=getTransactionHistory with-param name=accountId query-param=accountId/",
+    "startOffset": 2780,
+    "endOffset": 3446,
+    "content": "<operation name=\"insertTransaction\">\r\n        <call-query href=\"insertTransaction\">\r\n            <with-param name=\"transactionId\" query-param=\"transactionId\"/>\r\n            <with-param name=\"accountId\" query-param=\"accountId\"/>\r\n            <with-param name=\"type\" query-param=\"type\"/>\r\n            <with-param name=\"amount\" query-param=\"amount\"/>\r\n            <with-param name=\"currency\" query-param=\"currency\"/>\r\n        </call-query>\r\n    </operation>\r\n    \r\n    <operation name=\"getTransactionHistory\">\r\n        <call-query href=\"getTransactionHistory\">\r\n            <with-param name=\"accountId\" query-param=\"accountId\"/>\r\n        </call-query>\r\n    </operation>",
+    "embeddingText": "data BankDataService serviceNamespace=http://ws.wso2.org/dataservice operation name=insertTransaction call-query href=insertTransaction with-param name=transactionId query-param=transactionId with-param name=accountId query-param=accountId with-param name=type query-param=type with-param name=amount query-param=amount with-param name=currency query-param=currency operation name=getTransactionHistory call-query href=getTransactionHistory with-param name=accountId query-param=accountId",
+    "contentHash": "9842564311413cbd",
     "context": {
       "artifact": {
         "type": "data",
         "name": "BankDataService",
         "serviceNamespace": "http://ws.wso2.org/dataservice"
       },
+      "path": [],
       "references": [
+        "query:insertTransaction",
         "query:getTransactionHistory"
       ]
     },
     "isSequenceDefinition": false,
     "referencedSequences": [
+      "query:insertTransaction",
       "query:getTransactionHistory"
+    ],
+    "memberTags": [
+      "operation",
+      "operation"
     ]
   },
   {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/local-entries/CurrencyConverter.xml",
+    "filePath": "artifacts/local-entries/CurrencyConverter.xml",
     "chunkType": "localEntry",
     "chunkIndex": 0,
     "startLine": 2,
     "endLine": 14,
-    "content": "<localEntry key=\"CurrencyConverter\" xmlns=\"http://ws.apache.org/ns/synapse\">\n  <http.init>\n    <connectionType>HTTPS</connectionType>\n    <baseUrl>https://dev-tools.wso2.com/gs/helpers/v1.0</baseUrl>\n    <authType>None</authType>\n    <timeoutAction>Never</timeoutAction>\n    <retryCount>0</retryCount>\n    <retryDelay>0</retryDelay>\n    <suspendInitialDuration>-1</suspendInitialDuration>\n    <suspendProgressionFactor>1</suspendProgressionFactor>\n    <name>CurrencyConverter</name>\n  </http.init>\n</localEntry>",
-    "embeddingText": "LocalEntry: CurrencyConverter key=CurrencyConverter localEntry key=CurrencyConverter xmlns=http://ws.apache.org/ns/synapse http.init connectionType HTTPS baseUrl https://dev-tools.wso2.com/gs/helpers/v1.0 authType None timeoutAction Never retryCount 0 retryDelay 0 suspendInitialDuration -1 suspendProgressionFactor 1 name CurrencyConverter",
+    "startOffset": 40,
+    "endOffset": 563,
+    "content": "<localEntry key=\"CurrencyConverter\" xmlns=\"http://ws.apache.org/ns/synapse\">\r\n  <http.init>\r\n    <connectionType>HTTPS</connectionType>\r\n    <baseUrl>https://dev-tools.wso2.com/gs/helpers/v1.0</baseUrl>\r\n    <authType>None</authType>\r\n    <timeoutAction>Never</timeoutAction>\r\n    <retryCount>0</retryCount>\r\n    <retryDelay>0</retryDelay>\r\n    <suspendInitialDuration>-1</suspendInitialDuration>\r\n    <suspendProgressionFactor>1</suspendProgressionFactor>\r\n    <name>CurrencyConverter</name>\r\n  </http.init>\r\n</localEntry>",
+    "embeddingText": "localEntry CurrencyConverter localEntry key=CurrencyConverter http.init connectionType HTTPS baseUrl https://dev-tools.wso2.com/gs/helpers/v1.0 authType None timeoutAction Never retryCount 0 retryDelay 0 suspendInitialDuration -1 suspendProgressionFactor 1 name CurrencyConverter",
+    "contentHash": "5136f3425110eb82",
     "context": {
       "artifact": {
         "type": "localEntry",
         "name": "CurrencyConverter",
-        "key": "CurrencyConverter",
-        "xmlns": "http://ws.apache.org/ns/synapse"
-      }
+        "key": "CurrencyConverter"
+      },
+      "path": []
     },
     "sequenceKey": "CurrencyConverter",
     "isSequenceDefinition": true,
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/local-entries/EmailConnection.xml",
+    "filePath": "artifacts/local-entries/EmailConnection.xml",
     "chunkType": "localEntry",
     "chunkIndex": 0,
     "startLine": 2,
     "endLine": 12,
-    "content": "<localEntry key=\"EmailConnection\" xmlns=\"http://ws.apache.org/ns/synapse\">\n    <email.init>\n        <connectionType>SMTP</connectionType>\n        <host>smtp.gmail.com</host>\n        <port>587</port>\n        <enableOAuth2>false</enableOAuth2>\n        <username>bank@example.com</username>\n        <password>emailpassword</password>\n        <name>EmailConnection</name>\n    </email.init>\n</localEntry>",
-    "embeddingText": "LocalEntry: EmailConnection key=EmailConnection localEntry key=EmailConnection xmlns=http://ws.apache.org/ns/synapse email.init connectionType SMTP host smtp.gmail.com port 587 enableOAuth2 false username bank@example.com password emailpassword name EmailConnection",
+    "startOffset": 40,
+    "endOffset": 449,
+    "content": "<localEntry key=\"EmailConnection\" xmlns=\"http://ws.apache.org/ns/synapse\">\r\n    <email.init>\r\n        <connectionType>SMTP</connectionType>\r\n        <host>smtp.gmail.com</host>\r\n        <port>587</port>\r\n        <enableOAuth2>false</enableOAuth2>\r\n        <username>bank@example.com</username>\r\n        <password>emailpassword</password>\r\n        <name>EmailConnection</name>\r\n    </email.init>\r\n</localEntry>",
+    "embeddingText": "localEntry EmailConnection localEntry key=EmailConnection email.init connectionType SMTP host smtp.gmail.com port 587 enableOAuth2 false username bank@example.com password emailpassword name EmailConnection",
+    "contentHash": "37ed48e5d847da94",
     "context": {
       "artifact": {
         "type": "localEntry",
         "name": "EmailConnection",
-        "key": "EmailConnection",
-        "xmlns": "http://ws.apache.org/ns/synapse"
-      }
+        "key": "EmailConnection"
+      },
+      "path": []
     },
     "sequenceKey": "EmailConnection",
     "isSequenceDefinition": true,
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/local-entries/FileMemoryConnection.xml",
+    "filePath": "artifacts/local-entries/FileMemoryConnection.xml",
     "chunkType": "localEntry",
     "chunkIndex": 0,
     "startLine": 2,
     "endLine": 7,
-    "content": "<localEntry key=\"FILE_MEMORY_CONN\" xmlns=\"http://ws.apache.org/ns/synapse\">\n  <ai.init>\n    <connectionType>FILE_MEMORY</connectionType>\n    <name>FILE_MEMORY_CONN</name>\n  </ai.init>\n</localEntry>",
-    "embeddingText": "LocalEntry: FILE_MEMORY_CONN key=FILE_MEMORY_CONN localEntry key=FILE_MEMORY_CONN xmlns=http://ws.apache.org/ns/synapse ai.init connectionType FILE_MEMORY name FILE_MEMORY_CONN",
+    "startOffset": 40,
+    "endOffset": 242,
+    "content": "<localEntry key=\"FILE_MEMORY_CONN\" xmlns=\"http://ws.apache.org/ns/synapse\">\r\n  <ai.init>\r\n    <connectionType>FILE_MEMORY</connectionType>\r\n    <name>FILE_MEMORY_CONN</name>\r\n  </ai.init>\r\n</localEntry>",
+    "embeddingText": "localEntry FILE_MEMORY_CONN localEntry key=FILE_MEMORY_CONN ai.init connectionType FILE_MEMORY name FILE_MEMORY_CONN",
+    "contentHash": "7bd828c5b0ffee6a",
     "context": {
       "artifact": {
         "type": "localEntry",
         "name": "FILE_MEMORY_CONN",
-        "key": "FILE_MEMORY_CONN",
-        "xmlns": "http://ws.apache.org/ns/synapse"
-      }
+        "key": "FILE_MEMORY_CONN"
+      },
+      "path": []
     },
     "sequenceKey": "FILE_MEMORY_CONN",
     "isSequenceDefinition": true,
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/local-entries/OpenAIConnection.xml",
+    "filePath": "artifacts/local-entries/OpenAIConnection.xml",
     "chunkType": "localEntry",
     "chunkIndex": 0,
     "startLine": 2,
     "endLine": 9,
-    "content": "<localEntry key=\"OPENAI_CONN\" xmlns=\"http://ws.apache.org/ns/synapse\">\n  <ai.init>\n    <connectionType>OPEN_AI</connectionType>\n    <apiKey>${configs.openai_api_key}</apiKey>\n    <baseUrl>https://api.openai.com/v1</baseUrl>\n    <name>OPENAI_CONN</name>\n  </ai.init>\n</localEntry>",
-    "embeddingText": "LocalEntry: OPENAI_CONN key=OPENAI_CONN localEntry key=OPENAI_CONN xmlns=http://ws.apache.org/ns/synapse ai.init connectionType OPEN_AI apiKey ${configs.openai_api_key} baseUrl https://api.openai.com/v1 name OPENAI_CONN",
+    "startOffset": 40,
+    "endOffset": 326,
+    "content": "<localEntry key=\"OPENAI_CONN\" xmlns=\"http://ws.apache.org/ns/synapse\">\r\n  <ai.init>\r\n    <connectionType>OPEN_AI</connectionType>\r\n    <apiKey>${configs.openai_api_key}</apiKey>\r\n    <baseUrl>https://api.openai.com/v1</baseUrl>\r\n    <name>OPENAI_CONN</name>\r\n  </ai.init>\r\n</localEntry>",
+    "embeddingText": "localEntry OPENAI_CONN localEntry key=OPENAI_CONN ai.init connectionType OPEN_AI apiKey ${configs.openai_api_key} baseUrl https://api.openai.com/v1 name OPENAI_CONN",
+    "contentHash": "6fad50a2bc28f435",
     "context": {
       "artifact": {
         "type": "localEntry",
         "name": "OPENAI_CONN",
-        "key": "OPENAI_CONN",
-        "xmlns": "http://ws.apache.org/ns/synapse"
-      }
+        "key": "OPENAI_CONN"
+      },
+      "path": []
     },
     "sequenceKey": "OPENAI_CONN",
     "isSequenceDefinition": true,
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/AuthenticationSequence.xml",
+    "filePath": "artifacts/sequences/AuthenticationSequence.xml",
     "chunkType": "sequence",
     "chunkIndex": 0,
     "startLine": 2,
     "endLine": 22,
-    "content": "<sequence name=\"AuthenticationSequence\" xmlns=\"http://ws.apache.org/ns/synapse\">\n    <filter xpath=\"${exists(headers.Authorization)}\">\n        <then>\n            <variable name=\"authHeader\" expression=\"${headers.Authorization}\" type=\"STRING\"/>\n            <filter xpath=\"${startsWith(vars.authHeader, 'Bearer ')}\">\n                <then>\n                    <variable name=\"token\" expression=\"${subString(vars.authHeader, 7)}\" type=\"STRING\"/>\n                    <log category=\"INFO\">\n                        <message>Authentication successful for token: ${vars.token}</message>\n                    </log>\n                </then>\n                <else>\n                    <throwError type=\"AUTH_ERROR\" errorMessage=\"Invalid authorization header format\"/>\n                </else>\n            </filter>\n        </then>\n        <else>\n            <throwError type=\"AUTH_ERROR\" errorMessage=\"Authorization header missing\"/>\n        </else>\n    </filter>\n</sequence>",
-    "embeddingText": "Sequence: AuthenticationSequence sequence name=AuthenticationSequence xmlns=http://ws.apache.org/ns/synapse filter xpath=${exists headers.Authorization then variable name=authHeader expression=${headers.Authorization} type=STRING/ filter xpath=${startsWith vars.authHeader, Bearer then variable name=token expression=${subString vars.authHeader, 7 type=STRING/ log category=INFO message Authentication successful for token: ${vars.token} else throwError type=AUTH_ERROR errorMessage=Invalid authorization header format/ else throwError type=AUTH_ERROR errorMessage=Authorization header missing/",
+    "startOffset": 40,
+    "endOffset": 1022,
+    "content": "<sequence name=\"AuthenticationSequence\" xmlns=\"http://ws.apache.org/ns/synapse\">\r\n    <filter xpath=\"${exists(headers.Authorization)}\">\r\n        <then>\r\n            <variable name=\"authHeader\" expression=\"${headers.Authorization}\" type=\"STRING\"/>\r\n            <filter xpath=\"${startsWith(vars.authHeader, 'Bearer ')}\">\r\n                <then>\r\n                    <variable name=\"token\" expression=\"${subString(vars.authHeader, 7)}\" type=\"STRING\"/>\r\n                    <log category=\"INFO\">\r\n                        <message>Authentication successful for token: ${vars.token}</message>\r\n                    </log>\r\n                </then>\r\n                <else>\r\n                    <throwError type=\"AUTH_ERROR\" errorMessage=\"Invalid authorization header format\"/>\r\n                </else>\r\n            </filter>\r\n        </then>\r\n        <else>\r\n            <throwError type=\"AUTH_ERROR\" errorMessage=\"Authorization header missing\"/>\r\n        </else>\r\n    </filter>\r\n</sequence>",
+    "embeddingText": "sequence AuthenticationSequence sequence name=AuthenticationSequence filter xpath=${exists headers.Authorization then variable name=authHeader expression=${headers.Authorization} type=STRING filter xpath=${startsWith vars.authHeader, Bearer then variable name=token expression=${subString vars.authHeader, 7 type=STRING log category=INFO message Authentication successful for token: ${vars.token} else throwError type=AUTH_ERROR errorMessage=Invalid authorization header format else throwError type=AUTH_ERROR errorMessage=Authorization header missing",
+    "contentHash": "e684d1cbebdda6a3",
     "context": {
       "artifact": {
         "type": "sequence",
-        "name": "AuthenticationSequence",
-        "xmlns": "http://ws.apache.org/ns/synapse"
-      }
+        "name": "AuthenticationSequence"
+      },
+      "path": []
     },
     "sequenceKey": "AuthenticationSequence",
     "isSequenceDefinition": true,
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/GlobalErrorSequence.xml",
-    "chunkType": "variable",
+    "filePath": "artifacts/sequences/GlobalErrorSequence.xml",
+    "chunkType": "aggregated",
+    "memberTags": [
+      "variable",
+      "variable",
+      "variable"
+    ],
     "chunkIndex": 0,
     "startLine": 3,
-    "endLine": 3,
-    "content": "    <variable name=\"errorCode\" expression=\"${props.synapse.ERROR_CODE}\" type=\"STRING\"/>",
-    "embeddingText": "Sequence: GlobalErrorSequence variable name=errorCode expression=${props.synapse.ERROR_CODE} type=STRING/",
-    "context": {
-      "artifact": {
-        "type": "sequence",
-        "name": "GlobalErrorSequence",
-        "xmlns": "http://ws.apache.org/ns/synapse"
-      }
-    },
-    "isSequenceDefinition": false,
-    "referencedSequences": []
-  },
-  {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/GlobalErrorSequence.xml",
-    "chunkType": "variable",
-    "chunkIndex": 1,
-    "startLine": 4,
-    "endLine": 4,
-    "content": "    <variable name=\"errorMessage\" expression=\"${props.synapse.ERROR_MESSAGE}\" type=\"STRING\"/>",
-    "embeddingText": "Sequence: GlobalErrorSequence variable name=errorMessage expression=${props.synapse.ERROR_MESSAGE} type=STRING/",
-    "context": {
-      "artifact": {
-        "type": "sequence",
-        "name": "GlobalErrorSequence",
-        "xmlns": "http://ws.apache.org/ns/synapse"
-      }
-    },
-    "isSequenceDefinition": false,
-    "referencedSequences": []
-  },
-  {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/GlobalErrorSequence.xml",
-    "chunkType": "variable",
-    "chunkIndex": 2,
-    "startLine": 5,
     "endLine": 5,
-    "content": "    <variable name=\"errorDetail\" expression=\"${props.synapse.ERROR_DETAIL}\" type=\"STRING\"/>",
-    "embeddingText": "Sequence: GlobalErrorSequence variable name=errorDetail expression=${props.synapse.ERROR_DETAIL} type=STRING/",
+    "startOffset": 123,
+    "endOffset": 394,
+    "content": "<variable name=\"errorCode\" expression=\"${props.synapse.ERROR_CODE}\" type=\"STRING\"/>\r\n    <variable name=\"errorMessage\" expression=\"${props.synapse.ERROR_MESSAGE}\" type=\"STRING\"/>\r\n    <variable name=\"errorDetail\" expression=\"${props.synapse.ERROR_DETAIL}\" type=\"STRING\"/>",
+    "embeddingText": "sequence GlobalErrorSequence variable name=errorCode expression=${props.synapse.ERROR_CODE} type=STRING variable name=errorMessage expression=${props.synapse.ERROR_MESSAGE} type=STRING variable name=errorDetail expression=${props.synapse.ERROR_DETAIL} type=STRING",
+    "contentHash": "c0f2519d04568307",
     "context": {
       "artifact": {
         "type": "sequence",
-        "name": "GlobalErrorSequence",
-        "xmlns": "http://ws.apache.org/ns/synapse"
-      }
+        "name": "GlobalErrorSequence"
+      },
+      "path": []
     },
     "isSequenceDefinition": false,
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/GlobalErrorSequence.xml",
+    "filePath": "artifacts/sequences/GlobalErrorSequence.xml",
     "chunkType": "log",
-    "chunkIndex": 3,
+    "chunkIndex": 1,
     "startLine": 7,
     "endLine": 9,
-    "content": "    <log category=\"ERROR\">\n        <message>Error Code: ${vars.errorCode} | Message: ${vars.errorMessage} | Detail: ${vars.errorDetail}</message>\n    </log>",
-    "embeddingText": "Sequence: GlobalErrorSequence log category=ERROR message Error Code: ${vars.errorCode} Message: ${vars.errorMessage} Detail: ${vars.errorDetail}",
+    "startOffset": 406,
+    "endOffset": 560,
+    "content": "<log category=\"ERROR\">\r\n        <message>Error Code: ${vars.errorCode} | Message: ${vars.errorMessage} | Detail: ${vars.errorDetail}</message>\r\n    </log>",
+    "embeddingText": "sequence GlobalErrorSequence log category=ERROR message Error Code: ${vars.errorCode} Message: ${vars.errorMessage} Detail: ${vars.errorDetail}",
+    "contentHash": "63fa880303a9d8f1",
     "context": {
       "artifact": {
         "type": "sequence",
-        "name": "GlobalErrorSequence",
-        "xmlns": "http://ws.apache.org/ns/synapse"
-      }
+        "name": "GlobalErrorSequence"
+      },
+      "path": []
     },
     "isSequenceDefinition": false,
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/GlobalErrorSequence.xml",
-    "chunkType": "switch",
-    "chunkIndex": 4,
+    "filePath": "artifacts/sequences/GlobalErrorSequence.xml",
+    "chunkType": "aggregated",
+    "chunkIndex": 2,
     "startLine": 11,
-    "endLine": 45,
-    "content": "    <switch source=\"${vars.errorCode}\">\n        <case regex=\"AUTH_ERROR\">\n            <payloadFactory media-type=\"json\">\n                <format>{\n                    \"status\": \"error\",\n                    \"code\": \"401\",\n                    \"message\": \"Authentication failed\",\n                    \"detail\": \"${vars.errorMessage}\"\n                }</format>\n            </payloadFactory>\n            <header name=\"HTTP_SC\" value=\"401\" scope=\"transport\"/>\n        </case>\n        <case regex=\"VALIDATION_ERROR\">\n            <payloadFactory media-type=\"json\">\n                <format>{\n                    \"status\": \"error\",\n                    \"code\": \"400\",\n                    \"message\": \"Validation failed\",\n                    \"detail\": \"${vars.errorMessage}\"\n                }</format>\n            </payloadFactory>\n            <header name=\"HTTP_SC\" value=\"400\" scope=\"transport\"/>\n        </case>\n        <default>\n            <payloadFactory media-type=\"json\">\n                <format>{\n                    \"status\": \"error\",\n                    \"code\": \"500\",\n                    \"message\": \"Internal server error\",\n                    \"detail\": \"${vars.errorMessage}\"\n                }</format>\n            </payloadFactory>\n            <header name=\"HTTP_SC\" value=\"500\" scope=\"transport\"/>\n        </default>\n    </switch>",
-    "embeddingText": "Sequence: GlobalErrorSequence switch source=${vars.errorCode} case regex=AUTH_ERROR payloadFactory media-type=json format status error code 401 message Authentication failed detail ${vars.errorMessage} header name=HTTP_SC value=401 scope=transport/ case regex=VALIDATION_ERROR payloadFactory media-type=json format status error code 400 message Validation failed detail ${vars.errorMessage} header name=HTTP_SC value=400 scope=transport/ default payloadFactory media-type=json format status error code 500 message Internal server error detail ${vars.errorMessage} header name=HTTP_SC value=500 scope=transport/",
-    "context": {
-      "artifact": {
-        "type": "sequence",
-        "name": "GlobalErrorSequence",
-        "xmlns": "http://ws.apache.org/ns/synapse"
-      }
-    },
-    "isSequenceDefinition": false,
-    "referencedSequences": []
-  },
-  {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/GlobalErrorSequence.xml",
-    "chunkType": "respond",
-    "chunkIndex": 5,
-    "startLine": 47,
     "endLine": 47,
-    "content": "    <respond/>",
-    "embeddingText": "Sequence: GlobalErrorSequence respond",
+    "startOffset": 572,
+    "endOffset": 1956,
+    "content": "<switch source=\"${vars.errorCode}\">\r\n        <case regex=\"AUTH_ERROR\">\r\n            <payloadFactory media-type=\"json\">\r\n                <format>{\r\n                    \"status\": \"error\",\r\n                    \"code\": \"401\",\r\n                    \"message\": \"Authentication failed\",\r\n                    \"detail\": \"${vars.errorMessage}\"\r\n                }</format>\r\n            </payloadFactory>\r\n            <header name=\"HTTP_SC\" value=\"401\" scope=\"transport\"/>\r\n        </case>\r\n        <case regex=\"VALIDATION_ERROR\">\r\n            <payloadFactory media-type=\"json\">\r\n                <format>{\r\n                    \"status\": \"error\",\r\n                    \"code\": \"400\",\r\n                    \"message\": \"Validation failed\",\r\n                    \"detail\": \"${vars.errorMessage}\"\r\n                }</format>\r\n            </payloadFactory>\r\n            <header name=\"HTTP_SC\" value=\"400\" scope=\"transport\"/>\r\n        </case>\r\n        <default>\r\n            <payloadFactory media-type=\"json\">\r\n                <format>{\r\n                    \"status\": \"error\",\r\n                    \"code\": \"500\",\r\n                    \"message\": \"Internal server error\",\r\n                    \"detail\": \"${vars.errorMessage}\"\r\n                }</format>\r\n            </payloadFactory>\r\n            <header name=\"HTTP_SC\" value=\"500\" scope=\"transport\"/>\r\n        </default>\r\n    </switch>\r\n    \r\n    <respond/>",
+    "embeddingText": "sequence GlobalErrorSequence switch source=${vars.errorCode} case regex=AUTH_ERROR payloadFactory media-type=json format { \"status\": \"error\", \"code\": \"401\", \"message\": \"Authentication failed\", \"detail\": \"${vars.errorMessage}\" } header name=HTTP_SC value=401 scope=transport case regex=VALIDATION_ERROR payloadFactory media-type=json format { \"status\": \"error\", \"code\": \"400\", \"message\": \"Validation failed\", \"detail\": \"${vars.errorMessage}\" } header name=HTTP_SC value=400 scope=transport default payloadFactory media-type=json format { \"status\": \"error\", \"code\": \"500\", \"message\": \"Internal server error\", \"detail\": \"${vars.errorMessage}\" } header name=HTTP_SC value=500 scope=transport respond",
+    "contentHash": "b627ce6c5ee3a69f",
     "context": {
       "artifact": {
         "type": "sequence",
-        "name": "GlobalErrorSequence",
-        "xmlns": "http://ws.apache.org/ns/synapse"
-      }
+        "name": "GlobalErrorSequence"
+      },
+      "path": []
     },
     "isSequenceDefinition": false,
-    "referencedSequences": []
+    "referencedSequences": [],
+    "memberTags": [
+      "switch",
+      "respond"
+    ]
   },
   {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/LoggingSequence.xml",
+    "filePath": "artifacts/sequences/LoggingSequence.xml",
     "chunkType": "sequence",
     "chunkIndex": 0,
     "startLine": 2,
     "endLine": 27,
-    "content": "<sequence name=\"LoggingSequence\" xmlns=\"http://ws.apache.org/ns/synapse\">\n    <variable name=\"requestId\" expression=\"${now()}\" type=\"STRING\"/>\n    <variable name=\"endpoint\" expression=\"${props.synapse.REST_URL_POSTFIX}\" type=\"STRING\"/>\n    <variable name=\"method\" expression=\"${props.synapse.REST_METHOD}\" type=\"STRING\"/>\n    \n    <log category=\"INFO\">\n        <message>Request ID: ${vars.requestId} | Method: ${vars.method} | Endpoint: ${vars.endpoint}</message>\n    </log>\n    \n    <dblookup>\n        <connection>\n            <pool>\n                <driver>com.mysql.jdbc.Driver</driver>\n                <url>jdbc:mysql://localhost:3306/bankdb</url>\n                <user>bankuser</user>\n                <password>bankpass</password>\n            </pool>\n        </connection>\n        <statement>\n            <sql>INSERT INTO api_logs (request_id, method, endpoint, timestamp) VALUES (?, ?, ?, NOW())</sql>\n            <parameter expression=\"${vars.requestId}\" type=\"VARCHAR\"/>\n            <parameter expression=\"${vars.method}\" type=\"VARCHAR\"/>\n            <parameter expression=\"${vars.endpoint}\" type=\"VARCHAR\"/>\n        </statement>\n    </dblookup>\n</sequence>",
-    "embeddingText": "Sequence: LoggingSequence sequence name=LoggingSequence xmlns=http://ws.apache.org/ns/synapse variable name=requestId expression=${now type=STRING/ variable name=endpoint expression=${props.synapse.REST_URL_POSTFIX} type=STRING/ variable name=method expression=${props.synapse.REST_METHOD} type=STRING/ log category=INFO message Request ID: ${vars.requestId} Method: ${vars.method} Endpoint: ${vars.endpoint} dblookup connection pool driver com.mysql.jdbc.Driver url jdbc:mysql://localhost:3306/bankdb user bankuser password bankpass statement sql INSERT INTO api_logs request_id, method, endpoint, timestamp VALUES NOW parameter expression=${vars.requestId} type=VARCHAR/ parameter expression=${vars.method} type=VARCHAR/ parameter expression=${vars.endpoint} type=VARCHAR/",
+    "startOffset": 40,
+    "endOffset": 1230,
+    "content": "<sequence name=\"LoggingSequence\" xmlns=\"http://ws.apache.org/ns/synapse\">\r\n    <variable name=\"requestId\" expression=\"${now()}\" type=\"STRING\"/>\r\n    <variable name=\"endpoint\" expression=\"${props.synapse.REST_URL_POSTFIX}\" type=\"STRING\"/>\r\n    <variable name=\"method\" expression=\"${props.synapse.REST_METHOD}\" type=\"STRING\"/>\r\n    \r\n    <log category=\"INFO\">\r\n        <message>Request ID: ${vars.requestId} | Method: ${vars.method} | Endpoint: ${vars.endpoint}</message>\r\n    </log>\r\n    \r\n    <dblookup>\r\n        <connection>\r\n            <pool>\r\n                <driver>com.mysql.jdbc.Driver</driver>\r\n                <url>jdbc:mysql://localhost:3306/bankdb</url>\r\n                <user>bankuser</user>\r\n                <password>bankpass</password>\r\n            </pool>\r\n        </connection>\r\n        <statement>\r\n            <sql>INSERT INTO api_logs (request_id, method, endpoint, timestamp) VALUES (?, ?, ?, NOW())</sql>\r\n            <parameter expression=\"${vars.requestId}\" type=\"VARCHAR\"/>\r\n            <parameter expression=\"${vars.method}\" type=\"VARCHAR\"/>\r\n            <parameter expression=\"${vars.endpoint}\" type=\"VARCHAR\"/>\r\n        </statement>\r\n    </dblookup>\r\n</sequence>",
+    "embeddingText": "sequence LoggingSequence sequence name=LoggingSequence variable name=requestId expression=${now type=STRING variable name=endpoint expression=${props.synapse.REST_URL_POSTFIX} type=STRING variable name=method expression=${props.synapse.REST_METHOD} type=STRING log category=INFO message Request ID: ${vars.requestId} Method: ${vars.method} Endpoint: ${vars.endpoint} dblookup connection pool driver com.mysql.jdbc.Driver url jdbc:mysql://localhost:3306/bankdb user bankuser password bankpass statement sql INSERT INTO api_logs request_id, method, endpoint, timestamp VALUES NOW parameter expression=${vars.requestId} type=VARCHAR parameter expression=${vars.method} type=VARCHAR parameter expression=${vars.endpoint} type=VARCHAR",
+    "contentHash": "e3561f818a50a52c",
     "context": {
       "artifact": {
         "type": "sequence",
-        "name": "LoggingSequence",
-        "xmlns": "http://ws.apache.org/ns/synapse"
-      }
+        "name": "LoggingSequence"
+      },
+      "path": []
     },
     "sequenceKey": "LoggingSequence",
     "isSequenceDefinition": true,
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/NotificationSequence.xml",
+    "filePath": "artifacts/sequences/NotificationSequence.xml",
     "chunkType": "sequence",
     "chunkIndex": 0,
     "startLine": 2,
     "endLine": 28,
-    "content": "<sequence name=\"NotificationSequence\" xmlns=\"http://ws.apache.org/ns/synapse\">\n    <variable name=\"customerEmail\" expression=\"${payload.customerEmail}\" type=\"STRING\"/>\n    <variable name=\"transactionType\" expression=\"${payload.transactionType}\" type=\"STRING\"/>\n    <variable name=\"amount\" expression=\"${payload.amount}\" type=\"STRING\"/>\n    \n    <email.send configKey=\"EmailConnection\">\n        <from>bank@example.com</from>\n        <to>${vars.customerEmail}</to>\n        <subject>Transaction Notification - ${vars.transactionType}</subject>\n        <content>Dear Customer,\n\nYour ${vars.transactionType} transaction of ${vars.amount} has been processed successfully.\n\nTransaction ID: ${payload.transactionId}\nTimestamp: ${formatDateTime(now(), 'yyyy-MM-dd HH:mm:ss')}\n\nThank you for banking with us.\n\nBest regards,\nO2 Bank</content>\n        <contentType>text/plain</contentType>\n    </email.send>\n    \n    <log category=\"INFO\">\n        <message>Notification sent to ${vars.customerEmail}</message>\n    </log>\n</sequence>",
-    "embeddingText": "Sequence: NotificationSequence sequence name=NotificationSequence xmlns=http://ws.apache.org/ns/synapse variable name=customerEmail expression=${payload.customerEmail} type=STRING/ variable name=transactionType expression=${payload.transactionType} type=STRING/ variable name=amount expression=${payload.amount} type=STRING/ email.send configKey=EmailConnection from bank@example.com to ${vars.customerEmail} subject Transaction Notification ${vars.transactionType} content Dear Customer, Your ${vars.transactionType} transaction of ${vars.amount} has been processed successfully. Transaction ID: ${payload.transactionId} Timestamp: ${formatDateTime now yyyy-MM-dd HH:mm:ss Thank you for banking with us. Best regards, O2 Bank contentType text/plain log category=INFO message Notification sent to ${vars.customerEmail}",
+    "startOffset": 40,
+    "endOffset": 1085,
+    "content": "<sequence name=\"NotificationSequence\" xmlns=\"http://ws.apache.org/ns/synapse\">\r\n    <variable name=\"customerEmail\" expression=\"${payload.customerEmail}\" type=\"STRING\"/>\r\n    <variable name=\"transactionType\" expression=\"${payload.transactionType}\" type=\"STRING\"/>\r\n    <variable name=\"amount\" expression=\"${payload.amount}\" type=\"STRING\"/>\r\n    \r\n    <email.send configKey=\"EmailConnection\">\r\n        <from>bank@example.com</from>\r\n        <to>${vars.customerEmail}</to>\r\n        <subject>Transaction Notification - ${vars.transactionType}</subject>\r\n        <content>Dear Customer,\r\n\r\nYour ${vars.transactionType} transaction of ${vars.amount} has been processed successfully.\r\n\r\nTransaction ID: ${payload.transactionId}\r\nTimestamp: ${formatDateTime(now(), 'yyyy-MM-dd HH:mm:ss')}\r\n\r\nThank you for banking with us.\r\n\r\nBest regards,\r\nO2 Bank</content>\r\n        <contentType>text/plain</contentType>\r\n    </email.send>\r\n    \r\n    <log category=\"INFO\">\r\n        <message>Notification sent to ${vars.customerEmail}</message>\r\n    </log>\r\n</sequence>",
+    "embeddingText": "sequence NotificationSequence sequence name=NotificationSequence variable name=customerEmail expression=${payload.customerEmail} type=STRING variable name=transactionType expression=${payload.transactionType} type=STRING variable name=amount expression=${payload.amount} type=STRING email.send configKey=EmailConnection from bank@example.com to ${vars.customerEmail} subject Transaction Notification ${vars.transactionType} content Dear Customer, Your ${vars.transactionType} transaction of ${vars.amount} has been processed successfully. Transaction ID: ${payload.transactionId} Timestamp: ${formatDateTime now yyyy-MM-dd HH:mm:ss Thank you for banking with us. Best regards, O2 Bank contentType text/plain log category=INFO message Notification sent to ${vars.customerEmail}",
+    "contentHash": "599299f2038fefe2",
     "context": {
       "artifact": {
         "type": "sequence",
-        "name": "NotificationSequence",
-        "xmlns": "http://ws.apache.org/ns/synapse"
+        "name": "NotificationSequence"
       },
+      "path": [],
       "references": [
         "localEntry:EmailConnection"
       ]
@@ -1042,114 +842,112 @@
     ]
   },
   {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/RateLimitSequence.xml",
-    "chunkType": "variable",
+    "filePath": "artifacts/sequences/RateLimitSequence.xml",
+    "chunkType": "sequence",
     "chunkIndex": 0,
-    "startLine": 3,
-    "endLine": 3,
-    "content": "    <variable name=\"clientId\" expression=\"${headers['X-Client-ID']}\" type=\"STRING\"/>",
-    "embeddingText": "Sequence: RateLimitSequence variable name=clientId expression=${headers[ X-Client-ID ]} type=STRING/",
+    "startLine": 2,
+    "endLine": 47,
+    "startOffset": 40,
+    "endOffset": 2277,
+    "content": "<sequence name=\"RateLimitSequence\" xmlns=\"http://ws.apache.org/ns/synapse\">\r\n    <variable name=\"clientId\" expression=\"${headers['X-Client-ID']}\" type=\"STRING\"/>\r\n    \r\n    <filter xpath=\"${exists(vars.clientId)}\">\r\n        <then>\r\n            <throttle id=\"BankAPIThrottle\">\r\n                <policy>\r\n                    <wsp:Policy xmlns:wsp=\"http://schemas.xmlsoap.org/ws/2004/09/policy\"\r\n                                xmlns:throttle=\"http://www.wso2.org/products/wso2commons/throttle\">\r\n                        <throttle:ThrottleAssertion>\r\n                            <throttle:MaximumConcurrentAccess>10</throttle:MaximumConcurrentAccess>\r\n                            <wsp:Policy>\r\n                                <throttle:ID throttle:type=\"IP\">other</throttle:ID>\r\n                                <wsp:Policy>\r\n                                    <throttle:Control>\r\n                                        <wsp:Policy>\r\n                                            <throttle:MaximumCount>100</throttle:MaximumCount>\r\n                                            <throttle:UnitTime>60000</throttle:UnitTime>\r\n                                        </wsp:Policy>\r\n                                    </throttle:Control>\r\n                                </wsp:Policy>\r\n                            </wsp:Policy>\r\n                        </throttle:ThrottleAssertion>\r\n                    </wsp:Policy>\r\n                </policy>\r\n                <onAccept>\r\n                    <log category=\"INFO\">\r\n                        <message>Request accepted for client: ${vars.clientId}</message>\r\n                    </log>\r\n                </onAccept>\r\n                <onReject>\r\n                    <payloadFactory media-type=\"json\">\r\n                        <format>{\r\n                            \"status\": \"error\",\r\n                            \"message\": \"Rate limit exceeded. Please try again later.\"\r\n                        }</format>\r\n                    </payloadFactory>\r\n                    <respond/>\r\n                </onReject>\r\n            </throttle>\r\n        </then>\r\n        <else>\r\n            <throwError type=\"VALIDATION_ERROR\" errorMessage=\"Client ID header missing\"/>\r\n        </else>\r\n    </filter>\r\n</sequence>",
+    "embeddingText": "sequence RateLimitSequence sequence name=RateLimitSequence variable name=clientId expression=${headers[ X-Client-ID ]} type=STRING filter xpath=${exists vars.clientId then throttle id=BankAPIThrottle policy wsp:Policy throttle:ThrottleAssertion throttle:MaximumConcurrentAccess 10 wsp:Policy throttle:ID throttle:type=IP other wsp:Policy throttle:Control wsp:Policy throttle:MaximumCount 100 throttle:UnitTime 60000 onAccept log category=INFO message Request accepted for client: ${vars.clientId} onReject payloadFactory media-type=json format { \"status\": \"error\", \"message\": \"Rate limit exceeded. Please try again later.\" } respond else throwError type=VALIDATION_ERROR errorMessage=Client ID header missing",
+    "contentHash": "2c638fcdfae7dcaa",
     "context": {
       "artifact": {
         "type": "sequence",
-        "name": "RateLimitSequence",
-        "xmlns": "http://ws.apache.org/ns/synapse"
-      }
+        "name": "RateLimitSequence"
+      },
+      "path": []
     },
-    "isSequenceDefinition": false,
+    "sequenceKey": "RateLimitSequence",
+    "isSequenceDefinition": true,
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/sequences/RateLimitSequence.xml",
-    "chunkType": "filter",
-    "chunkIndex": 1,
-    "startLine": 5,
-    "endLine": 46,
-    "content": "    <filter xpath=\"${exists(vars.clientId)}\">\n        <then>\n            <throttle id=\"BankAPIThrottle\">\n                <policy>\n                    <wsp:Policy xmlns:wsp=\"http://schemas.xmlsoap.org/ws/2004/09/policy\"\n                                xmlns:throttle=\"http://www.wso2.org/products/wso2commons/throttle\">\n                        <throttle:ThrottleAssertion>\n                            <throttle:MaximumConcurrentAccess>10</throttle:MaximumConcurrentAccess>\n                            <wsp:Policy>\n                                <throttle:ID throttle:type=\"IP\">other</throttle:ID>\n                                <wsp:Policy>\n                                    <throttle:Control>\n                                        <wsp:Policy>\n                                            <throttle:MaximumCount>100</throttle:MaximumCount>\n                                            <throttle:UnitTime>60000</throttle:UnitTime>\n                                        </wsp:Policy>\n                                    </throttle:Control>\n                                </wsp:Policy>\n                            </wsp:Policy>\n                        </throttle:ThrottleAssertion>\n                    </wsp:Policy>\n                </policy>\n                <onAccept>\n                    <log category=\"INFO\">\n                        <message>Request accepted for client: ${vars.clientId}</message>\n                    </log>\n                </onAccept>\n                <onReject>\n                    <payloadFactory media-type=\"json\">\n                        <format>{\n                            \"status\": \"error\",\n                            \"message\": \"Rate limit exceeded. Please try again later.\"\n                        }</format>\n                    </payloadFactory>\n                    <respond/>\n                </onReject>\n            </throttle>\n        </then>\n        <else>\n            <throwError type=\"VALIDATION_ERROR\" errorMessage=\"Client ID header missing\"/>\n        </else>\n    </filter>",
-    "embeddingText": "Sequence: RateLimitSequence filter xpath=${exists vars.clientId then throttle id=BankAPIThrottle policy wsp:Policy xmlns:wsp=http://schemas.xmlsoap.org/ws/2004/09/policy xmlns:throttle=http://www.wso2.org/products/wso2commons/throttle throttle:ThrottleAssertion throttle:MaximumConcurrentAccess 10 wsp:Policy throttle:ID throttle:type=IP other wsp:Policy throttle:Control wsp:Policy throttle:MaximumCount 100 throttle:UnitTime 60000 onAccept log category=INFO message Request accepted for client: ${vars.clientId} onReject payloadFactory media-type=json format status error message Rate limit exceeded. Please try again later. respond else throwError type=VALIDATION_ERROR errorMessage=Client ID header missing/",
-    "context": {
-      "artifact": {
-        "type": "sequence",
-        "name": "RateLimitSequence",
-        "xmlns": "http://ws.apache.org/ns/synapse"
-      }
-    },
-    "isSequenceDefinition": false,
-    "referencedSequences": []
-  },
-  {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/templates/ConvertCurrencyTool.xml",
+    "filePath": "artifacts/templates/ConvertCurrencyTool.xml",
     "chunkType": "localEntry",
     "chunkIndex": 0,
     "startLine": 2,
     "endLine": 6,
-    "content": "<localEntry key=\"CurrencyConverter\" xmlns=\"http://ws.apache.org/ns/synapse\">\n  <undefined.init>\n    <CurrencyConverter xmlns=\"name\"/>\n  </undefined.init>\n</localEntry>",
-    "embeddingText": "LocalEntry: CurrencyConverter key=CurrencyConverter localEntry key=CurrencyConverter xmlns=http://ws.apache.org/ns/synapse undefined.init CurrencyConverter xmlns=name/",
+    "startOffset": 40,
+    "endOffset": 211,
+    "content": "<localEntry key=\"CurrencyConverter\" xmlns=\"http://ws.apache.org/ns/synapse\">\r\n  <undefined.init>\r\n    <CurrencyConverter xmlns=\"name\"/>\r\n  </undefined.init>\r\n</localEntry>",
+    "embeddingText": "localEntry CurrencyConverter localEntry key=CurrencyConverter undefined.init CurrencyConverter",
+    "contentHash": "5d42654da649396d",
     "context": {
       "artifact": {
         "type": "localEntry",
         "name": "CurrencyConverter",
-        "key": "CurrencyConverter",
-        "xmlns": "http://ws.apache.org/ns/synapse"
-      }
+        "key": "CurrencyConverter"
+      },
+      "path": []
     },
     "sequenceKey": "CurrencyConverter",
     "isSequenceDefinition": true,
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/templates/CurrencyConverter.xml",
+    "filePath": "artifacts/templates/CurrencyConverter.xml",
     "chunkType": "localEntry",
     "chunkIndex": 0,
     "startLine": 2,
     "endLine": 14,
-    "content": "<localEntry key=\"CurrencyConverter\" xmlns=\"http://ws.apache.org/ns/synapse\">\n  <ENTCinit>\n    <connectionType>HTTPS</connectionType>\n    <baseUrl>https://dev-tools.wso2.com/gs/helpers/v1.0</baseUrl>\n    <authType>None</authType>\n    <timeoutAction>Never</timeoutAction>\n    <retryCount>0</retryCount>\n    <retryDelay>0</retryDelay>\n    <suspendInitialDuration>-1</suspendInitialDuration>\n    <suspendProgressionFactor>1</suspendProgressionFactor>\n    <name>CurrencyConverter</name>\n  </ENTCinit>\n</localEntry>",
-    "embeddingText": "LocalEntry: CurrencyConverter key=CurrencyConverter localEntry key=CurrencyConverter xmlns=http://ws.apache.org/ns/synapse ENTCinit connectionType HTTPS baseUrl https://dev-tools.wso2.com/gs/helpers/v1.0 authType None timeoutAction Never retryCount 0 retryDelay 0 suspendInitialDuration -1 suspendProgressionFactor 1 name CurrencyConverter",
+    "startOffset": 40,
+    "endOffset": 561,
+    "content": "<localEntry key=\"CurrencyConverter\" xmlns=\"http://ws.apache.org/ns/synapse\">\r\n  <ENTCinit>\r\n    <connectionType>HTTPS</connectionType>\r\n    <baseUrl>https://dev-tools.wso2.com/gs/helpers/v1.0</baseUrl>\r\n    <authType>None</authType>\r\n    <timeoutAction>Never</timeoutAction>\r\n    <retryCount>0</retryCount>\r\n    <retryDelay>0</retryDelay>\r\n    <suspendInitialDuration>-1</suspendInitialDuration>\r\n    <suspendProgressionFactor>1</suspendProgressionFactor>\r\n    <name>CurrencyConverter</name>\r\n  </ENTCinit>\r\n</localEntry>",
+    "embeddingText": "localEntry CurrencyConverter localEntry key=CurrencyConverter ENTCinit connectionType HTTPS baseUrl https://dev-tools.wso2.com/gs/helpers/v1.0 authType None timeoutAction Never retryCount 0 retryDelay 0 suspendInitialDuration -1 suspendProgressionFactor 1 name CurrencyConverter",
+    "contentHash": "53b72249e4f9e5fb",
     "context": {
       "artifact": {
         "type": "localEntry",
         "name": "CurrencyConverter",
-        "key": "CurrencyConverter",
-        "xmlns": "http://ws.apache.org/ns/synapse"
-      }
+        "key": "CurrencyConverter"
+      },
+      "path": []
     },
     "sequenceKey": "CurrencyConverter",
     "isSequenceDefinition": true,
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/templates/GetAccountBalanceTool.xml",
+    "filePath": "artifacts/templates/GetAccountBalanceTool.xml",
     "chunkType": "template",
     "chunkIndex": 0,
     "startLine": 2,
     "endLine": 15,
-    "content": "<template name=\"GetAccountBalanceTool\" xmlns=\"http://ws.apache.org/ns/synapse\">\n  <description>Retrieves the current account balance for a given account ID</description>\n  <parameter isMandatory=\"true\" name=\"accountId\" description=\"The account ID to check balance for\"/>\n  <sequence>\n    <payloadFactory media-type=\"json\">\n      <format>{\n        \"accountId\": \"${params.functionParams.accountId}\",\n        \"balance\": 5000.00,\n        \"currency\": \"USD\",\n        \"lastUpdated\": \"${formatDateTime(now(), 'yyyy-MM-dd HH:mm:ss')}\"\n      }</format>\n    </payloadFactory>\n  </sequence>\n</template>",
-    "embeddingText": "Template: GetAccountBalanceTool template name=GetAccountBalanceTool xmlns=http://ws.apache.org/ns/synapse description Retrieves the current account balance for given account ID parameter isMandatory=true name=accountId description=The account ID to check balance for/ sequence payloadFactory media-type=json format accountId ${params.functionParams.accountId} balance 5000.00, currency USD lastUpdated ${formatDateTime now yyyy-MM-dd HH:mm:ss",
+    "startOffset": 40,
+    "endOffset": 643,
+    "content": "<template name=\"GetAccountBalanceTool\" xmlns=\"http://ws.apache.org/ns/synapse\">\r\n  <description>Retrieves the current account balance for a given account ID</description>\r\n  <parameter isMandatory=\"true\" name=\"accountId\" description=\"The account ID to check balance for\"/>\r\n  <sequence>\r\n    <payloadFactory media-type=\"json\">\r\n      <format>{\r\n        \"accountId\": \"${params.functionParams.accountId}\",\r\n        \"balance\": 5000.00,\r\n        \"currency\": \"USD\",\r\n        \"lastUpdated\": \"${formatDateTime(now(), 'yyyy-MM-dd HH:mm:ss')}\"\r\n      }</format>\r\n    </payloadFactory>\r\n  </sequence>\r\n</template>",
+    "embeddingText": "template GetAccountBalanceTool template name=GetAccountBalanceTool description Retrieves the current account balance for given account ID parameter isMandatory=true name=accountId description=The account ID to check balance for sequence payloadFactory media-type=json format { \"accountId\": \"${params.functionParams.accountId}\", \"balance\": 5000.00, \"currency\": \"USD\", \"lastUpdated\": \"${formatDateTime(now(), 'yyyy-MM-dd HH:mm:ss')}\" }",
+    "contentHash": "48f6262525dedbbe",
     "context": {
       "artifact": {
         "type": "template",
-        "name": "GetAccountBalanceTool",
-        "xmlns": "http://ws.apache.org/ns/synapse"
-      }
+        "name": "GetAccountBalanceTool"
+      },
+      "path": []
     },
     "sequenceKey": "GetAccountBalanceTool",
     "isSequenceDefinition": true,
     "referencedSequences": []
   },
   {
-    "filePath": "/Users/minuras/Desktop/semantic_xml_chunker/artifacts/templates/GetTransactionHistoryTool.xml",
+    "filePath": "artifacts/templates/GetTransactionHistoryTool.xml",
     "chunkType": "template",
     "chunkIndex": 0,
     "startLine": 2,
     "endLine": 26,
-    "content": "<template name=\"GetTransactionHistoryTool\" xmlns=\"http://ws.apache.org/ns/synapse\">\n  <description>Retrieves the transaction history for a given account ID</description>\n  <parameter isMandatory=\"true\" name=\"accountId\" description=\"The account ID to get transaction history for\"/>\n  <sequence>\n    <payloadFactory media-type=\"json\">\n      <format>{\n        \"accountId\": \"${params.functionParams.accountId}\",\n        \"transactions\": [\n          {\n            \"transactionId\": \"TXN001\",\n            \"type\": \"deposit\",\n            \"amount\": 1000.00,\n            \"date\": \"2024-01-15\"\n          },\n          {\n            \"transactionId\": \"TXN002\",\n            \"type\": \"withdrawal\",\n            \"amount\": 500.00,\n            \"date\": \"2024-01-16\"\n          }\n        ]\n      }</format>\n    </payloadFactory>\n  </sequence>\n</template>",
-    "embeddingText": "Template: GetTransactionHistoryTool template name=GetTransactionHistoryTool xmlns=http://ws.apache.org/ns/synapse description Retrieves the transaction history for given account ID parameter isMandatory=true name=accountId description=The account ID to get transaction history for/ sequence payloadFactory media-type=json format accountId ${params.functionParams.accountId} transactions transactionId TXN001 type deposit amount 1000.00, date 2024-01-15 }, transactionId TXN002 type withdrawal amount 500.00, date 2024-01-16",
+    "startOffset": 40,
+    "endOffset": 891,
+    "content": "<template name=\"GetTransactionHistoryTool\" xmlns=\"http://ws.apache.org/ns/synapse\">\r\n  <description>Retrieves the transaction history for a given account ID</description>\r\n  <parameter isMandatory=\"true\" name=\"accountId\" description=\"The account ID to get transaction history for\"/>\r\n  <sequence>\r\n    <payloadFactory media-type=\"json\">\r\n      <format>{\r\n        \"accountId\": \"${params.functionParams.accountId}\",\r\n        \"transactions\": [\r\n          {\r\n            \"transactionId\": \"TXN001\",\r\n            \"type\": \"deposit\",\r\n            \"amount\": 1000.00,\r\n            \"date\": \"2024-01-15\"\r\n          },\r\n          {\r\n            \"transactionId\": \"TXN002\",\r\n            \"type\": \"withdrawal\",\r\n            \"amount\": 500.00,\r\n            \"date\": \"2024-01-16\"\r\n          }\r\n        ]\r\n      }</format>\r\n    </payloadFactory>\r\n  </sequence>\r\n</template>",
+    "embeddingText": "template GetTransactionHistoryTool template name=GetTransactionHistoryTool description Retrieves the transaction history for given account ID parameter isMandatory=true name=accountId description=The account ID to get transaction history for sequence payloadFactory media-type=json format { \"accountId\": \"${params.functionParams.accountId}\", \"transactions\": [ { \"transactionId\": \"TXN001\", \"type\": \"deposit\", \"amount\": 1000.00, \"date\": \"2024-01-15\" }, { \"transactionId\": \"TXN002\", \"type\": \"withdrawal\", \"amount\": 500.00, \"date\": \"2024-01-16\" } ] }",
+    "contentHash": "93604991b72f7009",
     "context": {
       "artifact": {
         "type": "template",
-        "name": "GetTransactionHistoryTool",
-        "xmlns": "http://ws.apache.org/ns/synapse"
-      }
+        "name": "GetTransactionHistoryTool"
+      },
+      "path": []
     },
     "sequenceKey": "GetTransactionHistoryTool",
     "isSequenceDefinition": true,
